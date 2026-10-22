@@ -5,6 +5,9 @@ import { connection, state } from "./state"
 import { config } from "./protocol"
 import type { ServerMessage, PixelEvent } from "./protocol"
 import { applyEvents } from "./sync"
+import {requestFrame} from "./frame"
+import type {ConnectionStatus} from "./state"
+function setStatus(status:ConnectionStatus){connection.status=status;requestFrame()}
 
 function parseMessage(data: string): ServerMessage {
   const msg = JSON.parse(data)
@@ -70,7 +73,7 @@ export function createWS(clientId: string) {
   }
   function requestSync(recovery = false) {
     if (ws?.readyState !== WebSocket.OPEN) return
-    if (recovery) connection.status = "syncing"
+    if (recovery) setStatus("syncing")
     if (syncTimer !== null || syncSendTimer !== null) return
     const socket = ws
     syncSendTimer = window.setTimeout(() => {
@@ -82,7 +85,7 @@ export function createWS(clientId: string) {
     }, Math.max(0,1050-(performance.now()-lastSyncSent)))
   }
   function connect() {
-    if (!navigator.onLine) { connection.status = "disconnected"; return }
+    if (!navigator.onLine) { setStatus("disconnected"); return }
     if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return
     if (reconnectTimer !== null) window.clearTimeout(reconnectTimer)
     reconnectTimer = null
@@ -92,11 +95,11 @@ export function createWS(clientId: string) {
     ws = socket
     let initialized = false
     lastSyncSent = -Infinity
-    connection.status = "connecting"
+    setStatus("connecting")
     handshakeTimer = window.setTimeout(() => socket.close(),10000)
     socket.onopen = () => {
       if (ws !== socket) return
-      connection.status = "handshaking"
+      setStatus("handshaking")
       lastMessage = performance.now()
       socket.send(JSON.stringify({type:"init_client",clientId,lastVersion:version}))
     }
@@ -119,7 +122,7 @@ export function createWS(clientId: string) {
           handshakeTimer=null
           clearSync()
           setCooldown(msg.cooldownMs)
-          connection.status="connected"
+          setStatus("connected")
           reconnectDelay=250
           requestRender()
           break
@@ -132,7 +135,7 @@ export function createWS(clientId: string) {
             if (result.changed) requestRender()
           } catch { socket.close(); return }
           setCooldown(msg.cooldownMs)
-          connection.status="connected"
+          setStatus("connected")
           break
         case "pixel_update":
           if (!initialized) {socket.close();return}
@@ -156,6 +159,7 @@ export function createWS(clientId: string) {
         case "error":
           clearSync()
           state.message="Sync is busy. Retrying shortly."
+          requestFrame()
           syncSendTimer=window.setTimeout(()=>{syncSendTimer=null;requestSync(connection.status==="syncing")},Math.max(1100,msg.cooldownMs))
           break
       }
@@ -167,7 +171,7 @@ export function createWS(clientId: string) {
       clearSync()
       ws=null
       if(state.pending)finishPending("Connection lost. Your selection is kept; check the canvas before retrying.")
-      connection.status=navigator.onLine ? "reconnecting" : "disconnected"
+      setStatus(navigator.onLine ? "reconnecting" : "disconnected")
       if(!navigator.onLine)return
       reconnectTimer=window.setTimeout(connect,reconnectDelay+Math.random()*250)
       reconnectDelay=Math.min(reconnectDelay*2,15000)
@@ -180,7 +184,7 @@ export function createWS(clientId: string) {
     if(!ws || ws.readyState===WebSocket.CLOSED)connect()
   }
   window.addEventListener("online",resume)
-  window.addEventListener("offline",()=>{connection.status="disconnected";ws?.close()})
+  window.addEventListener("offline",()=>{setStatus("disconnected");ws?.close()})
   window.addEventListener("pageshow",resume)
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)resume()})
   window.setInterval(()=>{

@@ -1,37 +1,20 @@
-import { connectionOverlay, connectionWarning } from "../dom"
-import { connection } from "../state"
-
-export function updateConnectionUI(): void {
-  if (!connectionOverlay || !connectionWarning) return
-
-  switch (connection.status) {
-    case "connected":
-      connectionOverlay.style.display = "none"
-      return
-
-    case "connecting":
-      connectionOverlay.style.display = "flex"
-      connectionWarning.textContent =
-        "🔄 Connecting socket..."
-      return
-
-    case "handshaking":
-    case "syncing":
-      connectionOverlay.style.display = "flex"
-      connectionWarning.textContent =
-        "🔄 Syncing canvas..."
-      return
-
-    case "reconnecting":
-      connectionOverlay.style.display = "flex"
-      connectionWarning.textContent =
-        "⚠️ Reconnecting..."
-      return
-
-    case "disconnected":
-      connectionOverlay.style.display = "flex"
-      connectionWarning.textContent =
-        "❌ Disconnected"
-      return
+import {connectionOverlay,connectionWarning} from "../dom"
+import {connection} from "../state"
+import type {ConnectionStatus} from "../state"
+let previous:ConnectionStatus|null=null
+export function updateConnectionUI():void {
+  if(previous===connection.status)return
+  previous=connection.status
+  const messages:Record<ConnectionStatus,string>={
+    connected:"Connected",
+    connecting:"Connecting…",
+    handshaking:"Syncing canvas…",
+    syncing:"Recovering canvas…",
+    reconnecting:"Reconnecting…",
+    disconnected:"Offline. Reconnect to place pixels."
   }
+  connectionOverlay.style.display=connection.status==="connected"?"none":"flex"
+  connectionWarning.textContent=messages[connection.status]
+  const status=document.getElementById("connection-status")
+  if(status)status.textContent=messages[connection.status]
 }

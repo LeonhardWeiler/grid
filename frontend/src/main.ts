@@ -7,7 +7,8 @@ import {GRID_SIZE,fitToScreen,camera,clampCamera} from "./camera/camera"
 import {setupControls,didDrag,zoomCamera} from "./camera/controls"
 import {render,requestRender} from "./render/render"
 import {updateButtonUI} from "./ui/button"
-import {isCooldownActive} from "./ui/cooldown"
+import {isCooldownActive,getCooldownRemaining} from "./ui/cooldown"
+import {requestFrame,setFrameHandler} from "./frame"
 import {screenToWorld} from "./utils/coords"
 import {createWS} from "./ws"
 import {browserIdentity} from "./identity"
@@ -68,16 +69,25 @@ document.getElementById("reset-view")!.addEventListener("click",()=>{fitToScreen
 setupControls()
 setupPalette()
 fitToScreen()
+let uiTimer:number|null=null
 function loop(){
+  if(uiTimer!==null)window.clearTimeout(uiTimer)
+  uiTimer=null
+  if(document.hidden)return
   const oldX=camera.x,oldY=camera.y,oldZoom=camera.zoom
-  camera.x+=(camera.tx-camera.x)*.15
-  camera.y+=(camera.ty-camera.y)*.15
-  camera.zoom+=(camera.tzoom-camera.zoom)*.15
+  const speed=window.matchMedia("(prefers-reduced-motion: reduce)").matches?1:.15
+  camera.x+=(camera.tx-camera.x)*speed
+  camera.y+=(camera.ty-camera.y)*speed
+  camera.zoom+=(camera.tzoom-camera.zoom)*speed
+  if(Math.abs(camera.tx-camera.x)<.001)camera.x=camera.tx
+  if(Math.abs(camera.ty-camera.y)<.001)camera.y=camera.ty
+  if(Math.abs(camera.tzoom-camera.zoom)<.00001)camera.zoom=camera.tzoom
   clampCamera()
-  if(Math.abs(oldX-camera.x)>.001||Math.abs(oldY-camera.y)>.001||Math.abs(oldZoom-camera.zoom)>.001)requestRender()
+  if(oldX!==camera.x||oldY!==camera.y||oldZoom!==camera.zoom)requestRender()
   render()
   updateButtonUI()
   updateConnectionUI()
-  requestAnimationFrame(loop)
+  if(getCooldownRemaining()>0)uiTimer=window.setTimeout(requestFrame,100)
 }
-loop()
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&uiTimer!==null){window.clearTimeout(uiTimer);uiTimer=null}else if(!document.hidden)requestRender()})
+setFrameHandler(loop)

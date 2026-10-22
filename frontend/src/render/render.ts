@@ -3,6 +3,7 @@ import { drawMinimap } from "./minimap"
 import { drawGrid } from "./grid"
 import { drawPixels } from "./pixels"
 import { drawPreview } from "./preview"
+import {requestFrame} from "../frame"
 
 export { pixels } from "../model"
 
@@ -10,6 +11,7 @@ let needsRender = true
 
 export function requestRender(): void {
   needsRender = true
+  requestFrame()
 }
 
 export function render(): void {

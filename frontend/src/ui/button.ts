@@ -16,7 +16,8 @@ export function updateButtonUI():void {
   else if(remaining>0)label="Ready in "+(remaining/1000).toFixed(1)+"s"
   else if(pixel)label="Place "+colorName+" at "+pixel.x+", "+pixel.y
   setText(cooldownEl,label)
-  cooldownEl.disabled=connection.status!=="connected"||state.pending!==null||!pixel||remaining>0
+  const disabled=connection.status!=="connected"||state.pending!==null||!pixel||remaining>0
+  if(cooldownEl.disabled!==disabled)cooldownEl.disabled=disabled
   if(pixel){
     const current=pixels.get(pixel.x+":"+pixel.y)
     const currentName=config.colors.find(c=>c.value===current)?.name ?? "Empty"
