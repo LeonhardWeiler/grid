@@ -4,6 +4,8 @@ export interface Pixel {
 }
 
 export const state = {
+	message: "",
+	pending: null as { requestId: string; x: number; y: number; color: string } | null,
   hoverPixel: null as Pixel | null,
   selectedPixel: null as Pixel | null,
   selectedColor: "#ff0000",

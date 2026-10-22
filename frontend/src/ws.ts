@@ -1,7 +1,7 @@
 import { pixels } from "./model"
 import { requestRender } from "./render/render"
 import { setCooldown } from "./ui/cooldown"
-import { connection } from "./state"
+import { connection, state } from "./state"
 
 import type { ServerMessage } from "./protocol"
 
@@ -13,6 +13,16 @@ export function createWS(clientId: string) {
   let reconnectTimer: number | null = null
   let handshakeTimer: number | null = null
   let lastMessage = Date.now()
+  let pendingTimer: number | null = null
+
+  function finishPending(message: string, accepted = false) {
+    if (pendingTimer !== null) window.clearTimeout(pendingTimer)
+    pendingTimer = null
+    state.pending = null
+    if (accepted) state.selectedPixel = null
+    state.message = message
+    requestRender()
+  }
 
   function clearHandshake() {
     if (handshakeTimer !== null) window.clearTimeout(handshakeTimer)
@@ -46,6 +56,19 @@ export function createWS(clientId: string) {
       let msg: ServerMessage
       try { msg = JSON.parse(e.data) } catch { return }
       switch (msg.type) {
+        case "accepted":
+          if (state.pending?.requestId === msg.requestId) finishPending("Pixel saved.", true)
+          setCooldown(msg.cooldownMs)
+          break
+        case "rejected":
+          if (state.pending?.requestId === msg.requestId) {
+            finishPending(msg.code === "unavailable" ? "Storage unavailable. Your selection is kept." : msg.code === "invalid_pixel" ? "This pixel is invalid. Select another pixel." : "Please wait before trying again. Your selection is kept.")
+            if (msg.cooldownMs > 0) setCooldown(msg.cooldownMs)
+          }
+          break
+        case "error":
+          state.message = "Sync is busy. Retrying shortly."
+          break
         case "init":
           pixels.clear()
           for (const [key, color] of Object.entries(msg.pixels ?? {})) pixels.set(key, color)
@@ -86,6 +109,7 @@ export function createWS(clientId: string) {
       if (ws !== socket) return
       clearHandshake()
       ws = null
+      if (state.pending) finishPending("Connection lost. Your selection is kept; check the canvas before retrying.")
       connection.status = navigator.onLine ? "reconnecting" : "disconnected"
       if (!navigator.onLine) return
       reconnectTimer = window.setTimeout(connect, reconnectDelay + Math.random() * 250)
@@ -115,8 +139,17 @@ export function createWS(clientId: string) {
   connect()
 
   return {
-    send(data: string | ArrayBuffer | Blob) {
-      if (ws?.readyState === WebSocket.OPEN && connection.status === "connected") ws.send(data)
+    placePixel(x: number, y: number, color: string) {
+      if (ws?.readyState !== WebSocket.OPEN || connection.status !== "connected" || state.pending) return false
+      const requestId = crypto.randomUUID()
+      state.pending = { requestId, x, y, color }
+      state.message = "Saving pixel…"
+      ws.send(JSON.stringify({ type:"set_pixel", x, y, color, requestId }))
+      pendingTimer = window.setTimeout(() => {
+        finishPending("No confirmation received. Your selection is kept; check the canvas before retrying.")
+        ws?.close()
+      },10000)
+      return true
     }
   }
 }

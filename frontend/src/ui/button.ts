@@ -4,7 +4,10 @@ import { toCenteredCoords } from "../utils/gridCoords"
 import { getCooldownRemaining } from "./cooldown"
 
 export function updateButtonUI(): void {
+  const feedback=document.getElementById("feedback")
+  if(feedback && feedback.textContent!==state.message) feedback.textContent=state.message
   if (!cooldownEl) return
+  if (state.pending) {cooldownEl.textContent="Saving pixel…";cooldownEl.classList.add("disabled");return}
 
   const remaining = getCooldownRemaining()
 

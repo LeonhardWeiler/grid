@@ -4,6 +4,8 @@ body {
   background-color: white;
 }
 
+#feedback { position:fixed; bottom:65px; left:50%; transform:translateX(-50%); margin:0; color:white; background:#111; z-index:1001; max-width:90vw; font:14px/1.4 sans-serif; }
+
 canvas {
   display: block;
   cursor: grab;

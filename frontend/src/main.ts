@@ -56,15 +56,9 @@ function confirmPixel() {
   if (connection.status !== "connected") return
   if (!state.selectedPixel) return
   if (isCooldownActive()) return
+  if (state.pending) return
 
-  ws.send(JSON.stringify({
-    type: "set_pixel",
-    x: state.selectedPixel.x,
-    y: state.selectedPixel.y,
-    color: state.selectedColor
-  }))
-
-  state.selectedPixel = null
+  ws.placePixel(state.selectedPixel.x,state.selectedPixel.y,state.selectedColor)
   updateButtonUI()
   requestRender()
 }

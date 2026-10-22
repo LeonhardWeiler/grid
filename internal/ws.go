@@ -17,9 +17,11 @@ type ClientMsg struct {
 	Color       string `json:"color"`
 	LastVersion int    `json:"lastVersion"`
 	ClientID    string `json:"clientId"`
+	RequestID   string `json:"requestId,omitempty"`
 }
 
 type ServerResponse struct {
+	RequestID   string            `json:"requestId,omitempty"`
 	Code        string            `json:"code,omitempty"`
 	Protocol    int               `json:"protocol,omitempty"`
 	GridSize    int               `json:"gridSize,omitempty"`
@@ -139,7 +141,12 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			h.enqueue(client, out)
 			h.stateMu.Unlock()
 		case "set_pixel":
-			handleSetPixel(h, id, source, msg)
+			response := handleSetPixel(h, id, source, msg)
+			if msg.RequestID != "" {
+				response.RequestID = msg.RequestID
+				out, _ := json.Marshal(response)
+				h.enqueue(client, out)
+			}
 		}
 	}
 }
@@ -174,22 +181,25 @@ func decodeClientMsg(data []byte) (ClientMsg, error) {
 			return msg, fmt.Errorf("missing %s", key)
 		}
 	}
+	if msg.RequestID != "" && !ValidClientID(msg.RequestID) {
+		return msg, fmt.Errorf("invalid request id")
+	}
 	return msg, nil
 }
 
-func handleSetPixel(h *Hub, id, source string, msg ClientMsg) {
+func handleSetPixel(h *Hub, id, source string, msg ClientMsg) ServerResponse {
 	if !ValidCoords(msg.X, msg.Y) || !ValidColor(msg.Color) {
-		return
+		return ServerResponse{Type: "rejected", Code: "invalid_pixel"}
 	}
 	h.stateMu.Lock()
 	defer h.stateMu.Unlock()
 	if h.stopping || !h.Ready() {
-		return
+		return ServerResponse{Type: "rejected", Code: "unavailable"}
 	}
 	now := time.Now().UnixMilli()
 	if h.GetCooldownEnd(id) > now {
 		h.sendCooldown(id)
-		return
+		return ServerResponse{Type: "rejected", Code: "cooldown", CooldownMs: max(0, h.GetCooldownEnd(id)-now)}
 	}
 	sourceNext, retry := h.sourceCooldown(source, now)
 	globalNext, globalRetry := advanceBudget(h.globalWrite, now, 100, 20)
@@ -197,14 +207,14 @@ func handleSetPixel(h *Hub, id, source string, msg ClientMsg) {
 		globalRetry = 0
 	}
 	if retry > 0 || globalRetry > 0 {
-		return
+		return ServerResponse{Type: "rejected", Code: "rate_limited", CooldownMs: max(retry, globalRetry)}
 	}
 	ev := Event{Version: h.store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
 	if err := h.persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now, Source: source, SourceTime: sourceNext}); err != nil {
 		h.stopping = true
 		h.markFailed(err)
 		log.Printf("pixel persistence failed; writes disabled until restart: %v", err)
-		return
+		return ServerResponse{Type: "rejected", Code: "unavailable"}
 	}
 	if source != "" {
 		h.sourceActions[source] = sourceNext
@@ -219,6 +229,7 @@ func handleSetPixel(h *Hub, id, source string, msg ClientMsg) {
 	}{Event: ev, Type: "pixel_update"})
 	h.Broadcast(out)
 	h.sendCooldown(id)
+	return ServerResponse{Type: "accepted", Version: ev.Version, CooldownMs: CooldownMs}
 }
 
 func (h *Hub) sendCooldown(id string) {
