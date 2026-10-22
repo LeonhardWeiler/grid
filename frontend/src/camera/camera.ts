@@ -1,6 +1,6 @@
 import { canvas } from "../dom"
 
-export const GRID_SIZE: number = 1000
+export const GRID_SIZE: number = 512
 export const BASE_PIXEL_SIZE: number = 40
 
 export interface Camera {
