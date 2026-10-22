@@ -37,7 +37,7 @@
           '';
         };
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [ go_1_27 gopls gotools air git nodejs_24 chromium ];
+          packages = with pkgs; [ go_1_27 gopls gotools air git nodejs_24 chromium gitleaks ];
           BROWSER_EXECUTABLE = "${pkgs.chromium}/bin/chromium";
         };
       });
