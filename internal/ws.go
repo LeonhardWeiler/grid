@@ -51,8 +51,9 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
-		var msg ClientMsg
-		if json.Unmarshal(data, &msg) != nil {
+		msg, err := decodeClientMsg(data)
+		if err != nil {
+			conn.Close(websocket.StatusPolicyViolation, "invalid message")
 			return
 		}
 		if msg.Type == "init_client" {
@@ -107,6 +108,34 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			handleSetPixel(h, id, msg)
 		}
 	}
+}
+
+func decodeClientMsg(data []byte) (ClientMsg, error) {
+	var msg ClientMsg
+	if err := json.Unmarshal(data, &msg); err != nil {
+		return msg, err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return msg, err
+	}
+	required := []string{"type"}
+	switch msg.Type {
+	case "set_pixel":
+		required = append(required, "x", "y", "color")
+	case "init_client":
+		required = append(required, "clientId", "lastVersion")
+	case "sync":
+		required = append(required, "lastVersion")
+	default:
+		return msg, fmt.Errorf("unknown message type")
+	}
+	for _, key := range required {
+		if value, ok := fields[key]; !ok || string(value) == "null" {
+			return msg, fmt.Errorf("missing %s", key)
+		}
+	}
+	return msg, nil
 }
 
 func handleSetPixel(h *Hub, id string, msg ClientMsg) {
