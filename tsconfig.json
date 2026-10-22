@@ -25,5 +25,6 @@
     "noImplicitOverride": true
   },
 
-  "exclude": ["public/dist"],
+  "include": ["frontend/src/**/*.ts", "vite.config.ts"],
+  "exclude": ["public/dist", "result", "node_modules"],
 }
