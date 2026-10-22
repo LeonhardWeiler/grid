@@ -105,7 +105,7 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			trySend(client.send, out)
 			h.stateMu.Unlock()
 		case "set_pixel":
-			handleSetPixel(h, id, msg)
+			handleSetPixel(h, id, sourceKey(r), msg)
 		}
 	}
 }
@@ -138,7 +138,7 @@ func decodeClientMsg(data []byte) (ClientMsg, error) {
 	return msg, nil
 }
 
-func handleSetPixel(h *Hub, id string, msg ClientMsg) {
+func handleSetPixel(h *Hub, id, source string, msg ClientMsg) {
 	if !ValidCoords(msg.X, msg.Y) || !ValidColor(msg.Color) {
 		return
 	}
@@ -152,12 +152,24 @@ func handleSetPixel(h *Hub, id string, msg ClientMsg) {
 		h.sendCooldown(id)
 		return
 	}
+	sourceNext, retry := h.sourceCooldown(source, now)
+	globalNext, globalRetry := advanceBudget(h.globalWrite, now, 100, 20)
+	if source == "" {
+		globalRetry = 0
+	}
+	if retry > 0 || globalRetry > 0 {
+		return
+	}
 	ev := Event{Version: h.store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
-	if err := h.persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now}); err != nil {
+	if err := h.persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now, Source: source, SourceTime: sourceNext}); err != nil {
 		h.stopping = true
 		log.Printf("pixel persistence failed; writes disabled until restart: %v", err)
 		return
 	}
+	if source != "" {
+		h.sourceActions[source] = sourceNext
+	}
+	h.globalWrite = globalNext
 	h.store.Set(fmt.Sprintf("%d:%d", msg.X, msg.Y), msg.X, msg.Y, msg.Color)
 	h.UpdateCooldown(id, now, CooldownMs)
 	h.lastWrite = time.Now()

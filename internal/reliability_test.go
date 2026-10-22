@@ -28,14 +28,14 @@ func openTestHub(t *testing.T, dir string) *Hub {
 func TestJournalSurvivesCrashAndCompaction(t *testing.T) {
 	dir := t.TempDir()
 	h := openTestHub(t, dir)
-	handleSetPixel(h, "alice", ClientMsg{X: 7, Y: 9, Color: "#ff0000"})
+	handleSetPixel(h, "alice", "", ClientMsg{X: 7, Y: 9, Color: "#ff0000"})
 	// Reopen without calling Save or Shutdown, simulating a killed process.
 	restored := openTestHub(t, dir)
 	pixels, version := restored.store.Snapshot()
 	if pixels["7:9"] != "#ff0000" || version != 1 || restored.GetCooldownEnd("alice") <= time.Now().UnixMilli() {
 		t.Fatalf("lost state: %v, %d", pixels, version)
 	}
-	handleSetPixel(restored, "alice", ClientMsg{X: 8, Y: 9, Color: "#00ff00"})
+	handleSetPixel(restored, "alice", "", ClientMsg{X: 8, Y: 9, Color: "#00ff00"})
 	if restored.store.Version() != 1 {
 		t.Fatal("restart bypassed cooldown")
 	}
@@ -46,7 +46,7 @@ func TestJournalSurvivesCrashAndCompaction(t *testing.T) {
 	if err != nil || len(wal) != 0 {
 		t.Fatalf("journal not compacted: %v", err)
 	}
-	handleSetPixel(restored, "bob", ClientMsg{X: 8, Y: 9, Color: "#00ff00"})
+	handleSetPixel(restored, "bob", "", ClientMsg{X: 8, Y: 9, Color: "#00ff00"})
 	again := openTestHub(t, dir)
 	pixels, version = again.store.Snapshot()
 	if len(pixels) != 2 || version != 2 {
@@ -57,7 +57,7 @@ func TestJournalSurvivesCrashAndCompaction(t *testing.T) {
 func TestJournalTruncationAndCorruption(t *testing.T) {
 	dir := t.TempDir()
 	h := openTestHub(t, dir)
-	handleSetPixel(h, "alice", ClientMsg{Color: "#ff0000"})
+	handleSetPixel(h, "alice", "", ClientMsg{Color: "#ff0000"})
 	path := filepath.Join(dir, "snapshot.json.wal")
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
@@ -66,7 +66,7 @@ func TestJournalTruncationAndCorruption(t *testing.T) {
 	f.WriteString(`{"version":2`)
 	f.Close()
 	restored := openTestHub(t, dir)
-	handleSetPixel(restored, "bob", ClientMsg{X: 1, Color: "#00ff00"})
+	handleSetPixel(restored, "bob", "", ClientMsg{X: 1, Color: "#00ff00"})
 	if openTestHub(t, dir).store.Version() != 2 {
 		t.Fatal("partial tail poisoned future writes")
 	}
@@ -84,7 +84,7 @@ func TestConcurrentSaveAndWrites(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := range 30 {
 		wg.Go(func() {
-			handleSetPixel(h, fmt.Sprintf("client-%d", i), ClientMsg{X: i, Y: i, Color: "#ff0000"})
+			handleSetPixel(h, fmt.Sprintf("client-%d", i), "", ClientMsg{X: i, Y: i, Color: "#ff0000"})
 			if err := h.Save(); err != nil {
 				t.Error(err)
 			}
@@ -115,8 +115,8 @@ func TestSnapshotFallbackAfterRestart(t *testing.T) {
 
 func TestWebSocketReloadSnapshotAndBroadcast(t *testing.T) {
 	h := openTestHub(t, t.TempDir())
-	handleSetPixel(h, "prior", ClientMsg{X: 1, Y: 2, Color: "#ff0000"})
-	handleSetPixel(h, "other", ClientMsg{X: 2, Y: 3, Color: "#00ff00"})
+	handleSetPixel(h, "prior", "", ClientMsg{X: 1, Y: 2, Color: "#ff0000"})
+	handleSetPixel(h, "other", "", ClientMsg{X: 2, Y: 3, Color: "#00ff00"})
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { HandleWS(h, w, r) }))
 	defer server.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -215,7 +215,7 @@ func TestReloadWaitsForQuietAndIsBounded(t *testing.T) {
 	done := make(chan struct{})
 	go func() { h.WaitForQuiet(ctx, 100*time.Millisecond, 600*time.Millisecond); close(done) }()
 	time.Sleep(180 * time.Millisecond)
-	handleSetPixel(h, "alice", ClientMsg{Color: "#ff0000"})
+	handleSetPixel(h, "alice", "", ClientMsg{Color: "#ff0000"})
 	select {
 	case <-done:
 		t.Fatal("reload kicked clients before quiet window")

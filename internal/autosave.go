@@ -16,10 +16,11 @@ func (h *Hub) Save() error {
 
 func (h *Hub) saveLocked() error {
 	h.CleanupLastAction(CooldownMs)
+	h.cleanupSources()
 	snap, version := h.store.Snapshot()
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	return h.persistence.Save(snap, version, h.lastAction)
+	return h.persistence.Save(snap, version, h.lastAction, h.sourceActions)
 }
 
 func (h *Hub) RunAutosave(ctx context.Context) {

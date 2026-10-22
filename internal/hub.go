@@ -11,16 +11,18 @@ import (
 )
 
 type Hub struct {
-	stateMu     sync.Mutex
-	lastWrite   time.Time
-	stopping    bool
-	mu          sync.RWMutex
-	clients     map[*websocket.Conn]*Client
-	store       *PixelStore
-	lastAction  map[string]int64
-	connToID    map[*websocket.Conn]string
-	idToClients map[string]map[*Client]struct{}
-	persistence *Persistence
+	stateMu       sync.Mutex
+	lastWrite     time.Time
+	sourceActions map[string]int64 // guarded by stateMu
+	globalWrite   int64
+	stopping      bool
+	mu            sync.RWMutex
+	clients       map[*websocket.Conn]*Client
+	store         *PixelStore
+	lastAction    map[string]int64
+	connToID      map[*websocket.Conn]string
+	idToClients   map[string]map[*Client]struct{}
+	persistence   *Persistence
 }
 
 type Client struct {
@@ -58,7 +60,8 @@ func OpenHub(dir string) (*Hub, error) {
 		clients: make(map[*websocket.Conn]*Client), store: store,
 		lastAction: state.LastAction, connToID: make(map[*websocket.Conn]string),
 		idToClients: make(map[string]map[*Client]struct{}), persistence: p,
-		lastWrite: time.Now(),
+		lastWrite:     time.Now(),
+		sourceActions: state.SourceActions,
 	}, nil
 }
 

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bufio"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,16 +14,19 @@ import (
 )
 
 type SnapshotFile struct {
-	Schema     int               `json:"schema,omitempty"`
-	Pixels     map[string]string `json:"pixels"`
-	Version    int               `json:"version"`
-	LastAction map[string]int64  `json:"lastAction,omitempty"`
+	Schema        int               `json:"schema,omitempty"`
+	Pixels        map[string]string `json:"pixels"`
+	Version       int               `json:"version"`
+	LastAction    map[string]int64  `json:"lastAction,omitempty"`
+	SourceActions map[string]int64  `json:"sourceActions,omitempty"`
 }
 
 type JournalEntry struct {
 	Event
-	ClientID string `json:"clientId"`
-	Time     int64  `json:"time"`
+	ClientID   string `json:"clientId"`
+	Time       int64  `json:"time"`
+	Source     string `json:"source,omitempty"`
+	SourceTime int64  `json:"sourceTime,omitempty"`
 }
 
 type Persistence struct {
@@ -51,10 +55,10 @@ func (p *Persistence) Append(entry JournalEntry) error {
 	return f.Sync()
 }
 
-func (p *Persistence) Save(pixels map[string]string, version int, lastAction map[string]int64) error {
+func (p *Persistence) Save(pixels map[string]string, version int, lastAction, sources map[string]int64) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	b, err := json.Marshal(SnapshotFile{Schema: 1, Pixels: pixels, Version: version, LastAction: lastAction})
+	b, err := json.Marshal(SnapshotFile{Schema: 1, Pixels: pixels, Version: version, LastAction: lastAction, SourceActions: sources})
 	if err != nil {
 		return err
 	}
@@ -119,6 +123,9 @@ func (p *Persistence) Load() (SnapshotFile, error) {
 	if state.LastAction == nil {
 		state.LastAction = make(map[string]int64)
 	}
+	if state.SourceActions == nil {
+		state.SourceActions = make(map[string]int64)
+	}
 	f, err := os.OpenFile(p.filePath+".wal", os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		return state, err
@@ -170,6 +177,12 @@ func (p *Persistence) Load() (SnapshotFile, error) {
 			state.Pixels[fmt.Sprintf("%d:%d", entry.X, entry.Y)] = entry.Color
 			state.Version = entry.Version
 			state.LastAction[entry.ClientID] = entry.Time
+			if entry.Source != "" {
+				if !validSource(entry.Source) || entry.SourceTime < entry.Time {
+					return state, fmt.Errorf("invalid journal source")
+				}
+				state.SourceActions[entry.Source] = entry.SourceTime
+			}
 		}
 		if readErr != nil {
 			break
@@ -195,5 +208,18 @@ func validateSnapshot(s SnapshotFile) error {
 			return fmt.Errorf("invalid snapshot cooldown")
 		}
 	}
+	if len(s.SourceActions) > 10000 {
+		return fmt.Errorf("too many source budgets")
+	}
+	for source, timestamp := range s.SourceActions {
+		if !validSource(source) || timestamp < 0 {
+			return fmt.Errorf("invalid source budget")
+		}
+	}
 	return nil
+}
+
+func validSource(source string) bool {
+	_, err := hex.DecodeString(source)
+	return len(source) == 64 && err == nil
 }
