@@ -56,3 +56,5 @@ tmp/
 # optional: local frontend entry noise
 # =========================
 coverage/
+test-results/
+playwright-report/

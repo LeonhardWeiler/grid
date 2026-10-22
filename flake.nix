@@ -14,7 +14,7 @@
           version = "0.1.0";
           src = ./.;
           nodejs = pkgs.nodejs_24;
-          npmDepsHash = "sha256-LzAQuHaziKT7jgw3tKKDsqM0jXKJhoIoz1Z2UXvWnz8=";
+          npmDepsHash = "sha256-+669B44SCeOpS07Tg8eq4C91ZbpirbpNf70vGZrhiOc=";
           preBuild = "npm test && npm exec tsc -- --noEmit";
           installPhase = "cp -r public/dist $out";
         };
@@ -37,7 +37,8 @@
           '';
         };
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [ go_1_27 gopls gotools air git nodejs_24 ];
+          packages = with pkgs; [ go_1_27 gopls gotools air git nodejs_24 chromium ];
+          BROWSER_EXECUTABLE = "${pkgs.chromium}/bin/chromium";
         };
       });
 }
