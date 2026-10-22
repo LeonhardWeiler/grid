@@ -1,4 +1,4 @@
-import { canvas, coordsEl } from "../dom"
+import { canvas, coordsEl,view,resizeCanvas } from "../dom"
 import { toCenteredCoords } from "../utils/gridCoords"
 
 import {
@@ -84,8 +84,7 @@ export function setupControls(): void {
   }, { passive: false })
 
   window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    resizeCanvas()
     clampCamera()
 
     requestRender()

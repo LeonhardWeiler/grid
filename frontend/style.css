@@ -11,6 +11,7 @@ canvas {
   cursor: grab;
   background-color: white;
 }
+#canvas { width:100vw; height:100dvh; }
 
 canvas:active {
   cursor: grabbing;

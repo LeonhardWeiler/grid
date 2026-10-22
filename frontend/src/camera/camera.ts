@@ -1,4 +1,4 @@
-import { canvas } from "../dom"
+import { canvas ,view} from "../dom"
 import { clampView } from "./bounds"
 
 import { config } from "../protocol"
@@ -36,10 +36,10 @@ export function fitToScreen(): void {
 export function clampCamera(): void {
   const target = clampView(
     { x: camera.tx, y: camera.ty, zoom: camera.tzoom },
-    canvas.width, canvas.height, GRID_SIZE, BASE_PIXEL_SIZE
+    view.width, view.height, GRID_SIZE, BASE_PIXEL_SIZE
   )
   camera.tx = target.x
   camera.ty = target.y
   camera.tzoom = target.zoom
-  Object.assign(camera, clampView(camera, canvas.width, canvas.height, GRID_SIZE, BASE_PIXEL_SIZE))
+  Object.assign(camera, clampView(camera, view.width, view.height, GRID_SIZE, BASE_PIXEL_SIZE))
 }

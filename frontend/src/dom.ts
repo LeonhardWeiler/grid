@@ -10,8 +10,7 @@ if (!ctxEl) {
 }
 export const ctx: CanvasRenderingContext2D = ctxEl
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+export const view = { width:window.innerWidth,height:window.innerHeight,dpr:1 }
 
 const minimapEl = document.getElementById("minimap")
 if (!(minimapEl instanceof HTMLCanvasElement)) {
@@ -24,6 +23,16 @@ if (!minimapCtxEl) {
   throw new Error("Minimap 2D context not available")
 }
 export const minimapCtx: CanvasRenderingContext2D = minimapCtxEl
+
+export function resizeCanvas():void {
+  const rect=canvas.getBoundingClientRect()
+  view.width=rect.width;view.height=rect.height;view.dpr=Math.min(3,window.devicePixelRatio||1)
+  canvas.width=Math.round(view.width*view.dpr);canvas.height=Math.round(view.height*view.dpr)
+  ctx.setTransform(view.dpr,0,0,view.dpr,0,0)
+  minimap.width=Math.round(minimap.clientWidth*view.dpr);minimap.height=Math.round(minimap.clientHeight*view.dpr)
+  minimapCtx.setTransform(view.dpr,0,0,view.dpr,0,0)
+}
+resizeCanvas()
 
 const cooldownElRaw = document.getElementById("cooldown")
 if (!(cooldownElRaw instanceof HTMLElement)) {

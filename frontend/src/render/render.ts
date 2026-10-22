@@ -1,4 +1,4 @@
-import { canvas, ctx } from "../dom"
+import { canvas, ctx ,view} from "../dom"
 import { drawMinimap } from "./minimap"
 import { drawGrid } from "./grid"
 import { drawPixels } from "./pixels"
@@ -16,7 +16,7 @@ export function render(): void {
   if (!needsRender) return
 
   ctx.fillStyle = "#111"
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.fillRect(0, 0, view.width, view.height)
 
   drawPixels()
   drawGrid()
