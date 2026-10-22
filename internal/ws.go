@@ -1,9 +1,9 @@
 package internal
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -19,237 +19,118 @@ type ClientMsg struct {
 	ClientID    string `json:"clientId"`
 }
 
-type PixelUpdateMsg struct {
-	Type    string `json:"type"`
-	Version int    `json:"version"`
-	X       int    `json:"x"`
-	Y       int    `json:"y"`
-	Color   string `json:"color"`
-}
-
-type CooldownMsg struct {
-	Type string `json:"type"`
-	End  int64  `json:"end"`
-}
-
 type ServerResponse struct {
-	Type    		string            `json:"type"`
-	Pixels 		  map[string]string `json:"pixels,omitempty"`
-	Events  		[]Event           `json:"events,omitempty"`
+	Type        string            `json:"type"`
+	Pixels      map[string]string `json:"pixels,omitempty"`
+	Events      []Event           `json:"events,omitempty"`
 	Version     int               `json:"version"`
-	CooldownEnd int64 						`json:"cooldownEnd,omitempty"`
+	CooldownEnd int64             `json:"cooldownEnd"`
 }
-
-const (
-	MsgTypeInitClient  = "init_client"
-	MsgTypeSync        = "sync"
-	MsgTypeSetPixel    = "set_pixel"
-
-	MsgTypeInit        = "init"
-	MsgTypePixelUpdate = "pixel_update"
-	MsgTypeCooldown    = "cooldown"
-)
 
 func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		OriginPatterns: []string{
-			"http://localhost:5173",
-			"http://localhost:4000",
-		},
-	})
+	// coder/websocket always accepts the request's own origin. Local Vite uses
+	// the same-origin dev proxy, so no cross-origin exceptions are required.
+	conn, err := websocket.Accept(w, r, nil)
 	if err != nil {
 		return
 	}
+	conn.SetReadLimit(MaxMessageSize)
 	client := h.Add(conn)
-	if client == nil {
-		return
-	}
-
 	defer func() {
 		h.RemoveClient(conn)
-		_ = conn.Close(websocket.StatusNormalClosure, "")
+		conn.Close(websocket.StatusNormalClosure, "")
 	}()
-
-	invalidCount := 0
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+	timer := time.AfterFunc(10*time.Second, func() { h.RemoveClient(conn) })
+	defer timer.Stop()
 	for {
-		_, data, err := conn.Read(ctx)
+		_, data, err := conn.Read(client.ctx)
 		if err != nil {
 			return
 		}
-
 		var msg ClientMsg
-
-		if err := json.Unmarshal(data, &msg); err != nil {
-			invalidCount++
-			if invalidCount >= 3 {
-				return
-			}
-			continue
+		if json.Unmarshal(data, &msg) != nil {
+			return
 		}
-
-		invalidCount = 0
-
-		switch msg.Type {
-
-		case MsgTypeInitClient:
-			if !ValidClientID(msg.ClientID) {
+		if msg.Type == "init_client" {
+			if !ValidClientID(msg.ClientID) || !ValidVersion(msg.LastVersion) {
 				return
 			}
-
 			if h.GetClientID(conn) != "" {
 				continue
 			}
-
 			h.SetClientID(conn, msg.ClientID)
-
-			events, ok := h.Store.GetSince(msg.LastVersion)
-
-			if ok && len(events) > 0 {
-				resp := ServerResponse{
-					Type:    MsgTypeSync,
-					Events:  events,
-					Version: h.Store.Version(),
-				}
-
-				b, err := json.Marshal(resp)
-				if err != nil {
-					return
-				}
-
-				trySend(client.send, b)
-				continue
-			}
-
-			snap, version := h.Store.Snapshot()
-
-			if err := handleInit(
-				h,
-				client,
-				conn,
-				snap,
-				version,
-				); err != nil {
+			h.stateMu.Lock()
+			if h.stopping {
+				h.stateMu.Unlock()
 				return
 			}
-
-			continue
-
-		case MsgTypeSync:
-			handleSync(h, client, msg)
-
-		case MsgTypeSetPixel:
-			id := h.GetClientID(conn)
-			if id == "" {
-				continue
-			}
-			handleSetPixel(h, client, id, msg)
-
-		default:
+			// A newly loaded page has no pixel map, even if localStorage contains an
+			// old version. Always start it with a complete authoritative snapshot.
+			snap, version := h.Store.Snapshot()
+			out, _ := json.Marshal(ServerResponse{Type: "init", Pixels: snap, Version: version, CooldownEnd: h.GetCooldownEnd(msg.ClientID)})
+			trySend(client.send, out)
+			h.mu.Lock()
+			client.ready = true
+			h.mu.Unlock()
+			h.stateMu.Unlock()
+			timer.Stop()
 			continue
 		}
-	}
-}
-
-func handleInit(h *Hub, client *Client, conn *websocket.Conn, snap map[string]string, version int,) error {
-	id := h.GetClientID(conn)
-
-	resp := ServerResponse{
-		Type:         MsgTypeInit,
-		Pixels:       snap,
-		Version:      version,
-		CooldownEnd:  h.GetCooldownEnd(id),
-	}
-
-	b, err := json.Marshal(resp)
-	if err != nil {
-		return err
-	}
-
-	trySend(client.send, b)
-	return nil
-}
-
-func handleSync(h *Hub, client *Client, msg ClientMsg) {
-	if !ValidVersion(msg.LastVersion) {
-		return
-	}
-
-	events, ok := h.Store.GetSince(msg.LastVersion)
-
-	if !ok {
-		snap, version := h.Store.Snapshot()
-
-		resp := ServerResponse{
-			Type:    MsgTypeInit,
-			Pixels:  snap,
-			Version: version,
-		}
-
-		b, err := json.Marshal(resp)
-		if err != nil {
+		id := h.GetClientID(conn)
+		if id == "" {
 			return
 		}
-
-		trySend(client.send, b)
-		return
+		switch msg.Type {
+		case "sync":
+			if !ValidVersion(msg.LastVersion) {
+				return
+			}
+			h.stateMu.Lock()
+			events, ok := h.Store.GetSince(msg.LastVersion)
+			resp := ServerResponse{Type: "sync", Events: events, Version: h.Store.Version(), CooldownEnd: h.GetCooldownEnd(id)}
+			if !ok {
+				resp.Type = "init"
+				resp.Pixels, resp.Version = h.Store.Snapshot()
+			}
+			out, _ := json.Marshal(resp)
+			trySend(client.send, out)
+			h.stateMu.Unlock()
+		case "set_pixel":
+			handleSetPixel(h, id, msg)
+		}
 	}
-
-	resp := ServerResponse{
-		Type:    MsgTypeSync,
-		Events:  events,
-		Version: h.Store.Version(),
-	}
-
-	b, err := json.Marshal(resp)
-	if err != nil {
-		return
-	}
-
-	trySend(client.send, b)
 }
 
-func handleSetPixel(h *Hub, client *Client, id string, msg ClientMsg) {
-	if id == "" {
-		return
-	}
-
+func handleSetPixel(h *Hub, id string, msg ClientMsg) {
 	if !ValidCoords(msg.X, msg.Y) || !ValidColor(msg.Color) {
 		return
 	}
-
+	h.stateMu.Lock()
+	defer h.stateMu.Unlock()
+	if h.stopping {
+		return
+	}
 	now := time.Now().UnixMilli()
-
-	if !h.UpdateCooldown(id, now, CooldownMs) {
+	if h.GetCooldownEnd(id) > now {
 		return
 	}
-
-	key := fmt.Sprintf("%d:%d", msg.X, msg.Y)
-
-	ev := h.Store.Set(key, msg.X, msg.Y, msg.Color)
-
-	out, err := json.Marshal(PixelUpdateMsg{
-		Type:    MsgTypePixelUpdate,
-		Version: ev.Version,
-		X:       ev.X,
-		Y:       ev.Y,
-		Color:   ev.Color,
-	})
-	if err != nil {
+	ev := Event{Version: h.Store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
+	if err := h.Persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now}); err != nil {
+		h.stopping = true
+		log.Printf("pixel persistence failed; writes disabled until restart: %v", err)
 		return
 	}
-
+	h.Store.Set(fmt.Sprintf("%d:%d", msg.X, msg.Y), msg.X, msg.Y, msg.Color)
+	h.UpdateCooldown(id, now, CooldownMs)
+	h.lastWrite = time.Now()
+	out, _ := json.Marshal(struct {
+		Event
+		Type string `json:"type"`
+	}{Event: ev, Type: "pixel_update"})
 	h.Broadcast(out)
-
-	cd, err := json.Marshal(CooldownMsg{
-		Type: MsgTypeCooldown,
-		End:  now + CooldownMs,
-	})
-	if err != nil {
-		return
-	}
-
+	cd, _ := json.Marshal(struct {
+		Type string `json:"type"`
+		End  int64  `json:"end"`
+	}{Type: "cooldown", End: now + CooldownMs})
 	h.SendToClientID(id, cd)
 }

@@ -1,217 +1,121 @@
-# grid
+# Grid
 
-A minimal real-time pixel canvas inspired by r/place.
+A real-time 512 × 512 pixel canvas built with Go, coder/websocket, TypeScript
+and Vite. Live at **https://grid.coprime.tech**.
 
-Built with:
-
-* Go
-* WebSockets
-* TypeScript
-* HTML5 Canvas API
-* Vite (frontend tooling)
-* Nix Flakes (optional)
-* In-memory state with event log + snapshot persistence
-
----
-
-## Features
-
-* Real-time pixel synchronization
-* Server-authoritative canvas state
-* Event-based sync (delta updates)
-* Snapshot fallback sync
-* Lightweight WebSocket protocol (JSON)
-* Reconnect with backoff + jitter
-* Rate limiting (cooldown per user)
-* Minimal frontend (no framework)
-* Stateless clients
-* Crash-safe persistence (snapshot-based)
-
----
-
-## Architecture
-
-### Backend
-
-* Go
-* `github.com/coder/websocket`
-* `net/http`
-* In-memory pixel store (event log + ring buffer)
-* Snapshot persistence (JSON file)
-* Hub-based WebSocket broadcaster
-
-### Frontend
-
-* TypeScript
-* Vite
-* HTML5 Canvas API
-* Native WebSocket API
-* Connection state machine (sync-aware UI)
-
----
-
-## Getting Started
-
-### With Nix (recommended)
-
-```bash
-git clone https://github.com/LeonhardWeiler/grid.git
-cd grid
-
-nix develop
-
-go mod tidy
-air
-npm i
-bun run dev
-```
-
-Open:
-
-```text
-http://localhost:5173 (frontend)
-http://localhost:4000 (backend)
-```
-
----
-
-### Without Nix
-
-Requirements:
-
-* Go 1.24+
-* Bun
-
-Install dependencies:
-
-```bash
-go mod tidy
-cd frontend
-bun install
-```
-
----
+The server validates coordinates and colors and enforces a five-second cooldown
+per browser identity. All tabs share the identity in `localStorage`. The server
+owns the canvas; each connection starts with a complete snapshot, followed by
+ordered live updates. Heartbeats, gap recovery and automatic reconnect keep
+clients synchronized after sleep, network loss and deployments.
 
 ## Development
 
-Run backend:
-
-```bash
-air
+```sh
+nix develop
+npm ci
+go run .        # backend, 127.0.0.1:4000
+npm run dev     # frontend, localhost:5173 (proxies /ws to the backend)
 ```
 
-Run frontend:
+Use two terminals for the servers. Without Nix, install Go 1.26.2+ and Node 24+.
+For a production build and all checks:
 
-```bash
-bun run dev
+```sh
+nix build -L
+STATE_DIRECTORY=./data STATIC_DIR=./result/share/grid ./result/bin/grid
 ```
 
----
+`nix build` builds the frontend from `package-lock.json`, typechecks it, runs
+Go vet and the Go tests with the race detector, and packages both the binary
+(`bin/grid`) and frontend (`share/grid`). `flake.lock`, the npm dependency hash
+and the Go vendor hash pin the complete build. After dependency changes, update
+the corresponding hash in `flake.nix` using the hash reported by `nix build`.
 
-## Build
+## Production deployment
 
-### Frontend build
+A push to `main` runs `.github/workflows/deploy.yml`: build and test the locked
+Nix package, then trigger the existing **waentw server configuration** pipeline
+(GitLab project 87242023), using the repository secret `GITLAB_TRIGGER_TOKEN`.
+The server configuration's deploy command updates the `grid` input alongside
+`slf`, commits the lock locally when run manually, and switches NixOS on
+`deploy@server` through Tailscale. GitLab serializes deployments with the
+`server` resource group.
 
-```bash
-bun run build
+The server configuration lives in the waentw repository:
+
+- `flake.nix`: Grid input and deployment command.
+- `server-config/configuration.nix`: `grid.service` and the HTTPS nginx virtual
+  host for `grid.coprime.tech`, including WebSocket proxying and ACME.
+
+The app listens only on `127.0.0.1:4000`. systemd manages its unprivileged user,
+automatic startup/restart and persistent `/var/lib/grid` state directory.
+State is outside the immutable package and survives upgrades and rollbacks.
+
+To deploy manually from the committed waentw checkout:
+
+```sh
+nix run .#deploy
 ```
 
-Output:
+For an exact locked rebuild without updating inputs, use
+`nixos-rebuild switch --flake .#server --target-host deploy@server --sudo`.
 
-```text
-public/dist
+### Updating an active canvas
+
+NixOS reloads the existing process with `SIGHUP` instead of immediately killing
+connections. It continues serving and accepting drawings until there have been
+30 seconds without a new pixel, waiting at least 30 seconds and at most five
+minutes. Then it saves, closes connections, and exits; systemd starts the new
+package. Open clients keep their camera, selection and identity, reconnect with
+backoff starting at 250 ms, and resynchronize without reloading the page.
+There is a brief reconnect during the process change; uninterrupted WebSocket
+handover between processes is not implemented. `SIGTERM`/`SIGINT` save and exit
+immediately for an explicit service stop or server shutdown.
+
+### Persistence and recovery
+
+Each accepted pixel, its version and the writer's cooldown are appended to
+`snapshot.json.wal` and **fsynced before broadcasting**. Every 15 seconds and on
+shutdown, an fsynced snapshot is atomically renamed into place, its directory
+is synced, and the journal is compacted. Startup loads the snapshot and replays
+newer journal entries. Old snapshots containing only `pixels` and `version`
+remain compatible. A truncated final journal record after a crash is discarded;
+a complete corrupt record or unreadable snapshot causes startup to fail instead
+of silently starting an empty canvas.
+
+Back up both `snapshot.json` and `snapshot.json.wal` together, ideally with the
+service stopped or a filesystem snapshot. Keep independent backups: persistence
+on the server does not protect against disk loss.
+
+```sh
+ssh deploy@server systemctl status grid
+ssh deploy@server journalctl -u grid -f
+curl --fail https://grid.coprime.tech/healthz
+ssh deploy@server sudo systemctl reload grid   # exercise a graceful restart
 ```
 
----
+To roll back the system package:
+`ssh deploy@server sudo nixos-rebuild switch --rollback`. The state directory
+stays in place.
 
-### Full package build (Nix)
+## Configuration
 
-```bash
-bun run package
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `STATE_DIRECTORY` | `./data` | Persistent snapshot and journal directory; systemd sets `/var/lib/grid`. |
+| `STATIC_DIR` | `./public/dist` | Built frontend directory. |
+| `LISTEN_ADDR` | `127.0.0.1:4000` | HTTP and WebSocket listen address. |
+
+An optional local container build is available with `docker compose up --build -d`.
+It mounts `./data` at `/data`; production uses the locked Nix package.
+
+## Verification
+
+```sh
+nix develop -c sh -c 'go vet ./... && go test -race ./... && npx tsc --noEmit && npm run build'
 ```
 
----
-
-## Current Status
-
-### Core System
-
-* [x] WebSocket server (Go)
-* [x] Real-time pixel sync
-* [x] Server-authoritative state
-* [x] Event-based delta sync
-* [x] Snapshot fallback sync
-* [x] Rate limiting / cooldown system
-* [x] Client reconnection logic (backoff + jitter)
-* [x] Connection state machine (frontend)
-* [x] Canvas rendering system (HTML5 Canvas)
-
----
-
-### Persistence
-
-* [x] In-memory pixel store
-* [x] Snapshot persistence (JSON)
-* [x] Startup state recovery
-* [ ] Atomic snapshot writes (tmp → rename)
-* [ ] Graceful shutdown persistence
-* [ ] Periodic autosave loop
-
----
-
-### Reliability
-
-* [x] Reconnect handling
-* [x] Offline detection (basic)
-* [ ] WebSocket heartbeat (ping/pong)
-* [ ] Full concurrency audit (final pass)
-* [ ] Cleanup of stale lastAction entries
-
----
-
-### Performance
-
-* [x] Efficient event buffer (ring buffer)
-* [ ] Snapshot optimization (reduce full copies)
-* [ ] Message batching (optional)
-* [ ] Binary WebSocket protocol (future)
-
----
-
-### Scaling (Future)
-
-* [ ] Canvas chunking system
-* [ ] Multi-server architecture
-* [ ] Redis PubSub (optional)
-* [ ] Horizontal scaling support
-
----
-
-### Deployment
-
-* [ ] Auto deployment via SSH
-* [ ] Production Docker setup (optional)
-
----
-
-## Design Goals
-
-* Simplicity over abstraction
-* Minimal dependencies
-* Real-time consistency
-* Server authority (clients are dumb)
-* Low-latency pixel sync
-* Easy local development
-* Hackable architecture
-
----
-
-## Future Ideas
-
-* Pixel ownership / history tracking
-* Replay / timelapse system
-* Heatmap analytics
-* Mobile touch controls
-* Collaborative teams / factions
-* Custom maps (e.g. regional / thematic boards)
-* Competitive events / time-limited canvases
+Tests cover snapshot + journal recovery without shutdown, partial writes,
+corruption detection, cooldown recovery, concurrent persistence, delta fallback,
+and full WebSocket initialization and cross-client broadcasts.

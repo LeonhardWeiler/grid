@@ -1,0 +1,24 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: grid-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - run: nix build -L
+      - name: Deploy through the server configuration
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
+        run: curl --fail-with-body --silent --show-error --output /dev/null --form-string "token=$GITLAB_TRIGGER_TOKEN" --form-string ref=main https://gitlab.com/api/v4/projects/87242023/trigger/pipeline

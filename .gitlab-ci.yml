@@ -1,32 +1,6 @@
-stages:
-  - build
-  - docker
-
-
+# Production deployment is owned by .github/workflows/deploy.yml and the
+# waentw server configuration. Keep GitLab mirrors as a build check only.
 build:
-  stage: build
   image: nixos/nix:latest
   script:
-    - nix --extra-experimental-features "nix-command flakes" build
-  artifacts:
-    paths:
-      - result/bin/grid
-    expire_in: 1 week
-
-docker-build:
-  stage: docker
-  image: docker:24
-  services:
-    - docker:24-dind
-
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-
-  script:
-    - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_TOKEN"
-
-    - docker build -t weilerleonhard/grid:latest .
-    - docker tag weilerleonhard/grid:latest weilerleonhard/grid:$CI_COMMIT_SHA
-
-    - docker push weilerleonhard/grid:latest
-    - docker push weilerleonhard/grid:$CI_COMMIT_SHA
+    - nix --extra-experimental-features "nix-command flakes" build -L

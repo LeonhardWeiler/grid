@@ -2,17 +2,21 @@ package internal
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
-	"os"
 
 	"github.com/coder/websocket"
 )
 
 type Hub struct {
-	mu 					sync.RWMutex
-	clients 		map[*websocket.Conn]*Client
-	Store 			*PixelStore
+	stateMu     sync.Mutex
+	lastWrite   time.Time
+	stopping    bool
+	mu          sync.RWMutex
+	clients     map[*websocket.Conn]*Client
+	Store       *PixelStore
 	lastAction  map[string]int64
 	connToID    map[*websocket.Conn]string
 	idToClients map[string]map[*Client]struct{}
@@ -20,37 +24,42 @@ type Hub struct {
 }
 
 type Client struct {
-	conn     *websocket.Conn
-	send     chan []byte
-	ctx      context.Context
-	cancel   context.CancelFunc
+	ready  bool
+	conn   *websocket.Conn
+	send   chan []byte
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func NewHub() *Hub {
-
-	err := os.MkdirAll("./data", 0755)
+	dir := os.Getenv("STATE_DIRECTORY")
+	if dir == "" {
+		dir = "./data"
+	}
+	h, err := OpenHub(dir)
 	if err != nil {
 		panic(err)
 	}
+	return h
+}
 
-	p := NewPersistence("./data/snapshot.json")
-
-	pixels, version, err := p.Load()
-	if err != nil {
-		panic(err)
+func OpenHub(dir string) (*Hub, error) {
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return nil, err
 	}
-
+	p := NewPersistence(filepath.Join(dir, "snapshot.json"))
+	state, err := p.Load()
+	if err != nil {
+		return nil, err
+	}
 	store := NewPixelStore()
-	store.LoadSnapshot(pixels, version)
-
+	store.LoadSnapshot(state.Pixels, state.Version)
 	return &Hub{
-		clients:     make(map[*websocket.Conn]*Client),
-		Store:       store,
-		lastAction:  make(map[string]int64),
-		connToID:    make(map[*websocket.Conn]string),
-		idToClients: make(map[string]map[*Client]struct{}),
-		Persistence: p,
-	}
+		clients: make(map[*websocket.Conn]*Client), Store: store,
+		lastAction: state.LastAction, connToID: make(map[*websocket.Conn]string),
+		idToClients: make(map[string]map[*Client]struct{}), Persistence: p,
+		lastWrite: time.Now(),
+	}, nil
 }
 
 func (h *Hub) Add(c *websocket.Conn) *Client {
@@ -68,6 +77,8 @@ func (h *Hub) Add(c *websocket.Conn) *Client {
 	h.mu.Unlock()
 
 	go func(cl *Client) {
+		ticker := time.NewTicker(25 * time.Second)
+		defer ticker.Stop()
 		defer func() {
 			h.RemoveClient(cl.conn)
 			cl.conn.Close(websocket.StatusNormalClosure, "")
@@ -75,6 +86,13 @@ func (h *Hub) Add(c *websocket.Conn) *Client {
 
 		for {
 			select {
+			case <-ticker.C:
+				ctx, cancel := context.WithTimeout(cl.ctx, 10*time.Second)
+				err := cl.conn.Ping(ctx)
+				cancel()
+				if err != nil {
+					return
+				}
 			case msg, ok := <-cl.send:
 				if !ok {
 					return
@@ -100,7 +118,9 @@ func (h *Hub) Broadcast(msg []byte) {
 	h.mu.RLock()
 	clients := make([]*Client, 0, len(h.clients))
 	for _, client := range h.clients {
-		clients = append(clients, client)
+		if client.ready {
+			clients = append(clients, client)
+		}
 	}
 	h.mu.RUnlock()
 
@@ -230,10 +250,10 @@ func (h *Hub) RemoveClient(conn *websocket.Conn) {
 }
 
 func trySend(ch chan []byte, msg []byte) {
-    select {
-    case ch <- msg:
-    default:
-    }
+	select {
+	case ch <- msg:
+	default:
+	}
 }
 
 func (h *Hub) CleanupLastAction(maxAge int64) {
@@ -247,15 +267,4 @@ func (h *Hub) CleanupLastAction(maxAge int64) {
 			delete(h.lastAction, id)
 		}
 	}
-}
-
-func (h *Hub) StartPersistenceLoop() {
-	ticker := time.NewTicker(5 * time.Second)
-
-	go func() {
-		for range ticker.C {
-			snap, version := h.Store.Snapshot()
-			_ = h.Persistence.Save(snap, version)
-		}
-	}()
 }
