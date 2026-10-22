@@ -1,4 +1,4 @@
-module the_grid
+module grid
 
 go 1.26.2
 

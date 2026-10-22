@@ -5,7 +5,7 @@ import (
 	"mime"
 	"net/http"
 
-	"the_grid/internal"
+	"grid/internal"
 )
 
 func init() {

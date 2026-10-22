@@ -10,7 +10,7 @@ build:
     - nix --extra-experimental-features "nix-command flakes" build
   artifacts:
     paths:
-      - result/bin/the-grid
+      - result/bin/grid
     expire_in: 1 week
 
 docker-build:
@@ -25,8 +25,8 @@ docker-build:
   script:
     - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_TOKEN"
 
-    - docker build -t weilerleonhard/the-grid:latest .
-    - docker tag weilerleonhard/the-grid:latest weilerleonhard/the-grid:$CI_COMMIT_SHA
+    - docker build -t weilerleonhard/grid:latest .
+    - docker tag weilerleonhard/grid:latest weilerleonhard/grid:$CI_COMMIT_SHA
 
-    - docker push weilerleonhard/the-grid:latest
-    - docker push weilerleonhard/the-grid:$CI_COMMIT_SHA
+    - docker push weilerleonhard/grid:latest
+    - docker push weilerleonhard/grid:$CI_COMMIT_SHA

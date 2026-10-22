@@ -14,14 +14,14 @@ FROM golang:1.26.2 AS builder
 WORKDIR /app
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o the-grid .
+RUN CGO_ENABLED=0 GOOS=linux go build -o grid .
 
 FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/the-grid /app/the-grid
+COPY --from=builder /app/grid /app/grid
 COPY --from=frontend /frontend/dist ./public/dist
 
 EXPOSE 4000
-CMD ["/app/the-grid"]
+CMD ["/app/grid"]

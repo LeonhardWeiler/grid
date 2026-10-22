@@ -1,4 +1,4 @@
-# 🧱 The Grid — TODO
+# 🧱 grid — TODO
 
 ---
 

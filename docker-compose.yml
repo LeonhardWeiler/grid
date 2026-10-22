@@ -1,8 +1,8 @@
 version: "3.8"
 
 services:
-  the-grid:
-    image: weilerleonhard/the-grid:latest
+  grid:
+    image: weilerleonhard/grid:latest
     ports:
       - "4000:4000"
     volumes:

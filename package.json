@@ -1,5 +1,5 @@
 {
-  "name": "the_grid",
+  "name": "grid",
   "module": "index.ts",
   "type": "module",
   "private": true,

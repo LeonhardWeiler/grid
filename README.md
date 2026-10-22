@@ -1,4 +1,4 @@
-# The Grid
+# grid
 
 A minimal real-time pixel canvas inspired by r/place.
 
@@ -55,8 +55,8 @@ Built with:
 ### With Nix (recommended)
 
 ```bash
-git clone https://gitlab.com/htl-villach/it/classes/3ahitm-2025/sew/game/sj25_26_3ahitm_game_weilerl.git the_grid
-cd the_grid
+git clone https://github.com/LeonhardWeiler/grid.git
+cd grid
 
 nix develop
 

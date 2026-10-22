@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-The Grid: a real-time pixel canvas like r/place. Go WebSocket backend,
+grid: a real-time pixel canvas like r/place. Go WebSocket backend,
 TypeScript + Vite frontend on HTML5 Canvas. Details in `README.md`.
 
 ## Commands

@@ -1,5 +1,5 @@
 {
-  description = "The Grid - Go realtime canvas";
+  description = "grid - Go realtime canvas";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -12,7 +12,7 @@
         pkgs = import nixpkgs { inherit system; };
 
         goApp = pkgs.buildGoModule {
-          pname = "the-grid";
+          pname = "grid";
           version = "0.1.0";
 
           src = ./.;
@@ -20,12 +20,12 @@
           vendorHash = "sha256-7JqwcenKhaOgziXfkl32qz2VrZ0zKhNJMLfvHto/Pco=";
 
           buildPhase = ''
-            go build -o the-grid .
+            go build -o grid .
           '';
 
           installPhase = ''
             mkdir -p $out/bin
-            cp the-grid $out/bin/
+            cp grid $out/bin/
           '';
         };
       in {
@@ -42,7 +42,7 @@
           ];
 
           shellHook = ''
-            echo "🚀 The Grid dev environment ready"
+            echo "🚀 grid dev environment ready"
             echo "Go version:"
             go version
             echo "Bun version:"

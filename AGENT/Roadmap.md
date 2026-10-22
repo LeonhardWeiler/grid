@@ -1,4 +1,4 @@
-# 🟦 The Grid — Updated Roadmap (Current State Aligned)
+# 🟦 grid — Updated Roadmap (Current State Aligned)
 
 ---
 
