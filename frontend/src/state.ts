@@ -1,14 +1,16 @@
-export interface Pixel {
-  x: number
-  y: number
-}
+import type { Pixel } from "./model"
 
 export const state = {
-	message: "",
-	pending: null as { requestId: string; x: number; y: number; color: string } | null,
+  message: "",
+  pending: null as {
+    requestId: string
+    x: number
+    y: number
+    color: string
+  } | null,
   hoverPixel: null as Pixel | null,
   selectedPixel: null as Pixel | null,
-  selectedColor: "#ff0000",
+  selectedColor: "#ff0000"
 }
 
 export type ConnectionStatus =
@@ -20,5 +22,5 @@ export type ConnectionStatus =
   | "disconnected"
 
 export const connection = {
-  status: "connecting" as ConnectionStatus,
+  status: "connecting" as ConnectionStatus
 }

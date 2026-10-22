@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Draw together on one shared pixel canvas. Choose a color, select a pixel, and leave your mark." />
+    <meta
+      name="description"
+      content="Draw together on one shared pixel canvas. Choose a color, select a pixel, and leave your mark."
+    />
     <meta name="theme-color" content="#10151d" />
     <title>grid | A shared pixel canvas</title>
     <link rel="icon" href="data:," />
@@ -11,31 +14,82 @@
   </head>
   <body>
     <header class="topbar">
-      <div class="brand"><h1>grid</h1><p>One shared canvas.</p></div>
-      <span id="connection-status" class="sr-only" role="status" aria-live="polite">Connecting…</span>
+      <div class="brand">
+        <h1>grid</h1>
+        <p>One shared canvas.</p>
+      </div>
+      <span
+        id="connection-status"
+        class="sr-only"
+        role="status"
+        aria-live="polite"
+        >Connecting…</span
+      >
       <nav id="navigation" aria-label="Canvas controls">
-        <button type="button" id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
-        <button type="button" id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+        <button
+          type="button"
+          id="zoom-out"
+          aria-label="Zoom out"
+          title="Zoom out"
+        >
+          −
+        </button>
+        <button type="button" id="zoom-in" aria-label="Zoom in" title="Zoom in">
+          +
+        </button>
         <button type="button" id="reset-view">Reset view</button>
         <button type="button" id="help-open">Help</button>
         <button type="button" id="privacy-open">Privacy</button>
       </nav>
     </header>
     <main id="workspace" aria-label="Shared canvas">
-      <canvas id="canvas" tabindex="0" role="img" aria-label="Shared pixel canvas" aria-describedby="instructions selection">
+      <canvas
+        id="canvas"
+        tabindex="0"
+        role="img"
+        aria-label="Shared pixel canvas"
+        aria-describedby="instructions selection"
+      >
         Use the X and Y fields below to select and inspect a pixel.
       </canvas>
       <aside class="overview" aria-label="Canvas overview">
-        <canvas id="minimap" role="img" aria-label="Overview of the entire shared canvas"></canvas>
+        <canvas
+          id="minimap"
+          role="img"
+          aria-label="Overview of the entire shared canvas"
+        ></canvas>
       </aside>
-      <div id="connection-overlay" role="status" aria-live="polite"><p id="connection-warning">Connecting…</p></div>
-      <p id="instructions" class="sr-only">Click or tap to select a pixel. Drag to pan and pinch or scroll to zoom. With the canvas focused, use arrow keys to select, Shift and arrow keys to move ten cells, and Enter or Space to place. You can also use the coordinate fields.</p>
+      <div id="connection-overlay" role="status" aria-live="polite">
+        <p id="connection-warning">Connecting…</p>
+      </div>
+      <p id="instructions" class="sr-only">
+        Click or tap to select a pixel. Drag to pan and pinch or scroll to zoom.
+        With the canvas focused, use arrow keys to select, Shift and arrow keys
+        to move ten cells, and Enter or Space to place. You can also use the
+        coordinate fields.
+      </p>
     </main>
     <footer id="tools" aria-label="Drawing tools">
       <div id="palette" role="group" aria-label="Choose a color"></div>
       <form id="coordinates" aria-label="Select a pixel by coordinates">
-        <label for="pixel-x">X</label><input id="pixel-x" type="number" min="0" step="1" required inputmode="numeric" />
-        <label for="pixel-y">Y</label><input id="pixel-y" type="number" min="0" step="1" required inputmode="numeric" />
+        <label for="pixel-x">X</label
+        ><input
+          id="pixel-x"
+          type="number"
+          min="0"
+          step="1"
+          required
+          inputmode="numeric"
+        />
+        <label for="pixel-y">Y</label
+        ><input
+          id="pixel-y"
+          type="number"
+          min="0"
+          step="1"
+          required
+          inputmode="numeric"
+        />
         <button type="submit">Select</button>
       </form>
       <output id="coords" aria-label="Pointer coordinates">256 | 256</output>
@@ -45,23 +99,62 @@
     </footer>
     <dialog id="help" aria-labelledby="help-title">
       <h2 id="help-title">Draw together</h2>
-      <p>Choose a color, select a pixel, then use the Place button. A saved pixel is shared with everyone. Each browser waits five seconds between pixels; shared networks also have a small drawing budget.</p>
-      <p>Drag to move around. Scroll or pinch with two fingers to zoom. You can select exact coordinates with X and Y. On the canvas, arrow keys move the selection; Enter or Space places it.</p>
-      <p>Your selection stays until the server confirms it. If the connection fails, check the canvas before trying again.</p>
+      <p>
+        Choose a color, select a pixel, then use the Place button. A saved pixel
+        is shared with everyone. Each browser waits five seconds between pixels;
+        shared networks also have a small drawing budget.
+      </p>
+      <p>
+        Drag to move around. Scroll or pinch with two fingers to zoom. You can
+        select exact coordinates with X and Y. On the canvas, arrow keys move
+        the selection; Enter or Space places it.
+      </p>
+      <p>
+        Your selection stays until the server confirms it. If the connection
+        fails, check the canvas before trying again.
+      </p>
       <form method="dialog"><button type="submit">Close</button></form>
     </dialog>
     <dialog id="privacy" aria-labelledby="privacy-title">
       <h2 id="privacy-title">Privacy and local data</h2>
-      <p>This canvas is public. Pixels are visible to everyone and kept in the drawing and its backups. Do not put personal or sensitive information in the drawing.</p>
-      <p>Your browser stores a random ID in local storage to enforce the five-second drawing wait. There are no analytics or advertising cookies. If storage is blocked, an ID lasts for the current page.</p>
-      <p>The server temporarily keeps that ID and a hash of your network address for drawing and connection limits. Hashes are pseudonymous, not anonymous. Expired drawing limits are removed at the next checkpoint, normally within 30 seconds. Connection limits expire after a minute without activity. They are not included in the independent hourly backups; those contain only pixels and the drawing version and are kept for 30 days.</p>
-      <p>Access logs contain request counts, status, size and duration, without your address, browser details or URL. Technical error logs can contain network addresses. Server logs are kept for at most 14 days.</p>
-      <p>Resetting the browser ID clears this site's local identity and reloads the page. Your public pixels remain. Shared-network drawing limits still apply.</p>
+      <p>
+        This canvas is public. Pixels are visible to everyone and kept in the
+        drawing and its backups. Do not put personal or sensitive information in
+        the drawing.
+      </p>
+      <p>
+        Your browser stores a random ID in local storage to enforce the
+        five-second drawing wait. There are no analytics or advertising cookies.
+        If storage is blocked, an ID lasts for the current page.
+      </p>
+      <p>
+        The server temporarily keeps that ID and a hash of your network address
+        for drawing and connection limits. Hashes are pseudonymous, not
+        anonymous. Expired drawing limits are removed at the next checkpoint,
+        normally within 30 seconds. Connection limits expire after a minute
+        without activity. They are not included in the independent hourly
+        backups; those contain only pixels and the drawing version and are kept
+        for 30 days.
+      </p>
+      <p>
+        Access logs contain request counts, status, size and duration, without
+        your address, browser details or URL. Technical error logs can contain
+        network addresses. Server logs are kept for at most 14 days.
+      </p>
+      <p>
+        Resetting the browser ID clears this site's local identity and reloads
+        the page. Your public pixels remain. Shared-network drawing limits still
+        apply.
+      </p>
       <button type="button" id="identity-reset">Reset browser ID</button>
       <p id="privacy-feedback" role="status"></p>
       <form method="dialog"><button type="submit">Close</button></form>
     </dialog>
-    <noscript><p>This shared canvas needs JavaScript. Enable it to connect and draw.</p></noscript>
+    <noscript
+      ><p>
+        This shared canvas needs JavaScript. Enable it to connect and draw.
+      </p></noscript
+    >
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

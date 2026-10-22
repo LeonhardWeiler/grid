@@ -1,6 +1,6 @@
 import { ctx } from "../dom"
 import { state } from "../state"
-import type { Pixel } from "../state"
+import type { Pixel } from "../model"
 import { worldToScreen } from "../utils/coords"
 
 export function drawPreview(): void {
@@ -21,9 +21,9 @@ export function drawPreview(): void {
     )
 
     ctx.save()
-    ctx.globalAlpha=.35
-    ctx.fillStyle=state.selectedColor
-    ctx.fillRect(pos.x,pos.y,pos.size,pos.size)
+    ctx.globalAlpha = 0.35
+    ctx.fillStyle = state.selectedColor
+    ctx.fillRect(pos.x, pos.y, pos.size, pos.size)
     ctx.restore()
     ctx.strokeStyle = "black"
     ctx.lineWidth = 4

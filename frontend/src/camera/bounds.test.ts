@@ -2,10 +2,20 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { clampView } from "./bounds.ts"
 
-for (const [width, height] of [[390, 844], [1920, 1080], [5120, 1440], [390, 3000], [50000, 5000]] as const) {
+for (const [width, height] of [
+  [390, 844],
+  [1920, 1080],
+  [5120, 1440],
+  [390, 3000],
+  [50000, 5000]
+] as const) {
   test(`viewport stays inside all grid edges at ${width}×${height}`, () => {
     for (const zoom of [0.001, 0.08, 0.6, 10]) {
-      for (const [x, y] of [[-10000, -10000], [10000, 10000], [256, 256]] as const) {
+      for (const [x, y] of [
+        [-10000, -10000],
+        [10000, 10000],
+        [256, 256]
+      ] as const) {
         const view = clampView({ x, y, zoom }, width, height, 512, 40)
         const halfWidth = width / (2 * 40 * view.zoom)
         const halfHeight = height / (2 * 40 * view.zoom)

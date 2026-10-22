@@ -1,4 +1,4 @@
-import {requestFrame} from "../frame.ts"
+import { requestFrame } from "../frame.ts"
 let cooldownEnd = 0
 
 // A duration from the server avoids comparing clocks on different devices.

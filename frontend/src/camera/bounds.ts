@@ -4,7 +4,13 @@ interface View {
   zoom: number
 }
 
-export function clampView(view: View, width: number, height: number, gridSize: number, pixelSize: number): View {
+export function clampView(
+  view: View,
+  width: number,
+  height: number,
+  gridSize: number,
+  pixelSize: number
+): View {
   // The entire viewport must fit within the grid, including on wide displays.
   const minZoom = Math.max(width, height) / (gridSize * pixelSize)
   const zoom = Math.max(minZoom, Math.min(2, view.zoom))

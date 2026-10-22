@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vite"
 
 export default defineConfig({
   root: "frontend",
@@ -10,4 +10,4 @@ export default defineConfig({
     port: 5173,
     proxy: { "/ws": { target: "ws://127.0.0.1:4000", ws: true } }
   }
-});
+})

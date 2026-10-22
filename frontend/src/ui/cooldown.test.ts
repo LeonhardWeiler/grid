@@ -1,8 +1,12 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { setCooldown, getCooldownRemaining, isCooldownActive } from "./cooldown.ts"
+import {
+  setCooldown,
+  getCooldownRemaining,
+  isCooldownActive
+} from "./cooldown.ts"
 
-test("countdown expires after the server duration despite device clock differences", t => {
+test("countdown expires after the server duration despite device clock differences", (t) => {
   let elapsed = 100
   t.mock.method(performance, "now", () => elapsed)
   t.mock.method(Date, "now", () => 9000000000000)
@@ -16,7 +20,7 @@ test("countdown expires after the server duration despite device clock differenc
   assert(!isCooldownActive())
 })
 
-test("reconnect restores the remaining cooldown and expired cooldowns clear it", t => {
+test("reconnect restores the remaining cooldown and expired cooldowns clear it", (t) => {
   t.mock.method(performance, "now", () => 500)
   setCooldown(1800)
   assert.equal(getCooldownRemaining(), 1800)
