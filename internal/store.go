@@ -68,6 +68,9 @@ func (s *PixelStore) GetSince(v int) ([]Event, bool) {
 	if v < 0 || v > s.version {
 		return nil, false
 	}
+	if v == s.version {
+		return nil, true
+	}
 	if s.count == 0 {
 		return []Event{}, v == s.version
 	}
@@ -78,15 +81,14 @@ func (s *PixelStore) GetSince(v int) ([]Event, bool) {
 		return nil, false
 	}
 
-	res := make([]Event, 0, s.count)
-
-	for i := 0; i < s.count; i++ {
+	// Versions are contiguous: skip directly to the first missing event.
+	missing := s.version - v
+	res := make([]Event, 0, missing)
+	for i := s.count - missing; i < s.count; i++ {
 		idx := (s.start + i) % MaxEvents
 		e := s.events[idx]
 
-		if e.Version > v {
-			res = append(res, e)
-		}
+		res = append(res, e)
 	}
 
 	return res, true
