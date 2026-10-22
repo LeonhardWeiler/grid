@@ -18,8 +18,8 @@ export function render(): void {
   ctx.fillStyle = "#111"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  drawGrid()
   drawPixels()
+  drawGrid()
   drawPreview()
   drawMinimap()
 
