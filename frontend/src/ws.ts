@@ -66,8 +66,9 @@ export function createWS(clientId: string) {
   function finishPending(message: string, accepted = false) {
     if (pendingTimer !== null) window.clearTimeout(pendingTimer)
     pendingTimer = null
+    const saved = state.pending
     state.pending = null
-    if (accepted) state.selectedPixel = null
+    if (accepted && saved?.x === state.selectedPixel?.x && saved?.y === state.selectedPixel?.y) state.selectedPixel = null
     state.message = message
     requestRender()
   }
