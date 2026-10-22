@@ -16,6 +16,7 @@ export function updateConnectionUI(): void {
       return
 
     case "handshaking":
+    case "syncing":
       connectionOverlay.style.display = "flex"
       connectionWarning.textContent =
         "🔄 Syncing canvas..."

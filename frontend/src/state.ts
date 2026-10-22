@@ -14,6 +14,7 @@ export const state = {
 export type ConnectionStatus =
   | "connecting"
   | "handshaking"
+  | "syncing"
   | "connected"
   | "reconnecting"
   | "disconnected"
