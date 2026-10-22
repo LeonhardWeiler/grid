@@ -52,17 +52,12 @@ func main() {
 		addr = "127.0.0.1:4000"
 	}
 	mux := http.NewServeMux()
-	files := http.FileServer(http.Dir(staticDir))
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		files.ServeHTTP(w, r)
-	})
+	mux.Handle("/", internal.StaticHandler(staticDir))
 	mux.HandleFunc("GET /healthz", hub.Health)
 	mux.HandleFunc("GET /readyz", hub.Health)
 	mux.HandleFunc("GET /version", internal.Version)
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) { internal.HandleWS(hub, w, r) })
-	server := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second}
+	server := &http.Server{Addr: addr, Handler: internal.SecurityHeaders(mux), ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go hub.RunAutosave(ctx)
