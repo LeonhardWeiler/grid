@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/coder/websocket"
@@ -16,6 +17,9 @@ type Hub struct {
 	sourceActions map[string]int64 // guarded by stateMu
 	globalWrite   int64
 	stopping      bool
+	failed        atomic.Bool
+	closing       atomic.Bool
+	failures      chan error
 	mu            sync.RWMutex
 	clients       map[*websocket.Conn]*Client
 	store         *PixelStore
@@ -62,6 +66,7 @@ func OpenHub(dir string) (*Hub, error) {
 		idToClients: make(map[string]map[*Client]struct{}), persistence: p,
 		lastWrite:     time.Now(),
 		sourceActions: state.SourceActions,
+		failures:      make(chan error, 1),
 	}, nil
 }
 

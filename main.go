@@ -32,7 +32,8 @@ func main() {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		files.ServeHTTP(w, r)
 	})
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok\n")) })
+	mux.HandleFunc("GET /healthz", hub.Health)
+	mux.HandleFunc("GET /readyz", hub.Health)
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) { internal.HandleWS(hub, w, r) })
 	server := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -43,7 +44,12 @@ func main() {
 	defer signal.Stop(signals)
 	stopped := make(chan struct{})
 	go func() {
-		sig := <-signals
+		var sig os.Signal
+		select {
+		case sig = <-signals:
+		case err := <-hub.Failures():
+			log.Printf("storage failure; restarting with journal intact: %v", err)
+		}
 		if sig == syscall.SIGHUP {
 			log.Println("reload requested; waiting for 30 seconds without drawing (at most 5 minutes)")
 			quietCtx, quietCancel := context.WithCancel(ctx)
@@ -79,4 +85,7 @@ func main() {
 		log.Fatal(err)
 	}
 	<-stopped
+	if hub.Failed() {
+		os.Exit(1)
+	}
 }

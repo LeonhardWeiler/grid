@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 func (h *Hub) Save() error {
 	h.stateMu.Lock()
 	defer h.stateMu.Unlock()
+	if h.failed.Load() {
+		return fmt.Errorf("storage failed; journal retained for recovery")
+	}
 	return h.saveLocked()
 }
 
@@ -33,6 +37,8 @@ func (h *Hub) RunAutosave(ctx context.Context) {
 		case <-ticker.C:
 			if err := h.Save(); err != nil {
 				log.Printf("autosave failed: %v", err)
+				h.markFailed(err)
+				return
 			}
 		}
 	}
@@ -64,9 +70,16 @@ func (h *Hub) WaitForQuiet(ctx context.Context, quiet, maximum time.Duration) {
 }
 
 func (h *Hub) Shutdown() error {
+	h.closing.Store(true)
 	h.stateMu.Lock()
 	h.stopping = true
-	err := h.saveLocked()
+	var err error
+	if !h.failed.Load() {
+		err = h.saveLocked()
+		if err != nil {
+			h.markFailed(err)
+		}
+	}
 	h.stateMu.Unlock()
 	h.mu.RLock()
 	clients := make([]*Client, 0, len(h.clients))

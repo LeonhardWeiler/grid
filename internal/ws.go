@@ -65,7 +65,7 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			}
 			h.SetClientID(conn, msg.ClientID)
 			h.stateMu.Lock()
-			if h.stopping {
+			if h.stopping || !h.Ready() {
 				h.stateMu.Unlock()
 				return
 			}
@@ -144,7 +144,7 @@ func handleSetPixel(h *Hub, id, source string, msg ClientMsg) {
 	}
 	h.stateMu.Lock()
 	defer h.stateMu.Unlock()
-	if h.stopping {
+	if h.stopping || !h.Ready() {
 		return
 	}
 	now := time.Now().UnixMilli()
@@ -163,6 +163,7 @@ func handleSetPixel(h *Hub, id, source string, msg ClientMsg) {
 	ev := Event{Version: h.store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
 	if err := h.persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now, Source: source, SourceTime: sourceNext}); err != nil {
 		h.stopping = true
+		h.markFailed(err)
 		log.Printf("pixel persistence failed; writes disabled until restart: %v", err)
 		return
 	}
