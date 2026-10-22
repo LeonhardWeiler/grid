@@ -28,8 +28,8 @@ export function fitToScreen(): void {
   camera.y = GRID_SIZE / 2
   camera.tx = GRID_SIZE / 2
   camera.ty = GRID_SIZE / 2
-  camera.zoom = 0.6
-  camera.tzoom = 0.6
+  camera.zoom = Math.max(view.width,view.height)/(GRID_SIZE*BASE_PIXEL_SIZE)
+  camera.tzoom = camera.zoom
   clampCamera()
 }
 

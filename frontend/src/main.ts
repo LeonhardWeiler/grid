@@ -4,7 +4,7 @@ import type {Pixel} from "./model"
 import {updateConnectionUI} from "./ui/connection"
 import {setupPalette} from "./ui/palette"
 import {GRID_SIZE,fitToScreen,camera,clampCamera} from "./camera/camera"
-import {setupControls,didDrag} from "./camera/controls"
+import {setupControls,didDrag,zoomCamera} from "./camera/controls"
 import {render,requestRender} from "./render/render"
 import {updateButtonUI} from "./ui/button"
 import {isCooldownActive} from "./ui/cooldown"
@@ -15,6 +15,7 @@ import {browserIdentity} from "./identity"
 const identity=browserIdentity()
 if(!identity.persistent)state.message="Browser storage is unavailable. Your identity lasts for this page only."
 else if(identity.repaired)state.message="Your browser identity was repaired."
+else state.message="Choose a color, select a pixel, then Place. Drag to pan; scroll or pinch to zoom."
 const ws=createWS(identity.id)
 const xInput=document.getElementById("pixel-x") as HTMLInputElement
 const yInput=document.getElementById("pixel-y") as HTMLInputElement
@@ -60,6 +61,9 @@ canvas.addEventListener("keydown",event=>{
 })
 const help=document.getElementById("help") as HTMLDialogElement
 document.getElementById("help-open")!.addEventListener("click",()=>help.showModal())
+document.getElementById("zoom-in")!.addEventListener("click",()=>zoomCamera(2))
+document.getElementById("zoom-out")!.addEventListener("click",()=>zoomCamera(.5))
+document.getElementById("reset-view")!.addEventListener("click",()=>{fitToScreen();requestRender()})
 
 setupControls()
 setupPalette()

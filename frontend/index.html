@@ -12,7 +12,12 @@
   <body>
     <header class="topbar">
       <div class="brand"><h1>grid</h1><p>One shared canvas.</p></div>
-      <nav id="navigation" aria-label="Canvas controls"><button type="button" id="help-open">Help</button></nav>
+      <nav id="navigation" aria-label="Canvas controls">
+        <button type="button" id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
+        <button type="button" id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+        <button type="button" id="reset-view">Reset view</button>
+        <button type="button" id="help-open">Help</button>
+      </nav>
     </header>
     <main id="workspace" aria-label="Shared canvas">
       <canvas id="canvas" tabindex="0" role="img" aria-label="Shared pixel canvas" aria-describedby="instructions selection">
