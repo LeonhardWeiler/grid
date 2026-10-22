@@ -14,11 +14,12 @@
           version = "0.1.0";
           src = ./.;
           nodejs = pkgs.nodejs_24;
-          npmDepsHash = "sha256-D/5CgpG1WDxFGM9idFuYDCIkGjDqy1QiCzZ4R7nDxRo=";
+          npmDepsHash = "sha256-LzAQuHaziKT7jgw3tKKDsqM0jXKJhoIoz1Z2UXvWnz8=";
           preBuild = "npm test && npm exec tsc -- --noEmit";
           installPhase = "cp -r public/dist $out";
         };
       in {
+		packages.frontend = frontend;
         packages.default = buildGoModule {
           pname = "grid";
           version = "0.1.0";

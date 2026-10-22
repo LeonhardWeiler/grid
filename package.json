@@ -4,11 +4,9 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest",
-    "vite": "^8.0.12"
-  },
-  "peerDependencies": {
-    "typescript": "^6.0.3"
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.0"
   },
   "scripts": {
     "dev": "vite",
