@@ -8,6 +8,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        buildGoModule = pkgs.buildGoModule.override { go = pkgs.go_1_27; };
         frontend = pkgs.buildNpmPackage {
           pname = "grid-frontend";
           version = "0.1.0";
@@ -18,7 +19,7 @@
           installPhase = "cp -r public/dist $out";
         };
       in {
-        packages.default = pkgs.buildGoModule {
+        packages.default = buildGoModule {
           pname = "grid";
           version = "0.1.0";
           src = ./.;
@@ -34,7 +35,7 @@
           '';
         };
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [ go gopls gotools air git bun nodejs_24 ];
+          packages = with pkgs; [ go_1_27 gopls gotools air git nodejs_24 ];
         };
       });
 }
