@@ -9,18 +9,12 @@ import { updateButtonUI } from "./ui/button"
 import { isCooldownActive } from "./ui/cooldown"
 import { screenToWorld } from "./utils/coords"
 import { createWS } from "./ws"
+import { browserIdentity } from "./identity"
 
-let clientId = localStorage.getItem("clientId")
-
-if (!clientId) {
-  clientId = crypto.randomUUID()
-  localStorage.setItem(
-    "clientId",
-    clientId
-  )
-}
-
-const ws = createWS(clientId)
+const identity=browserIdentity()
+if (!identity.persistent) state.message="Browser storage is unavailable. Your identity lasts for this page only."
+else if (identity.repaired) state.message="Your browser identity was repaired."
+const ws = createWS(identity.id)
 
 canvas.addEventListener("click", (e) => {
   if (didDrag()) return
