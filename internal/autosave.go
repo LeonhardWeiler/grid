@@ -4,27 +4,45 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"maps"
 	"time"
 
 	"github.com/coder/websocket"
 )
 
 func (h *Hub) Save() error {
+	h.saveMu.Lock()
+	defer h.saveMu.Unlock()
 	h.stateMu.Lock()
-	defer h.stateMu.Unlock()
 	if h.failed.Load() {
+		h.stateMu.Unlock()
 		return fmt.Errorf("storage failed; journal retained for recovery")
 	}
-	return h.saveLocked()
-}
-
-func (h *Hub) saveLocked() error {
+	h.mu.RLock()
+	oldActions := len(h.lastAction)
+	h.mu.RUnlock()
+	oldSources := len(h.sourceActions)
 	h.CleanupLastAction(CooldownMs)
 	h.cleanupSources()
+	h.mu.RLock()
+	sameMetadata := oldActions == len(h.lastAction) && oldSources == len(h.sourceActions)
+	h.mu.RUnlock()
+	if h.savedVersion == h.store.Version() && sameMetadata {
+		h.stateMu.Unlock()
+		return nil
+	}
 	snap, version := h.store.Snapshot()
 	h.mu.RLock()
-	defer h.mu.RUnlock()
-	return h.persistence.Save(snap, version, h.lastAction, h.sourceActions)
+	actions := maps.Clone(h.lastAction)
+	h.mu.RUnlock()
+	sources := maps.Clone(h.sourceActions)
+	h.stateMu.Unlock()
+	if err := h.persistence.Save(snap, version, actions, sources); err != nil {
+		return err
+	}
+	h.savedVersion = version
+	h.lastSave.Store(time.Now().UnixMilli())
+	return nil
 }
 
 func (h *Hub) RunAutosave(ctx context.Context) {
@@ -73,14 +91,14 @@ func (h *Hub) Shutdown() error {
 	h.closing.Store(true)
 	h.stateMu.Lock()
 	h.stopping = true
+	h.stateMu.Unlock()
 	var err error
 	if !h.failed.Load() {
-		err = h.saveLocked()
+		err = h.Save()
 		if err != nil {
 			h.markFailed(err)
 		}
 	}
-	h.stateMu.Unlock()
 	h.mu.RLock()
 	clients := make([]*Client, 0, len(h.clients))
 	for _, client := range h.clients {

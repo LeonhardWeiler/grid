@@ -21,17 +21,17 @@ type ClientMsg struct {
 }
 
 type ServerResponse struct {
-	RequestID   string            `json:"requestId,omitempty"`
-	Code        string            `json:"code,omitempty"`
-	Protocol    int               `json:"protocol,omitempty"`
-	GridSize    int               `json:"gridSize,omitempty"`
-	End         int64             `json:"end,omitempty"`
-	Type        string            `json:"type"`
-	Pixels      map[string]string `json:"pixels,omitempty"`
-	Events      []Event           `json:"events,omitempty"`
-	Version     int               `json:"version"`
-	CooldownMs  int64             `json:"cooldownMs"`
-	CooldownEnd int64             `json:"cooldownEnd"`
+	RequestID   string          `json:"requestId,omitempty"`
+	Code        string          `json:"code,omitempty"`
+	Protocol    int             `json:"protocol,omitempty"`
+	GridSize    int             `json:"gridSize,omitempty"`
+	End         int64           `json:"end,omitempty"`
+	Type        string          `json:"type"`
+	Pixels      json.RawMessage `json:"pixels,omitempty"`
+	Events      []Event         `json:"events,omitempty"`
+	Version     int             `json:"version"`
+	CooldownMs  int64           `json:"cooldownMs"`
+	CooldownEnd int64           `json:"cooldownEnd"`
 }
 
 func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
@@ -91,7 +91,7 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			}
 			// A newly loaded page has no pixel map, even if localStorage contains an
 			// old version. Always start it with a complete authoritative snapshot.
-			snap, version := h.store.Snapshot()
+			snap, version := h.snapshotLocked()
 			end := h.GetCooldownEnd(msg.ClientID)
 			out, _ := json.Marshal(ServerResponse{Protocol: Protocol.Protocol, GridSize: GridSize, Type: "init", Pixels: snap, Version: version, CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
 			if !h.enqueue(client, out) {
@@ -135,7 +135,7 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 				resp.Type = "init"
 				resp.Protocol = Protocol.Protocol
 				resp.GridSize = GridSize
-				resp.Pixels, resp.Version = h.store.Snapshot()
+				resp.Pixels, resp.Version = h.snapshotLocked()
 			}
 			out, _ := json.Marshal(resp)
 			h.enqueue(client, out)
@@ -149,6 +149,17 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+// Called under stateMu so init ordering remains atomic with live broadcasts.
+func (h *Hub) snapshotLocked() (json.RawMessage, int) {
+	version := h.store.Version()
+	if h.snapshotVersion != version {
+		pixels, _ := h.store.Snapshot()
+		h.snapshotJSON = encodePixels(pixels)
+		h.snapshotVersion = version
+	}
+	return h.snapshotJSON, version
 }
 
 func (h *Hub) sendRateLimit(client *Client) {

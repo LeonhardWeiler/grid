@@ -136,7 +136,11 @@ func TestWebSocketReloadSnapshotAndBroadcast(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		var initial ServerResponse
+		var initial struct {
+			Type    string            `json:"type"`
+			Version int               `json:"version"`
+			Pixels  map[string]string `json:"pixels"`
+		}
 		if err := json.Unmarshal(data, &initial); err != nil {
 			t.Fatal(err)
 		}

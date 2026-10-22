@@ -15,7 +15,7 @@ import (
 
 type SnapshotFile struct {
 	Schema        int               `json:"schema,omitempty"`
-	Pixels        map[string]string `json:"pixels"`
+	Pixels        map[string]string `json:"pixels,omitempty"`
 	Version       int               `json:"version"`
 	LastAction    map[string]int64  `json:"lastAction,omitempty"`
 	SourceActions map[string]int64  `json:"sourceActions,omitempty"`
@@ -56,9 +56,33 @@ func (p *Persistence) Append(entry JournalEntry) error {
 }
 
 func (p *Persistence) Save(pixels map[string]string, version int, lastAction, sources map[string]int64) error {
+	b, err := encodeSnapshot(SnapshotFile{Schema: 1, Pixels: pixels, Version: version, LastAction: lastAction, SourceActions: sources})
+	if err != nil {
+		return err
+	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	b, err := json.Marshal(SnapshotFile{Schema: 1, Pixels: pixels, Version: version, LastAction: lastAction, SourceActions: sources})
+	// Newer writes may have arrived while encoding. Retain them during
+	// compaction; the old WAL remains intact until the snapshot is durable.
+	var retained []byte
+	journal, err := os.Open(p.filePath + ".wal")
+	if err != nil {
+		return err
+	}
+	scanner := bufio.NewScanner(journal)
+	for scanner.Scan() {
+		var entry JournalEntry
+		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
+			journal.Close()
+			return fmt.Errorf("cannot compact corrupt journal: %w", err)
+		}
+		if entry.Version > version {
+			retained = append(retained, scanner.Bytes()...)
+			retained = append(retained, '\n')
+		}
+	}
+	err = scanner.Err()
+	journal.Close()
 	if err != nil {
 		return err
 	}
@@ -90,12 +114,26 @@ func (p *Persistence) Save(pixels map[string]string, version int, lastAction, so
 		return err
 	}
 	// Only compact the journal after the replacement snapshot is durable.
-	wal, err := os.OpenFile(p.filePath+".wal", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+	wal, err := os.CreateTemp(filepath.Dir(p.filePath), ".journal-*")
 	if err != nil {
 		return err
 	}
-	defer wal.Close()
-	return wal.Sync()
+	defer os.Remove(wal.Name())
+	if _, err = wal.Write(retained); err != nil {
+		wal.Close()
+		return err
+	}
+	if err = wal.Sync(); err != nil {
+		wal.Close()
+		return err
+	}
+	if err = wal.Close(); err != nil {
+		return err
+	}
+	if err = os.Rename(wal.Name(), p.filePath+".wal"); err != nil {
+		return err
+	}
+	return dir.Sync()
 }
 
 func (p *Persistence) Load() (SnapshotFile, error) {

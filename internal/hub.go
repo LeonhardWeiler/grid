@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"sync"
@@ -12,6 +13,11 @@ import (
 )
 
 type Hub struct {
+	saveMu          sync.Mutex
+	savedVersion    int
+	lastSave        atomic.Int64
+	snapshotVersion int
+	snapshotJSON    json.RawMessage
 	stateMu         sync.Mutex
 	lastWrite       time.Time
 	sourceActions   map[string]int64 // guarded by stateMu
@@ -71,10 +77,12 @@ func OpenHub(dir string) (*Hub, error) {
 		clients: make(map[*websocket.Conn]*Client), store: store,
 		lastAction: state.LastAction, connToID: make(map[*websocket.Conn]string),
 		idToClients: make(map[string]map[*Client]struct{}), persistence: p,
-		lastWrite:     time.Now(),
-		sourceActions: state.SourceActions,
-		failures:      make(chan error, 1),
-		admissions:    make(map[string]*admission),
+		lastWrite:       time.Now(),
+		sourceActions:   state.SourceActions,
+		failures:        make(chan error, 1),
+		admissions:      make(map[string]*admission),
+		savedVersion:    -1,
+		snapshotVersion: -1,
 	}, nil
 }
 
