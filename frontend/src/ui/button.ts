@@ -1,33 +1,25 @@
-import { cooldownEl } from "../dom"
-import { state } from "../state"
-import { toCenteredCoords } from "../utils/gridCoords"
-import { getCooldownRemaining } from "./cooldown"
+import {cooldownEl} from "../dom"
+import {state,connection} from "../state"
+import {getCooldownRemaining} from "./cooldown"
+import {config} from "../protocol"
+import {pixels} from "../model"
 
-export function updateButtonUI(): void {
-  const feedback=document.getElementById("feedback")
-  if(feedback && feedback.textContent!==state.message) feedback.textContent=state.message
-  if (!cooldownEl) return
-  if (state.pending) {cooldownEl.textContent="Saving pixel…";cooldownEl.classList.add("disabled");return}
-
-  const remaining = getCooldownRemaining()
-
-  if (remaining > 0) {
-    cooldownEl.textContent = `Cooldown: ${(remaining / 1000).toFixed(1)}s`
-    cooldownEl.classList.add("disabled")
-    return
-  }
-
-  cooldownEl.classList.remove("disabled")
-
-  if (!state.selectedPixel) {
-    cooldownEl.textContent = "Select Pixel"
-    return
-  }
-
-  const centered = toCenteredCoords(
-    state.selectedPixel.x,
-    state.selectedPixel.y
-  )
-
-  cooldownEl.textContent = `Click to accept Pixel (${centered.x} | ${centered.y})`
+function setText(element:HTMLElement|null,text:string){if(element&&element.textContent!==text)element.textContent=text}
+export function updateButtonUI():void {
+  setText(document.getElementById("feedback"),state.message)
+  const remaining=getCooldownRemaining()
+  const pixel=state.selectedPixel
+  const colorName=config.colors.find(c=>c.value===state.selectedColor)?.name ?? "color"
+  let label="Select a pixel"
+  if(state.pending)label="Saving pixel…"
+  else if(connection.status!=="connected")label="Waiting for connection"
+  else if(remaining>0)label="Ready in "+(remaining/1000).toFixed(1)+"s"
+  else if(pixel)label="Place "+colorName+" at "+pixel.x+", "+pixel.y
+  setText(cooldownEl,label)
+  cooldownEl.disabled=connection.status!=="connected"||state.pending!==null||!pixel||remaining>0
+  if(pixel){
+    const current=pixels.get(pixel.x+":"+pixel.y)
+    const currentName=config.colors.find(c=>c.value===current)?.name ?? "Empty"
+    setText(document.getElementById("selection"),"Pixel "+pixel.x+", "+pixel.y+": "+currentName+". Selected color: "+colorName+".")
+  }else setText(document.getElementById("selection"),"Select a pixel to inspect its color.")
 }

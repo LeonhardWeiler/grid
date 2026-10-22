@@ -1,26 +1,24 @@
-import { paletteEl } from "../dom"
-import { config } from "../protocol"
-import { state } from "../state"
+import {paletteEl} from "../dom"
+import {config} from "../protocol"
+import {state} from "../state"
+import {requestRender} from "../render/render"
 
-export function setupPalette(): void {
-  if (!paletteEl) return
-
-  paletteEl.replaceChildren(...config.colors.map(color => { const button=document.createElement("button"); button.type="button"; button.className="color";button.dataset.color=color.value;button.style.backgroundColor=color.value;button.setAttribute("aria-label",color.name);return button }))
-
-  const buttons = paletteEl.querySelectorAll<HTMLButtonElement>(".color")
-
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const color = button.dataset.color
-      if (color) {
-        state.selectedColor = color
-      }
-
-      buttons.forEach((b) => b.classList.remove("active"))
-
-      button.classList.add("active")
+export function setupPalette():void {
+  const buttons=config.colors.map(color=>{
+    const button=document.createElement("button")
+    button.type="button"
+    button.className="color"
+    button.dataset.color=color.value
+    button.style.backgroundColor=color.value
+    button.setAttribute("aria-label",color.name)
+    button.setAttribute("aria-pressed",String(state.selectedColor===color.value))
+    button.classList.toggle("active",state.selectedColor===color.value)
+    button.addEventListener("click",()=>{
+      state.selectedColor=color.value
+      for(const other of buttons){const active=other===button;other.classList.toggle("active",active);other.setAttribute("aria-pressed",String(active))}
+      requestRender()
     })
+    return button
   })
-
-  buttons[0]?.classList.add("active")
+  paletteEl.replaceChildren(...buttons)
 }

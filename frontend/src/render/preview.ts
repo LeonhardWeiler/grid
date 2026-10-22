@@ -20,7 +20,15 @@ export function drawPreview(): void {
       state.selectedPixel.y
     )
 
-    ctx.strokeStyle = "yellow"
+    ctx.save()
+    ctx.globalAlpha=.35
+    ctx.fillStyle=state.selectedColor
+    ctx.fillRect(pos.x,pos.y,pos.size,pos.size)
+    ctx.restore()
+    ctx.strokeStyle = "black"
+    ctx.lineWidth = 4
+    ctx.strokeRect(pos.x, pos.y, pos.size, pos.size)
+    ctx.strokeStyle = "white"
     ctx.lineWidth = 2
     ctx.strokeRect(pos.x, pos.y, pos.size, pos.size)
   }

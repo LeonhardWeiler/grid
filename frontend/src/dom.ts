@@ -35,10 +35,10 @@ export function resizeCanvas():void {
 resizeCanvas()
 
 const cooldownElRaw = document.getElementById("cooldown")
-if (!(cooldownElRaw instanceof HTMLElement)) {
+if (!(cooldownElRaw instanceof HTMLButtonElement)) {
   throw new Error("Cooldown element not found")
 }
-export const cooldownEl: HTMLElement = cooldownElRaw
+export const cooldownEl: HTMLButtonElement = cooldownElRaw
 
 const coordsElRaw = document.getElementById("coords")
 if (!(coordsElRaw instanceof HTMLElement)) {
