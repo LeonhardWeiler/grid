@@ -1,5 +1,5 @@
 import { ctx, canvas } from "../dom"
-import { pixels } from "./render"
+import { pixels } from "../model"
 import { worldToScreen } from "../utils/coords"
 
 export function drawPixels(): void {

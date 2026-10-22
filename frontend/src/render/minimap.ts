@@ -1,6 +1,6 @@
 import { minimap, minimapCtx, canvas } from "../dom"
 import { GRID_SIZE, camera, BASE_PIXEL_SIZE } from "../camera/camera"
-import { pixels } from "./render"
+import { pixels } from "../model"
 
 const MINIMAP_SIZE: number = 180
 

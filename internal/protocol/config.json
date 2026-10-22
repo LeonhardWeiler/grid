@@ -1,0 +1,12 @@
+{
+  "protocol": 1,
+  "gridSize": 512,
+  "colors": [
+    { "value": "#ff0000", "name": "Red" },
+    { "value": "#00ff00", "name": "Green" },
+    { "value": "#0000ff", "name": "Blue" },
+    { "value": "#ffff00", "name": "Yellow" },
+    { "value": "#000000", "name": "Black" },
+    { "value": "#ffffff", "name": "White" }
+  ]
+}

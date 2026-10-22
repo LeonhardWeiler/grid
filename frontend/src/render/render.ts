@@ -4,7 +4,7 @@ import { drawGrid } from "./grid"
 import { drawPixels } from "./pixels"
 import { drawPreview } from "./preview"
 
-export const pixels: Map<string, string> = new Map()
+export { pixels } from "../model"
 
 let needsRender = true
 

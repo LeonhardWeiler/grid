@@ -16,11 +16,11 @@ type Hub struct {
 	stopping    bool
 	mu          sync.RWMutex
 	clients     map[*websocket.Conn]*Client
-	Store       *PixelStore
+	store       *PixelStore
 	lastAction  map[string]int64
 	connToID    map[*websocket.Conn]string
 	idToClients map[string]map[*Client]struct{}
-	Persistence *Persistence
+	persistence *Persistence
 }
 
 type Client struct {
@@ -55,9 +55,9 @@ func OpenHub(dir string) (*Hub, error) {
 	store := NewPixelStore()
 	store.LoadSnapshot(state.Pixels, state.Version)
 	return &Hub{
-		clients: make(map[*websocket.Conn]*Client), Store: store,
+		clients: make(map[*websocket.Conn]*Client), store: store,
 		lastAction: state.LastAction, connToID: make(map[*websocket.Conn]string),
-		idToClients: make(map[string]map[*Client]struct{}), Persistence: p,
+		idToClients: make(map[string]map[*Client]struct{}), persistence: p,
 		lastWrite: time.Now(),
 	}, nil
 }

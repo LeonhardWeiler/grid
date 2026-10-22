@@ -20,6 +20,9 @@ type ClientMsg struct {
 }
 
 type ServerResponse struct {
+	Protocol    int               `json:"protocol,omitempty"`
+	GridSize    int               `json:"gridSize,omitempty"`
+	End         int64             `json:"end,omitempty"`
 	Type        string            `json:"type"`
 	Pixels      map[string]string `json:"pixels,omitempty"`
 	Events      []Event           `json:"events,omitempty"`
@@ -67,9 +70,9 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			}
 			// A newly loaded page has no pixel map, even if localStorage contains an
 			// old version. Always start it with a complete authoritative snapshot.
-			snap, version := h.Store.Snapshot()
+			snap, version := h.store.Snapshot()
 			end := h.GetCooldownEnd(msg.ClientID)
-			out, _ := json.Marshal(ServerResponse{Type: "init", Pixels: snap, Version: version, CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
+			out, _ := json.Marshal(ServerResponse{Protocol: Protocol.Protocol, GridSize: GridSize, Type: "init", Pixels: snap, Version: version, CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
 			trySend(client.send, out)
 			h.mu.Lock()
 			client.ready = true
@@ -88,12 +91,14 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			h.stateMu.Lock()
-			events, ok := h.Store.GetSince(msg.LastVersion)
+			events, ok := h.store.GetSince(msg.LastVersion)
 			end := h.GetCooldownEnd(id)
-			resp := ServerResponse{Type: "sync", Events: events, Version: h.Store.Version(), CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())}
+			resp := ServerResponse{Type: "sync", Events: events, Version: h.store.Version(), CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())}
 			if !ok {
 				resp.Type = "init"
-				resp.Pixels, resp.Version = h.Store.Snapshot()
+				resp.Protocol = Protocol.Protocol
+				resp.GridSize = GridSize
+				resp.Pixels, resp.Version = h.store.Snapshot()
 			}
 			out, _ := json.Marshal(resp)
 			trySend(client.send, out)
@@ -118,13 +123,13 @@ func handleSetPixel(h *Hub, id string, msg ClientMsg) {
 		h.sendCooldown(id)
 		return
 	}
-	ev := Event{Version: h.Store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
-	if err := h.Persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now}); err != nil {
+	ev := Event{Version: h.store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
+	if err := h.persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now}); err != nil {
 		h.stopping = true
 		log.Printf("pixel persistence failed; writes disabled until restart: %v", err)
 		return
 	}
-	h.Store.Set(fmt.Sprintf("%d:%d", msg.X, msg.Y), msg.X, msg.Y, msg.Color)
+	h.store.Set(fmt.Sprintf("%d:%d", msg.X, msg.Y), msg.X, msg.Y, msg.Color)
 	h.UpdateCooldown(id, now, CooldownMs)
 	h.lastWrite = time.Now()
 	out, _ := json.Marshal(struct {
@@ -137,10 +142,6 @@ func handleSetPixel(h *Hub, id string, msg ClientMsg) {
 
 func (h *Hub) sendCooldown(id string) {
 	end := h.GetCooldownEnd(id)
-	cd, _ := json.Marshal(struct {
-		Type       string `json:"type"`
-		End        int64  `json:"end"` // Kept for clients opened before the duration-based protocol.
-		CooldownMs int64  `json:"cooldownMs"`
-	}{Type: "cooldown", End: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
+	cd, _ := json.Marshal(ServerResponse{Type: "cooldown", End: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
 	h.SendToClientID(id, cd)
 }

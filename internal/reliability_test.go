@@ -31,12 +31,12 @@ func TestJournalSurvivesCrashAndCompaction(t *testing.T) {
 	handleSetPixel(h, "alice", ClientMsg{X: 7, Y: 9, Color: "#ff0000"})
 	// Reopen without calling Save or Shutdown, simulating a killed process.
 	restored := openTestHub(t, dir)
-	pixels, version := restored.Store.Snapshot()
+	pixels, version := restored.store.Snapshot()
 	if pixels["7:9"] != "#ff0000" || version != 1 || restored.GetCooldownEnd("alice") <= time.Now().UnixMilli() {
 		t.Fatalf("lost state: %v, %d", pixels, version)
 	}
 	handleSetPixel(restored, "alice", ClientMsg{X: 8, Y: 9, Color: "#00ff00"})
-	if restored.Store.Version() != 1 {
+	if restored.store.Version() != 1 {
 		t.Fatal("restart bypassed cooldown")
 	}
 	if err := restored.Save(); err != nil {
@@ -48,7 +48,7 @@ func TestJournalSurvivesCrashAndCompaction(t *testing.T) {
 	}
 	handleSetPixel(restored, "bob", ClientMsg{X: 8, Y: 9, Color: "#00ff00"})
 	again := openTestHub(t, dir)
-	pixels, version = again.Store.Snapshot()
+	pixels, version = again.store.Snapshot()
 	if len(pixels) != 2 || version != 2 {
 		t.Fatalf("snapshot + journal recovery: %v, %d", pixels, version)
 	}
@@ -67,7 +67,7 @@ func TestJournalTruncationAndCorruption(t *testing.T) {
 	f.Close()
 	restored := openTestHub(t, dir)
 	handleSetPixel(restored, "bob", ClientMsg{X: 1, Color: "#00ff00"})
-	if openTestHub(t, dir).Store.Version() != 2 {
+	if openTestHub(t, dir).store.Version() != 2 {
 		t.Fatal("partial tail poisoned future writes")
 	}
 	if err := os.WriteFile(path, []byte("corrupt\n"), 0600); err != nil {
@@ -92,7 +92,7 @@ func TestConcurrentSaveAndWrites(t *testing.T) {
 	}
 	wg.Wait()
 	restored := openTestHub(t, dir)
-	pixels, version := restored.Store.Snapshot()
+	pixels, version := restored.store.Snapshot()
 	if len(pixels) != 30 || version != 30 {
 		t.Fatalf("concurrent persistence lost state: %d pixels at %d", len(pixels), version)
 	}
@@ -187,7 +187,7 @@ func TestWebSocketReloadSnapshotAndBroadcast(t *testing.T) {
 		t.Fatal(err)
 	}
 	readCooldown()
-	if h.Store.Version() != 3 {
+	if h.store.Version() != 3 {
 		t.Fatal("cooldown allowed an extra pixel")
 	}
 	if err := first.Write(ctx, websocket.MessageText, []byte(`{"type":"sync","lastVersion":3}`)); err != nil {

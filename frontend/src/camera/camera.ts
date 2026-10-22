@@ -1,7 +1,8 @@
 import { canvas } from "../dom"
 import { clampView } from "./bounds"
 
-export const GRID_SIZE: number = 512
+import { config } from "../protocol"
+export const GRID_SIZE: number = config.gridSize
 export const BASE_PIXEL_SIZE: number = 40
 
 export interface Camera {

@@ -1,19 +1,9 @@
-import { pixels, requestRender } from "./render/render"
+import { pixels } from "./model"
+import { requestRender } from "./render/render"
 import { setCooldown } from "./ui/cooldown"
 import { connection } from "./state"
 
-interface PixelMessage {
-  type: "init" | "pixel_update" | "sync" | "cooldown"
-  version?: number
-  pixels?: Record<string, string>
-  x?: number
-  y?: number
-  color?: string
-  events?: { version: number; x: number; y: number; color: string }[]
-  end?: number
-  cooldownMs?: number
-  cooldownEnd?: number
-}
+import type { ServerMessage } from "./protocol"
 
 export function createWS(clientId: string) {
   let ws: WebSocket | null = null
@@ -53,14 +43,14 @@ export function createWS(clientId: string) {
     socket.onmessage = (e: MessageEvent) => {
       if (ws !== socket) return
       lastMessage = Date.now()
-      let msg: PixelMessage
+      let msg: ServerMessage
       try { msg = JSON.parse(e.data) } catch { return }
       switch (msg.type) {
         case "init":
           pixels.clear()
           for (const [key, color] of Object.entries(msg.pixels ?? {})) pixels.set(key, color)
           version = msg.version ?? 0
-          setCooldown(msg.cooldownMs ?? Math.max(0, (msg.cooldownEnd ?? 0) - Date.now()))
+          setCooldown(msg.cooldownMs)
           clearHandshake()
           connection.status = "connected"
           reconnectDelay = 250
@@ -71,7 +61,7 @@ export function createWS(clientId: string) {
             if (event.version > version) pixels.set(`${event.x}:${event.y}`, event.color)
           }
           version = msg.version ?? version
-          setCooldown(msg.cooldownMs ?? Math.max(0, (msg.cooldownEnd ?? 0) - Date.now()))
+          setCooldown(msg.cooldownMs)
           requestRender()
           break
         case "pixel_update":
@@ -87,7 +77,7 @@ export function createWS(clientId: string) {
           }
           break
         case "cooldown":
-          setCooldown(msg.cooldownMs ?? Math.max(0, (msg.end ?? 0) - Date.now()))
+          setCooldown(msg.cooldownMs)
           break
       }
     }
