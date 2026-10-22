@@ -221,6 +221,71 @@ test("blocked storage remains usable", async ({ page }) => {
   )
 })
 
+test("invalid stored identities are repaired before connecting", async ({
+  page
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem("clientId", "invalid_id!")
+  )
+  await fakeServer(page)
+  await page.goto("/")
+  await connected(page)
+  await expect(page.locator("#feedback")).toContainText("identity was repaired")
+  expect(await page.evaluate(() => localStorage.getItem("clientId"))).toMatch(
+    /^[a-zA-Z0-9-]{1,64}$/
+  )
+})
+
+test("tools remain reachable at 200 percent text size on a narrow screen", async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 })
+  await fakeServer(page)
+  await page.goto("/")
+  await connected(page)
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = "200%"
+  })
+  await select(page)
+  for (const button of await page.locator("#palette button, #cooldown").all()) {
+    await button.scrollIntoViewIfNeeded()
+    await expect(button).toBeInViewport()
+  }
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true)
+})
+
+for (const dpr of [1, 3]) {
+  test(`canvas selection uses CSS coordinates at DPR ${dpr}`, async ({
+    browser
+  }) => {
+    const context = await browser.newContext({
+      viewport: { width: 1200, height: 800 },
+      deviceScaleFactor: dpr,
+      reducedMotion: "reduce"
+    })
+    const page = await context.newPage()
+    await fakeServer(page)
+    await page.goto("http://127.0.0.1:5410")
+    await connected(page)
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click()
+    await select(page, 200, 210)
+    await page.waitForTimeout(50)
+    const canvas = page.locator("#canvas")
+    const box = (await canvas.boundingBox())!
+    await canvas.click({ position: { x: box.width / 2, y: box.height / 2 } })
+    await expect(page.locator("#pixel-x")).toHaveValue("200")
+    await expect(page.locator("#pixel-y")).toHaveValue("210")
+    expect(
+      await canvas.evaluate((c: HTMLCanvasElement) => c.width / c.clientWidth)
+    ).toBe(dpr)
+    await context.close()
+  })
+}
+
 test("offline recovery keeps the selection and a privacy reset replaces local identity", async ({
   page,
   context
