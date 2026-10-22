@@ -144,6 +144,9 @@ nav {
 }
 #coordinates {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
   align-items: center;
   gap: 6px;
   margin: 0;
