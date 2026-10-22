@@ -24,4 +24,17 @@ jobs:
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
           GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
-        run: curl --fail-with-body --silent --show-error --output /dev/null --form-string "token=$GITLAB_TRIGGER_TOKEN" --form-string ref=main https://gitlab.com/api/v4/projects/87242023/trigger/pipeline
+        run: |
+          curl --fail-with-body --silent --show-error --output /dev/null \
+            --form-string "token=$GITLAB_TRIGGER_TOKEN" --form-string ref=main \
+            --form-string "variables[GRID_REVISION]=$GITHUB_SHA" \
+            https://gitlab.com/api/v4/projects/87242023/trigger/pipeline
+          for attempt in $(seq 1 120); do
+            if curl -fsS --max-time 10 https://grid.coprime.tech/version | jq -e --arg rev "$GITHUB_SHA" '.revision == $rev' >/dev/null; then
+              ./result/bin/grid -probe https://grid.coprime.tech
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "The requested Grid revision did not become ready" >&2
+          exit 1
