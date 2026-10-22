@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"maps"
+	"sync"
 	"time"
 
 	"github.com/coder/websocket"
@@ -108,9 +109,15 @@ func (h *Hub) Shutdown() error {
 		clients = append(clients, client)
 	}
 	h.mu.RUnlock()
+	var closed sync.WaitGroup
 	for _, client := range clients {
-		client.cancel()
-		go client.conn.Close(websocket.StatusServiceRestart, "server restarting; reconnect")
+		closed.Go(func() {
+			// Cancelling a reader first aborts the socket without a close frame.
+			// Wait for the bounded close handshake before the process exits.
+			client.conn.Close(websocket.StatusServiceRestart, "server restarting; reconnect")
+			client.cancel()
+		})
 	}
+	closed.Wait()
 	return err
 }
