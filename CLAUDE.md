@@ -1,29 +1,13 @@
-# CLAUDE.md
+# Grid contributor guide
 
-grid: a real-time pixel canvas like r/place. Go WebSocket backend,
-TypeScript + Vite frontend on HTML5 Canvas. Details in `README.md`.
+Read `README.md` for current development, deployment, recovery and checks, and
+`AGENT/protocol.md` for the shared protocol and locking contract.
 
-## Commands
-
-From the repo root:
-
-```bash
-air              # backend with live reload, :4000
-bun install
-bun run dev      # Vite dev server, :5173
-bun run build    # production build
-```
-
-## Layout
-
-- `main.go`, `internal/` - server: `hub.go` (broadcast), `store.go` (pixel grid + event ring buffer),
-  `persistence.go` (JSON snapshot), `autosave.go`, `validate.go`, `ws.go`, `config.go`.
-- `frontend/` - Canvas renderer and WebSocket client.
-
-## Rules
-
-- The server is the single source of truth. Clients send intents, never state.
-- Every incoming message is validated and rate-limited per user.
-- Messages are minimal JSON. Deltas for live updates, a snapshot for reconnect.
-- No frontend framework: Canvas + TypeScript only.
-- A change to rate limiting, the sync format or the snapshot model changes backend and frontend together.
+- Use `nix develop`, `npm ci --ignore-scripts`, `go run .` and `npm run dev`.
+- Run `nix build -L` and `nix develop -c npm run test:browser` for release changes.
+- The server owns all canvas state. Validate intents and keep bounded queues/budgets.
+- Keep the framework-free TypeScript UI and JSON/file persistence simple.
+- Edit shared grid/palette constants in `internal/protocol/config.json`.
+- Change both endpoints together when changing protocol or snapshot invariants.
+- Production state and credentials are outside Git and immutable packages.
+- The project report tracks audit findings; do not revive obsolete TODO lists.
