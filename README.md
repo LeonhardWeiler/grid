@@ -4,9 +4,12 @@ A real-time 512 × 512 pixel canvas built with Go, coder/websocket, TypeScript
 and Vite. Live at **https://grid.coprime.tech**.
 
 The server validates coordinates and colors and enforces a five-second cooldown
-per browser identity. All tabs share the identity in `localStorage`. The server
+per browser identity. The countdown uses the server-reported remaining duration
+and a monotonic browser timer, so device clock differences do not affect it.
+All tabs share the identity in `localStorage`. The server
 owns the canvas; each connection starts with a complete snapshot, followed by
-ordered live updates. Heartbeats, gap recovery and automatic reconnect keep
+ordered live updates. Zoom and pan stay inside the canvas at every window size.
+Heartbeats, gap recovery and automatic reconnect keep
 clients synchronized after sleep, network loss and deployments.
 
 ## Development
@@ -26,7 +29,7 @@ nix build -L
 STATE_DIRECTORY=./data STATIC_DIR=./result/share/grid ./result/bin/grid
 ```
 
-`nix build` builds the frontend from `package-lock.json`, typechecks it, runs
+`nix build` builds the frontend from `package-lock.json`, tests and typechecks it, runs
 Go vet and the Go tests with the race detector, and packages both the binary
 (`bin/grid`) and frontend (`share/grid`). `flake.lock`, the npm dependency hash
 and the Go vendor hash pin the complete build. After dependency changes, update
@@ -107,15 +110,13 @@ stays in place.
 | `STATIC_DIR` | `./public/dist` | Built frontend directory. |
 | `LISTEN_ADDR` | `127.0.0.1:4000` | HTTP and WebSocket listen address. |
 
-An optional local container build is available with `docker compose up --build -d`.
-It mounts `./data` at `/data`; production uses the locked Nix package.
-
 ## Verification
 
 ```sh
-nix develop -c sh -c 'go vet ./... && go test -race ./... && npx tsc --noEmit && npm run build'
+nix develop -c sh -c 'go vet ./... && go test -race ./... && npm test && npx tsc --noEmit && npm run build'
 ```
 
 Tests cover snapshot + journal recovery without shutdown, partial writes,
 corruption detection, cooldown recovery, concurrent persistence, delta fallback,
-and full WebSocket initialization and cross-client broadcasts.
+full WebSocket initialization and cross-client broadcasts, cooldown countdowns
+with skewed device clocks, and viewport bounds on mobile and wide screens.

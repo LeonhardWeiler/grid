@@ -11,6 +11,7 @@ interface PixelMessage {
   color?: string
   events?: { version: number; x: number; y: number; color: string }[]
   end?: number
+  cooldownMs?: number
   cooldownEnd?: number
 }
 
@@ -59,7 +60,7 @@ export function createWS(clientId: string) {
           pixels.clear()
           for (const [key, color] of Object.entries(msg.pixels ?? {})) pixels.set(key, color)
           version = msg.version ?? 0
-          setCooldown(msg.cooldownEnd ?? 0)
+          setCooldown(msg.cooldownMs ?? Math.max(0, (msg.cooldownEnd ?? 0) - Date.now()))
           clearHandshake()
           connection.status = "connected"
           reconnectDelay = 250
@@ -70,7 +71,7 @@ export function createWS(clientId: string) {
             if (event.version > version) pixels.set(`${event.x}:${event.y}`, event.color)
           }
           version = msg.version ?? version
-          setCooldown(msg.cooldownEnd ?? 0)
+          setCooldown(msg.cooldownMs ?? Math.max(0, (msg.cooldownEnd ?? 0) - Date.now()))
           requestRender()
           break
         case "pixel_update":
@@ -86,7 +87,7 @@ export function createWS(clientId: string) {
           }
           break
         case "cooldown":
-          if (msg.end !== undefined) setCooldown(msg.end)
+          setCooldown(msg.cooldownMs ?? Math.max(0, (msg.end ?? 0) - Date.now()))
           break
       }
     }

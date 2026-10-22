@@ -24,6 +24,7 @@ type ServerResponse struct {
 	Pixels      map[string]string `json:"pixels,omitempty"`
 	Events      []Event           `json:"events,omitempty"`
 	Version     int               `json:"version"`
+	CooldownMs  int64             `json:"cooldownMs"`
 	CooldownEnd int64             `json:"cooldownEnd"`
 }
 
@@ -67,7 +68,8 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			// A newly loaded page has no pixel map, even if localStorage contains an
 			// old version. Always start it with a complete authoritative snapshot.
 			snap, version := h.Store.Snapshot()
-			out, _ := json.Marshal(ServerResponse{Type: "init", Pixels: snap, Version: version, CooldownEnd: h.GetCooldownEnd(msg.ClientID)})
+			end := h.GetCooldownEnd(msg.ClientID)
+			out, _ := json.Marshal(ServerResponse{Type: "init", Pixels: snap, Version: version, CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
 			trySend(client.send, out)
 			h.mu.Lock()
 			client.ready = true
@@ -87,7 +89,8 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			}
 			h.stateMu.Lock()
 			events, ok := h.Store.GetSince(msg.LastVersion)
-			resp := ServerResponse{Type: "sync", Events: events, Version: h.Store.Version(), CooldownEnd: h.GetCooldownEnd(id)}
+			end := h.GetCooldownEnd(id)
+			resp := ServerResponse{Type: "sync", Events: events, Version: h.Store.Version(), CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())}
 			if !ok {
 				resp.Type = "init"
 				resp.Pixels, resp.Version = h.Store.Snapshot()
@@ -112,6 +115,7 @@ func handleSetPixel(h *Hub, id string, msg ClientMsg) {
 	}
 	now := time.Now().UnixMilli()
 	if h.GetCooldownEnd(id) > now {
+		h.sendCooldown(id)
 		return
 	}
 	ev := Event{Version: h.Store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
@@ -128,9 +132,15 @@ func handleSetPixel(h *Hub, id string, msg ClientMsg) {
 		Type string `json:"type"`
 	}{Event: ev, Type: "pixel_update"})
 	h.Broadcast(out)
+	h.sendCooldown(id)
+}
+
+func (h *Hub) sendCooldown(id string) {
+	end := h.GetCooldownEnd(id)
 	cd, _ := json.Marshal(struct {
-		Type string `json:"type"`
-		End  int64  `json:"end"`
-	}{Type: "cooldown", End: now + CooldownMs})
+		Type       string `json:"type"`
+		End        int64  `json:"end"` // Kept for clients opened before the duration-based protocol.
+		CooldownMs int64  `json:"cooldownMs"`
+	}{Type: "cooldown", End: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
 	h.SendToClientID(id, cd)
 }

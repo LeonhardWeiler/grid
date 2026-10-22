@@ -166,6 +166,45 @@ func TestWebSocketReloadSnapshotAndBroadcast(t *testing.T) {
 			t.Fatalf("bad broadcast: %s", data)
 		}
 	}
+	readCooldown := func() {
+		t.Helper()
+		_, data, err := first.Read(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var response ServerResponse
+		if err := json.Unmarshal(data, &response); err != nil {
+			t.Fatal(err)
+		}
+		if response.Type != "cooldown" || response.CooldownMs <= 0 || response.CooldownMs > CooldownMs {
+			t.Fatalf("missing server-reported remaining duration: %s", data)
+		}
+	}
+	readCooldown()
+	// A blocked attempt must return the remaining duration, so a client whose
+	// display expired too early can recover without waiting for a heartbeat.
+	if err := first.Write(ctx, websocket.MessageText, []byte(`{"type":"set_pixel","x":4,"y":4,"color":"#0000ff"}`)); err != nil {
+		t.Fatal(err)
+	}
+	readCooldown()
+	if h.Store.Version() != 3 {
+		t.Fatal("cooldown allowed an extra pixel")
+	}
+	if err := first.Write(ctx, websocket.MessageText, []byte(`{"type":"sync","lastVersion":3}`)); err != nil {
+		t.Fatal(err)
+	}
+	_, data, err := first.Read(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var synced ServerResponse
+	if err := json.Unmarshal(data, &synced); err != nil {
+		t.Fatal(err)
+	}
+	if synced.Type != "sync" || synced.CooldownMs <= 0 || synced.CooldownMs > CooldownMs {
+		t.Fatalf("sync lost remaining cooldown: %s", data)
+	}
+
 }
 
 func TestReloadWaitsForQuietAndIsBounded(t *testing.T) {

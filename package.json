@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "package": "vite build && nix build"
+    "package": "vite build && nix build",
+    "test": "node --test \"frontend/src/**/*.test.ts\""
   }
 }

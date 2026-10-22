@@ -14,7 +14,7 @@
           src = ./.;
           nodejs = pkgs.nodejs_24;
           npmDepsHash = "sha256-D/5CgpG1WDxFGM9idFuYDCIkGjDqy1QiCzZ4R7nDxRo=";
-          preBuild = "npm exec tsc -- --noEmit";
+          preBuild = "npm test && npm exec tsc -- --noEmit";
           installPhase = "cp -r public/dist $out";
         };
       in {

@@ -79,7 +79,6 @@ export function setupControls(): void {
 
     const factor = 1.1
     camera.tzoom *= e.deltaY < 0 ? factor : 1 / factor
-    camera.tzoom = Math.max(0.08, Math.min(2, camera.tzoom))
 
     clampCamera()
   }, { passive: false })
@@ -87,6 +86,7 @@ export function setupControls(): void {
   window.addEventListener("resize", () => {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
+    clampCamera()
 
     requestRender()
   })

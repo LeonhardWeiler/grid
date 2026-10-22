@@ -1,4 +1,5 @@
 import { canvas } from "../dom"
+import { clampView } from "./bounds"
 
 export const GRID_SIZE: number = 512
 export const BASE_PIXEL_SIZE: number = 40
@@ -28,15 +29,16 @@ export function fitToScreen(): void {
   camera.ty = GRID_SIZE / 2
   camera.zoom = 0.6
   camera.tzoom = 0.6
+  clampCamera()
 }
 
 export function clampCamera(): void {
-  const visibleWidth = canvas.width / (BASE_PIXEL_SIZE * camera.tzoom)
-  const visibleHeight = canvas.height / (BASE_PIXEL_SIZE * camera.tzoom)
-
-  const halfW = visibleWidth / 2
-  const halfH = visibleHeight / 2
-
-  camera.tx = Math.max(halfW, Math.min(GRID_SIZE - halfW, camera.tx))
-  camera.ty = Math.max(halfH, Math.min(GRID_SIZE - halfH, camera.ty))
+  const target = clampView(
+    { x: camera.tx, y: camera.ty, zoom: camera.tzoom },
+    canvas.width, canvas.height, GRID_SIZE, BASE_PIXEL_SIZE
+  )
+  camera.tx = target.x
+  camera.ty = target.y
+  camera.tzoom = target.zoom
+  Object.assign(camera, clampView(camera, canvas.width, canvas.height, GRID_SIZE, BASE_PIXEL_SIZE))
 }

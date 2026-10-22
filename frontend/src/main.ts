@@ -2,7 +2,7 @@ import { canvas, cooldownEl } from "./dom"
 import { state, connection } from "./state"
 import { updateConnectionUI } from "./ui/connection"
 import { setupPalette } from "./ui/palette"
-import { GRID_SIZE, fitToScreen, camera} from "./camera/camera"
+import { GRID_SIZE, fitToScreen, camera, clampCamera} from "./camera/camera"
 import { setupControls, didDrag} from "./camera/controls"
 import { render, requestRender} from "./render/render"
 import { updateButtonUI } from "./ui/button"
@@ -95,6 +95,7 @@ function loop() {
   camera.x += (camera.tx - camera.x) * 0.15
   camera.y += (camera.ty - camera.y) * 0.15
   camera.zoom += (camera.tzoom - camera.zoom) * 0.15
+  clampCamera()
 
   const moved =
     Math.abs(oldX - camera.x) > 0.001 ||

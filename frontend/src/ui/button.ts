@@ -1,7 +1,5 @@
 import { cooldownEl } from "../dom"
-import { GRID_SIZE } from "../camera/camera"
 import { state } from "../state"
-import type { Pixel } from "../state"
 import { toCenteredCoords } from "../utils/gridCoords"
 import { getCooldownRemaining } from "./cooldown"
 

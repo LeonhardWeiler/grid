@@ -1,15 +1,15 @@
-export const cooldown = {
-  end: 0,
-}
+let cooldownEnd = 0
 
-export function setCooldown(end: number): void {
-  cooldown.end = end
+// A duration from the server avoids comparing clocks on different devices.
+// The monotonic clock also tolerates adjustments to the device's wall clock.
+export function setCooldown(remainingMs: number): void {
+  cooldownEnd = performance.now() + Math.max(0, remainingMs)
 }
 
 export function isCooldownActive(): boolean {
-  return Date.now() < cooldown.end
+  return getCooldownRemaining() > 0
 }
 
 export function getCooldownRemaining(): number {
-  return Math.max(0, cooldown.end - Date.now())
+  return Math.max(0, cooldownEnd - performance.now())
 }
