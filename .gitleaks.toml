@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+# Historical Phoenix dev/test defaults from before the Go rewrite. These are
+# public framework examples, not live credentials. Keep this exception narrow.
+[[allowlists]]
+description = "Removed Phoenix development and test defaults"
+paths = ['''^config/(dev|test)\.exs$''']
