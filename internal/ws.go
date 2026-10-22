@@ -41,6 +41,7 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 	source := sourceKey(r)
 	if !h.admit(source, time.Now().UnixMilli()) {
+		h.connectionRejects.Add(1)
 		w.Header().Set("Retry-After", "1")
 		http.Error(w, "connection budget exceeded", 429)
 		return
@@ -111,6 +112,7 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 		}
 		switch msg.Type {
 		case "sync":
+			h.syncs.Add(1)
 			if !ValidVersion(msg.LastVersion) {
 				return
 			}
@@ -198,7 +200,14 @@ func decodeClientMsg(data []byte) (ClientMsg, error) {
 	return msg, nil
 }
 
-func handleSetPixel(h *Hub, id, source string, msg ClientMsg) ServerResponse {
+func handleSetPixel(h *Hub, id, source string, msg ClientMsg) (response ServerResponse) {
+	defer func() {
+		if response.Type == "accepted" {
+			h.accepted.Add(1)
+		} else {
+			h.rejected.Add(1)
+		}
+	}()
 	if !ValidCoords(msg.X, msg.Y) || !ValidColor(msg.Color) {
 		return ServerResponse{Type: "rejected", Code: "invalid_pixel"}
 	}
@@ -221,10 +230,15 @@ func handleSetPixel(h *Hub, id, source string, msg ClientMsg) ServerResponse {
 		return ServerResponse{Type: "rejected", Code: "rate_limited", CooldownMs: max(retry, globalRetry)}
 	}
 	ev := Event{Version: h.store.Version() + 1, X: msg.X, Y: msg.Y, Color: msg.Color}
+	watchdog := time.AfterFunc(5*time.Second, func() { h.markFailed(fmt.Errorf("journal fsync exceeded 5 seconds")) })
+	defer watchdog.Stop()
 	if err := h.persistence.Append(JournalEntry{Event: ev, ClientID: id, Time: now, Source: source, SourceTime: sourceNext}); err != nil {
 		h.stopping = true
 		h.markFailed(err)
 		log.Printf("pixel persistence failed; writes disabled until restart: %v", err)
+		return ServerResponse{Type: "rejected", Code: "unavailable"}
+	}
+	if !h.Ready() {
 		return ServerResponse{Type: "rejected", Code: "unavailable"}
 	}
 	if source != "" {

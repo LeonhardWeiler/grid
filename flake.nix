@@ -25,6 +25,7 @@
           version = "0.1.0";
           src = ./.;
           vendorHash = "sha256-7JqwcenKhaOgziXfkl32qz2VrZ0zKhNJMLfvHto/Pco=";
+          ldflags = [ "-s" "-w" "-X grid/internal.Revision=${self.rev or self.dirtyRev or "dev"}" ];
           preCheck = ''
             test -z "$(gofmt -l main.go internal)"
             go vet ./...

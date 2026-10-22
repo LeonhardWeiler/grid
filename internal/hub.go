@@ -13,30 +13,36 @@ import (
 )
 
 type Hub struct {
-	saveMu          sync.Mutex
-	savedVersion    int
-	lastSave        atomic.Int64
-	snapshotVersion int
-	snapshotJSON    json.RawMessage
-	stateMu         sync.Mutex
-	lastWrite       time.Time
-	sourceActions   map[string]int64 // guarded by stateMu
-	globalWrite     int64
-	snapshotBudget  int64
-	admissions      map[string]*admission // guarded by mu
-	openConnections int
-	handshakeBudget int64
-	stopping        bool
-	failed          atomic.Bool
-	closing         atomic.Bool
-	failures        chan error
-	mu              sync.RWMutex
-	clients         map[*websocket.Conn]*Client
-	store           *PixelStore
-	lastAction      map[string]int64
-	connToID        map[*websocket.Conn]string
-	idToClients     map[string]map[*Client]struct{}
-	persistence     *Persistence
+	checkpointVersion atomic.Int64
+	accepted          atomic.Uint64
+	rejected          atomic.Uint64
+	queueDrops        atomic.Uint64
+	connectionRejects atomic.Uint64
+	syncs             atomic.Uint64
+	saveMu            sync.Mutex
+	savedVersion      int
+	lastSave          atomic.Int64
+	snapshotVersion   int
+	snapshotJSON      json.RawMessage
+	stateMu           sync.Mutex
+	lastWrite         time.Time
+	sourceActions     map[string]int64 // guarded by stateMu
+	globalWrite       int64
+	snapshotBudget    int64
+	admissions        map[string]*admission // guarded by mu
+	openConnections   int
+	handshakeBudget   int64
+	stopping          bool
+	failed            atomic.Bool
+	closing           atomic.Bool
+	failures          chan error
+	mu                sync.RWMutex
+	clients           map[*websocket.Conn]*Client
+	store             *PixelStore
+	lastAction        map[string]int64
+	connToID          map[*websocket.Conn]string
+	idToClients       map[string]map[*Client]struct{}
+	persistence       *Persistence
 }
 
 type Client struct {
@@ -268,6 +274,7 @@ func (h *Hub) RemoveClient(conn *websocket.Conn) {
 
 func (h *Hub) enqueue(client *Client, msg []byte) bool {
 	if client.queued.Add(int64(len(msg))) > maxQueuedBytes {
+		h.queueDrops.Add(1)
 		client.queued.Add(-int64(len(msg)))
 		h.RemoveClient(client.conn)
 		return false
@@ -276,6 +283,7 @@ func (h *Hub) enqueue(client *Client, msg []byte) bool {
 	case client.send <- msg:
 		return true
 	default:
+		h.queueDrops.Add(1)
 		client.queued.Add(-int64(len(msg)))
 		h.RemoveClient(client.conn)
 		return false

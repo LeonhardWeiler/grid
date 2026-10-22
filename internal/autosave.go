@@ -37,10 +37,13 @@ func (h *Hub) Save() error {
 	h.mu.RUnlock()
 	sources := maps.Clone(h.sourceActions)
 	h.stateMu.Unlock()
+	watchdog := time.AfterFunc(5*time.Second, func() { h.markFailed(fmt.Errorf("checkpoint exceeded 5 seconds")) })
+	defer watchdog.Stop()
 	if err := h.persistence.Save(snap, version, actions, sources); err != nil {
 		return err
 	}
 	h.savedVersion = version
+	h.checkpointVersion.Store(int64(version))
 	h.lastSave.Store(time.Now().UnixMilli())
 	return nil
 }
