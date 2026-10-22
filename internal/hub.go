@@ -12,6 +12,9 @@ import (
 	"github.com/coder/websocket"
 )
 
+// Lock order: saveMu serializes checkpoints; stateMu serializes state changes
+// and snapshot capture, followed by mu/store locks. Checkpoint disk IO runs
+// after releasing stateMu. Never acquire stateMu while holding mu/store locks.
 type Hub struct {
 	checkpointVersion atomic.Int64
 	accepted          atomic.Uint64

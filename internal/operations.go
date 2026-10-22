@@ -126,6 +126,11 @@ func Probe(ctx context.Context, endpoint string) error {
 }
 
 func CheckState(dir string) error {
+	lock, err := LockStateDir(dir)
+	if err != nil {
+		return err
+	}
+	defer lock.Close()
 	state, err := NewPersistence(filepath.Join(dir, "snapshot.json")).Load()
 	if err != nil {
 		return err

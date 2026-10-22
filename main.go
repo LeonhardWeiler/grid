@@ -42,6 +42,15 @@ func main() {
 		return
 	}
 	mime.AddExtensionType(".js", "application/javascript")
+	dir := os.Getenv("STATE_DIRECTORY")
+	if dir == "" {
+		dir = "./data"
+	}
+	lock, err := internal.LockStateDir(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer lock.Close()
 	hub := internal.NewHub()
 	staticDir := os.Getenv("STATIC_DIR")
 	if staticDir == "" {
