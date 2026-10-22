@@ -12,9 +12,11 @@ import { screenToWorld } from "../utils/coords"
 import { requestRender } from "../render/render"
 import { state } from "../state"
 import type { Pixel } from "../state"
+import {exceedsDragThreshold} from "./gesture"
 
 let dragging = false
 let moved = false
+const start={x:0,y:0}
 
 const last: { x: number; y: number } = {
   x: 0,
@@ -29,6 +31,7 @@ export function setupControls(): void {
 
     last.x = e.clientX
     last.y = e.clientY
+    start.x=e.clientX;start.y=e.clientY
   })
 
   window.addEventListener("mouseup", () => {
@@ -40,7 +43,7 @@ export function setupControls(): void {
       const dx = e.clientX - last.x
       const dy = e.clientY - last.y
 
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      if (exceedsDragThreshold(start,{x:e.clientX,y:e.clientY})) {
         moved = true
       }
 
