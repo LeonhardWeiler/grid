@@ -1,0 +1,3 @@
+# Public Phoenix development/test defaults, removed in the Go rewrite.
+ab5ac9deb8a14395abdcbd102e4527196527d5c1:config/test.exs:generic-api-key:20
+ab5ac9deb8a14395abdcbd102e4527196527d5c1:config/dev.exs:generic-api-key:16
