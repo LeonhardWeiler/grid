@@ -1,0 +1,83 @@
+{
+  "occluded": [
+    {
+      "color": "#ff0000",
+      "topElement": "minimap",
+      "accessibleToPointer": false
+    },
+    {
+      "color": "#00ff00",
+      "topElement": "minimap",
+      "accessibleToPointer": false
+    },
+    {
+      "color": "#0000ff",
+      "topElement": "minimap",
+      "accessibleToPointer": false
+    },
+    {
+      "color": "#ffff00",
+      "topElement": "minimap",
+      "accessibleToPointer": false
+    },
+    {
+      "color": "#000000",
+      "topElement": "minimap",
+      "accessibleToPointer": false
+    },
+    {
+      "color": "#ffffff",
+      "topElement": "",
+      "accessibleToPointer": true
+    }
+  ],
+  "idle": {
+    "durationMs": 1000.5999999998603,
+    "mutations": 60
+  },
+  "historicalSecretContext": [
+    {
+      "file": "config/dev.exs",
+      "context": [
+        "# For development, we disable any cache and enable",
+        "config :the_grid, TheGridWeb.Endpoint,",
+        "  secret_key_base: \"REDACTED\",",
+        "# In order to use HTTPS in development, a self-signed",
+        "config :the_grid, TheGridWeb.Endpoint,",
+        "config :the_grid, dev_routes: true",
+        "# Do not include metadata nor timestamps in development logs",
+        "config :logger, :default_formatter, format: \"REDACTED\"",
+        "# Set a higher stacktrace during development. Avoid configuring such",
+        "# in production as building large stacktraces may be expensive.",
+        "config :phoenix, :stacktrace_depth, 20",
+        "# Initialize plugs at runtime for faster development compilation",
+        "config :phoenix, :plug_init_mode, :runtime",
+        "config :phoenix_live_view,",
+        "# Disable swoosh api client as it is only required for production adapters.",
+        "config :swoosh, :api_client, false"
+      ]
+    },
+    {
+      "file": "config/test.exs",
+      "context": [
+        "# to provide built-in test partitioning in CI environment.",
+        "# Run `mix help test` for more information.",
+        "config :the_grid, TheGrid.Repo,",
+        "  database: \"REDACTED\"MIX_TEST_PARTITION\"REDACTED\",",
+        "# We don't run a server during test. If one is required,",
+        "config :the_grid, TheGridWeb.Endpoint,",
+        "  secret_key_base: \"REDACTED\",",
+        "# In test we don't send emails",
+        "config :the_grid, TheGrid.Mailer, adapter: Swoosh.Adapters.Test",
+        "# Disable swoosh api client as it is only required for production adapters",
+        "config :swoosh, :api_client, false",
+        "# Print only warnings and errors during test",
+        "config :logger, level: :warning",
+        "# Initialize plugs at runtime for faster test compilation",
+        "config :phoenix, :plug_init_mode, :runtime",
+        "config :phoenix_live_view,",
+        "config :phoenix,"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "live": {
+    "version": 13,
+    "pixels": 8
+  },
+  "writeFailure": {
+    "healthStatus": 200,
+    "healthBody": "ok\n",
+    "responses": []
+  },
+  "invalidJSON": {
+    "code": 1000,
+    "reason": ""
+  },
+  "oversize": {
+    "code": 1009,
+    "reason": "read limited at 1025 bytes"
+  }
+}

@@ -1,0 +1,464 @@
+=== Symbol Results ===
+
+Vulnerability #1: GO-2026-6809
+    Distrust compromised intermediate certificates in crypto/x509
+  More info: https://pkg.go.dev/vuln/GO-2026-6809
+  Standard library
+    Found in: crypto/x509@go1.26.2
+    Fixed in: crypto/x509@go1.26.10
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls x509.Certificate.Verify
+
+Vulnerability #2: GO-2026-6617
+    HTTP/2 server crash due to HPACK encoder race in net/http
+  More info: https://pkg.go.dev/vuln/GO-2026-6617
+  Standard library
+    Found in: net/http@go1.26.2
+    Fixed in: net/http@go1.26.9
+    Example traces found:
+      #1: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #2: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #3: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #4: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #5: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #6: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #7: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #8: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #9: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #10: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #11: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #12: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #13: main.go:72:28: grid.main calls http.Server.Shutdown
+      #14: main.go:72:28: grid.main calls http.Server.Shutdown
+      #15: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #16: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #17: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #18: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #19: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #20: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #21: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #22: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #23: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #24: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #25: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #26: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #27: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #28: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #29: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #30: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #31: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #32: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #33: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #34: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #35: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #36: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #37: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #38: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #39: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #40: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #41: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #42: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #43: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #44: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #45: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #46: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #47: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #48: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #49: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #50: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #51: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #52: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #53: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #54: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #55: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #56: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #57: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #58: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #59: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #60: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #61: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #62: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #63: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #64: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #65: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #66: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #67: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #68: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #69: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #70: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #71: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+      #72: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+
+Vulnerability #3: GO-2026-6613
+    HTTP/1 server connection desynchronization after 2xx CONNECT response in
+    net/http
+  More info: https://pkg.go.dev/vuln/GO-2026-6613
+  Standard library
+    Found in: net/http@go1.26.2
+    Fixed in: net/http@go1.26.9
+    Example traces found:
+      #1: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.CanonicalHeaderKey
+      #2: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #3: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Del
+      #4: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #5: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #6: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #7: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #8: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #9: main.go:72:28: grid.main calls http.Server.Shutdown
+      #10: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #11: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #12: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #13: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #14: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #15: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #16: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #17: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #18: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #19: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.response.Write
+      #20: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+
+Vulnerability #4: GO-2026-6612
+    Double flow control refund on HTTP/2 server streams in net/http
+  More info: https://pkg.go.dev/vuln/GO-2026-6612
+  Standard library
+    Found in: net/http@go1.26.2
+    Fixed in: net/http@go1.26.9
+    Example traces found:
+      #1: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #2: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #3: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #4: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #5: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #6: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #7: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #8: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #9: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #10: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #11: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #12: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #13: main.go:72:28: grid.main calls http.Server.Shutdown
+      #14: main.go:72:28: grid.main calls http.Server.Shutdown
+      #15: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #16: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #17: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #18: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #19: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #20: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #21: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #22: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #23: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #24: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #25: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #26: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #27: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #28: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #29: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #30: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #31: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #32: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #33: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #34: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #35: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #36: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #37: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #38: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #39: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #40: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #41: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #42: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #43: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #44: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #45: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #46: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #47: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #48: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #49: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #50: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #51: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #52: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #53: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #54: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #55: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #56: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #57: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #58: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #59: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #60: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #61: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #62: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #63: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #64: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #65: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #66: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #67: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #68: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #69: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #70: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #71: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+      #72: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+
+Vulnerability #5: GO-2026-6611
+    Excessive CPU consumption from repeated initial window changes in net/http
+  More info: https://pkg.go.dev/vuln/GO-2026-6611
+  Standard library
+    Found in: net/http@go1.26.2
+    Fixed in: net/http@go1.26.9
+    Example traces found:
+      #1: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #2: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #3: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #4: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #5: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #6: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #7: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #8: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #9: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #10: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #11: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #12: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #13: main.go:72:28: grid.main calls http.Server.Shutdown
+      #14: main.go:72:28: grid.main calls http.Server.Shutdown
+      #15: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #16: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #17: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #18: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #19: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #20: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #21: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #22: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #23: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #24: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #25: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #26: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #27: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #28: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #29: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #30: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #31: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #32: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #33: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #34: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #35: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #36: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #37: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #38: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #39: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #40: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #41: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #42: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #43: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #44: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #45: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #46: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #47: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #48: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #49: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #50: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #51: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #52: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #53: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #54: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #55: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #56: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #57: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #58: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #59: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #60: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #61: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #62: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #63: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #64: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #65: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #66: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #67: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #68: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #69: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #70: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #71: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+      #72: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+
+Vulnerability #6: GO-2026-6609
+    Lack of limit on size of parsed Range headers in net/http
+  More info: https://pkg.go.dev/vuln/GO-2026-6609
+  Standard library
+    Found in: net/http@go1.26.2
+    Fixed in: net/http@go1.26.9
+    Example traces found:
+      #1: main.go:33:18: grid.main calls http.fileHandler.ServeHTTP
+
+Vulnerability #7: GO-2026-6608
+    Memory limit bypass when parsing MIME headers in net/textproto,
+    mime/multipart
+  More info: https://pkg.go.dev/vuln/GO-2026-6608
+  Standard library
+    Found in: net/textproto@go1.26.2
+    Fixed in: net/textproto@go1.26.9
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls textproto.Reader.ReadMIMEHeader
+
+Vulnerability #8: GO-2026-6607
+    Reject malformed ECH outer extension references in crypto/tls
+  More info: https://pkg.go.dev/vuln/GO-2026-6607
+  Standard library
+    Found in: crypto/tls@go1.26.2
+    Fixed in: crypto/tls@go1.26.9
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls tls.Conn.HandshakeContext
+      #2: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls tls.Conn.Read
+
+Vulnerability #9: GO-2026-6603
+    HTTP/2 server memory exhaustion due to Trailer headers in net/http
+  More info: https://pkg.go.dev/vuln/GO-2026-6603
+  Standard library
+    Found in: net/http@go1.26.2
+    Fixed in: net/http@go1.26.9
+    Example traces found:
+      #1: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #2: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Error
+      #3: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #4: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Get
+      #5: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #6: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Set
+      #7: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #8: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.Header.Values
+      #9: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #10: main.go:30:16: grid.main calls http.ServeMux.HandleFunc
+      #11: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #12: main.go:78:33: grid.main calls http.Server.ListenAndServe
+      #13: main.go:72:28: grid.main calls http.Server.Shutdown
+      #14: main.go:72:28: grid.main calls http.Server.Shutdown
+      #15: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #16: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.bodyEOFSignal.Read
+      #17: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #18: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.checkConnErrorWriter.Write
+      #19: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #20: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.chunkWriter.Write
+      #21: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #22: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.connReader.Read
+      #23: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #24: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ConnectionError.Error
+      #25: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #26: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2ErrCode.String
+      #27: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #28: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameHeader.String
+      #29: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #30: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameType.String
+      #31: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #32: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2FrameWriteRequest.String
+      #33: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #34: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2Setting.String
+      #35: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #36: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2SettingID.String
+      #37: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #38: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2StreamError.Error
+      #39: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #40: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2bufferedWriterTimeoutWriter.Write
+      #41: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #42: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2chunkWriter.Write
+      #43: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #44: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2connError.Error
+      #45: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #46: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2duplicatePseudoHeaderError.Error
+      #47: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #48: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldNameError.Error
+      #49: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #50: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2headerFieldValueError.Error
+      #51: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #52: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2pseudoHeaderError.Error
+      #53: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #54: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.Write
+      #55: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #56: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.http2responseWriter.WriteHeader
+      #57: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #58: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls http.http2responseWriter.WriteString
+      #59: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #60: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls http.http2writeData.String
+      #61: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #62: internal/autosave.go:78:3: internal.Hub.Shutdown calls websocket.Conn.Close, which eventually calls http.loggingConn.Close
+      #63: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #64: internal/persistence.go:133:36: internal.Persistence.Load calls bufio.Reader.ReadBytes, which eventually calls http.loggingConn.Read
+      #65: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #66: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.loggingConn.Write
+      #67: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #68: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls http.onceCloseListener.Close
+      #69: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #70: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.Hijack
+      #71: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+      #72: internal/ws.go:34:31: internal.HandleWS calls websocket.Accept, which eventually calls http.response.WriteHeader
+
+Vulnerability #10: GO-2026-6090
+    Limit handshake messages we are willing to accept post-handshake in
+    crypto/tls
+  More info: https://pkg.go.dev/vuln/GO-2026-6090
+  Standard library
+    Found in: crypto/tls@go1.26.2
+    Fixed in: crypto/tls@go1.26.6
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls tls.Conn.HandshakeContext
+      #2: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls tls.Conn.Read
+
+Vulnerability #11: GO-2026-6089
+    Apply ReadHeaderTimeout when doing unencrypted HTTP/2 check in net/http
+  More info: https://pkg.go.dev/vuln/GO-2026-6089
+  Standard library
+    Found in: net/http@go1.26.2
+    Fixed in: net/http@go1.26.6
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe
+
+Vulnerability #12: GO-2026-5972
+    Enforce maximum recursion depth in encoding/asn1
+  More info: https://pkg.go.dev/vuln/GO-2026-5972
+  Standard library
+    Found in: encoding/asn1@go1.26.2
+    Fixed in: encoding/asn1@go1.26.6
+    Example traces found:
+      #1: main.go:18:23: grid.main calls mime.AddExtensionType, which eventually calls asn1.Unmarshal
+
+Vulnerability #13: GO-2026-5856
+    Invoking Encrypted Client Hello privacy leak in crypto/tls
+  More info: https://pkg.go.dev/vuln/GO-2026-5856
+  Standard library
+    Found in: crypto/tls@go1.26.2
+    Fixed in: crypto/tls@go1.26.5
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls tls.Conn.HandshakeContext
+      #2: internal/hub.go:102:25: internal.Add calls websocket.Conn.Write, which eventually calls tls.Conn.Read
+
+Vulnerability #14: GO-2026-5039
+    Arbitrary inputs are included in errors without any escaping in
+    net/textproto
+  More info: https://pkg.go.dev/vuln/GO-2026-5039
+  Standard library
+    Found in: net/textproto@go1.26.2
+    Fixed in: net/textproto@go1.26.4
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls textproto.Reader.ReadMIMEHeader
+
+Vulnerability #15: GO-2026-5037
+    Inefficient candidate hostname parsing in crypto/x509
+  More info: https://pkg.go.dev/vuln/GO-2026-5037
+  Standard library
+    Found in: crypto/x509@go1.26.2
+    Fixed in: crypto/x509@go1.26.4
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls x509.Certificate.Verify
+      #2: main.go:78:33: grid.main calls http.Server.ListenAndServe, which eventually calls x509.Certificate.VerifyHostname
+      #3: internal/persistence.go:160:28: internal.Persistence.Load calls fmt.Sprintf, which eventually calls x509.HostnameError.Error
+
+Vulnerability #16: GO-2026-4971
+    Panic in Dial and LookupPort when handling NUL byte on Windows in net
+  More info: https://pkg.go.dev/vuln/GO-2026-4971
+  Standard library
+    Found in: net@go1.26.2
+    Fixed in: net@go1.26.3
+    Example traces found:
+      #1: main.go:78:33: grid.main calls http.Server.ListenAndServe, which calls net.Listen
+
+Your code is affected by 16 vulnerabilities from the Go standard library.
+This scan also found 10 vulnerabilities in packages you import and 9
+vulnerabilities in modules you require, but your code doesn't appear to call
+these vulnerabilities.
+Use '-show verbose' for more details.
+exit status 3

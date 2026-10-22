@@ -1,0 +1,292 @@
+{
+  "errors": [],
+  "desktop": {
+    "title": "grid",
+    "lang": "",
+    "dpr": 1,
+    "canvas": {
+      "width": 1440,
+      "height": 900
+    },
+    "navigation": [
+      {
+        "ttfb": 33.199999999953434,
+        "dom": 596.8000000000466,
+        "load": 598.3000000000466
+      }
+    ],
+    "resources": [
+      {
+        "name": "/assets/index-DY2gp-x3.js",
+        "transfer": 3671,
+        "duration": 47.60000000009313
+      },
+      {
+        "name": "/assets/index-BuPFkLmF.css",
+        "transfer": 877,
+        "duration": 42.300000000046566
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "label": null,
+        "pressed": null,
+        "size": [
+          34,
+          34
+        ]
+      },
+      {
+        "text": "",
+        "label": null,
+        "pressed": null,
+        "size": [
+          34,
+          34
+        ]
+      },
+      {
+        "text": "",
+        "label": null,
+        "pressed": null,
+        "size": [
+          34,
+          34
+        ]
+      },
+      {
+        "text": "",
+        "label": null,
+        "pressed": null,
+        "size": [
+          34,
+          34
+        ]
+      },
+      {
+        "text": "",
+        "label": null,
+        "pressed": null,
+        "size": [
+          34,
+          34
+        ]
+      },
+      {
+        "text": "",
+        "label": null,
+        "pressed": null,
+        "size": [
+          34,
+          34
+        ]
+      }
+    ]
+  },
+  "axe": [
+    {
+      "id": "button-name",
+      "impact": "critical",
+      "description": "Ensure buttons have discernible text",
+      "nodes": [
+        [
+          ".active"
+        ],
+        [
+          "button[data-color=\"#00ff00\"]"
+        ],
+        [
+          "button[data-color=\"#0000ff\"]"
+        ],
+        [
+          "button[data-color=\"#ffff00\"]"
+        ],
+        [
+          "button[data-color=\"#000000\"]"
+        ],
+        [
+          "button[data-color=\"#ffffff\"]"
+        ]
+      ]
+    },
+    {
+      "id": "html-has-lang",
+      "impact": "serious",
+      "description": "Ensure every HTML document has a lang attribute",
+      "nodes": [
+        [
+          "html"
+        ]
+      ]
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": "moderate",
+      "description": "Ensure the document has a main landmark",
+      "nodes": [
+        [
+          "html"
+        ]
+      ]
+    },
+    {
+      "id": "page-has-heading-one",
+      "impact": "moderate",
+      "description": "Ensure that the page, or at least one of its frames contains a level-one heading",
+      "nodes": [
+        [
+          "html"
+        ]
+      ]
+    },
+    {
+      "id": "region",
+      "impact": "moderate",
+      "description": "Ensure all page content is contained by landmarks",
+      "nodes": [
+        [
+          "#cooldown"
+        ],
+        [
+          "#coords"
+        ],
+        [
+          "#canvas"
+        ],
+        [
+          "#minimap"
+        ]
+      ]
+    }
+  ],
+  "mobile": {
+    "palette": {
+      "x": 16,
+      "y": 282,
+      "width": 60,
+      "height": 280
+    },
+    "minimap": {
+      "x": 16,
+      "y": 16,
+      "width": 252,
+      "height": 252
+    },
+    "coords": {
+      "x": 305.84375,
+      "y": 16,
+      "width": 68.15625,
+      "height": 34
+    },
+    "cooldown": {
+      "x": 141.421875,
+      "y": 786,
+      "width": 107.15625,
+      "height": 38
+    }
+  },
+  "landscape": {
+    "palette": {
+      "x": 16,
+      "y": 55,
+      "width": 60,
+      "height": 280
+    },
+    "minimap": {
+      "x": 16,
+      "y": 16,
+      "width": 252,
+      "height": 252
+    },
+    "coords": {
+      "x": 759.84375,
+      "y": 16,
+      "width": 68.15625,
+      "height": 34
+    },
+    "cooldown": {
+      "x": 368.421875,
+      "y": 332,
+      "width": 107.15625,
+      "height": 38
+    }
+  },
+  "touch": {
+    "dpr": 3,
+    "canvasWidth": 390,
+    "cssWidth": 390,
+    "afterDrag": "0 / 0"
+  },
+  "invalidIdentity": "⚠️ Reconnecting...",
+  "storageBlocked": {
+    "error": "Blocked storage",
+    "overlay": "none"
+  },
+  "render": [
+    {
+      "count": 10,
+      "renderMs": [
+        0.5999999998603016,
+        0.39999999990686774,
+        0.10000000009313226,
+        0.10000000009313226,
+        0.09999999986030161,
+        0.10000000009313226,
+        0.19999999995343387
+      ],
+      "parts": {
+        "pixels": 0,
+        "minimap": 0
+      }
+    },
+    {
+      "count": 10000,
+      "renderMs": [
+        42.5999999998603,
+        33.60000000009313,
+        30.899999999906868,
+        30.100000000093132,
+        21.699999999953434,
+        28.5,
+        26.300000000046566
+      ],
+      "parts": {
+        "pixels": 10.300000000046566,
+        "minimap": 16.4000000001397
+      }
+    },
+    {
+      "count": 100000,
+      "renderMs": [
+        353.89999999990687,
+        342.5,
+        335,
+        318.20000000018626,
+        287.19999999995343,
+        256.30000000004657,
+        229.39999999990687
+      ],
+      "parts": {
+        "pixels": 62.39999999990687,
+        "minimap": 141.5
+      }
+    },
+    {
+      "count": 262144,
+      "renderMs": [
+        444.5,
+        420.19999999995343,
+        440.70000000018626,
+        422.0999999998603,
+        451.10000000009313,
+        450.69999999995343,
+        451.39999999990687
+      ],
+      "parts": {
+        "pixels": 135.10000000009313,
+        "minimap": 317
+      }
+    }
+  ]
+}

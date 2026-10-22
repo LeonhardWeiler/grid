@@ -1,0 +1,26 @@
+=== RUN   TestAuditIdentityAndMissingFields
+    audit_test.go:17: different IDs: 2 writes in 13.128011ms
+    audit_test.go:21: omitted coordinates: version=3 pixel-at-origin=#0000ff
+--- PASS: TestAuditIdentityAndMissingFields (0.03s)
+=== RUN   TestAuditSemanticSnapshot
+    audit_test.go:28: null: ACCEPTED pixels=map[] version=0
+    audit_test.go:28: {"pixels":{"999:999":"invalid"},"version":-7}: ACCEPTED pixels=map[999:999:invalid] version=-7
+    audit_test.go:28: {"pixels":{},"version":40}: ACCEPTED pixels=map[] version=40
+--- PASS: TestAuditSemanticSnapshot (0.04s)
+=== RUN   TestAuditWriteFailure
+2026/10/22 13:36:12 pixel persistence failed; writes disabled until restart: open /tmp/nix-shell.8nOnmk/TestAuditWriteFailure3847970934/001/snapshot.json.wal: is a directory
+    audit_test.go:36: after WAL failure: stopping=true version=0
+    audit_test.go:40: storage repaired + Save success: stopping=true version=0
+--- PASS: TestAuditWriteFailure (0.04s)
+goos: linux
+goarch: amd64
+pkg: grid/internal
+cpu: AMD Ryzen 7 6800H with Radeon Graphics         
+BenchmarkAuditEmptyDeltaFullRing
+BenchmarkAuditEmptyDeltaFullRing-16    	       5	   2008964 ns/op	 4005888 B/op	       1 allocs/op
+BenchmarkAuditFullSnapshot
+BenchmarkAuditFullSnapshot-16          	       5	 446008143 ns/op	61784417 B/op	  525358 allocs/op
+BenchmarkAuditFullSave
+BenchmarkAuditFullSave-16              	       5	 452627102 ns/op	58429875 B/op	  525372 allocs/op
+PASS
+ok  	grid/internal	6.681s

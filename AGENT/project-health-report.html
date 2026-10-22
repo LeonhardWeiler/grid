@@ -1,22 +1,21 @@
 <!doctype html>
 <html lang="de">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>grid — Project Health Report</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Grid | Project Health Report | 22.10.2026</title>
     <style>
       :root {
-        --bg: #0d1117;
-        --card: #161b22;
-        --card-border: #30363d;
-        --text: #e6edf3;
-        --muted: #8b949e;
-        --accent: #58a6ff;
-        --crit: #f85149;
-        --high: #ff7b52;
-        --med: #d29922;
-        --low: #3fb950;
-        --info: #6e7681;
+        color-scheme: light dark;
+        --bg: #10151d;
+        --surface: #18212c;
+        --text: #edf2f7;
+        --muted: #b4c0cf;
+        --border: #354357;
+        --accent: #85c7ff;
+        --high: #ffb29d;
+        --medium: #ffdc87;
+        --low: #a8d8b3;
       }
       * {
         box-sizing: border-box;
@@ -25,617 +24,3248 @@
         margin: 0;
         background: var(--bg);
         color: var(--text);
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-          Arial, sans-serif;
-        line-height: 1.55;
-        padding: 2rem 1rem 4rem;
+        font:
+          16px/1.65 system-ui,
+          sans-serif;
       }
       .wrap {
-        max-width: 940px;
-        margin: 0 auto;
+        max-width: 1120px;
+        margin: auto;
+        padding: 40px 24px 80px;
       }
       h1 {
-        font-size: 1.9rem;
-        margin: 0 0 0.3rem;
-      }
-      .meta {
-        color: var(--muted);
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-      }
-      .meta code {
-        color: var(--accent);
-      }
-      .summary {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        margin: 1.2rem 0 2rem;
-      }
-      .pill {
-        display: flex;
-        align-items: center;
-        gap: 0.45rem;
-        background: var(--card);
-        border: 1px solid var(--card-border);
-        border-radius: 999px;
-        padding: 0.35rem 0.85rem;
-        font-size: 0.85rem;
-      }
-      .pill b {
-        font-size: 1rem;
-      }
-      .dot {
-        width: 0.7rem;
-        height: 0.7rem;
-        border-radius: 50%;
-        display: inline-block;
-      }
-      .d-crit {
-        background: var(--crit);
-      }
-      .d-high {
-        background: var(--high);
-      }
-      .d-med {
-        background: var(--med);
-      }
-      .d-low {
-        background: var(--low);
-      }
-      .d-info {
-        background: var(--info);
+        font-size: clamp(1.8rem, 5vw, 2.7rem);
+        line-height: 1.15;
+        margin: 0.5rem 0 1rem;
       }
       h2 {
-        font-size: 1.3rem;
-        margin: 2.4rem 0 1rem;
-        padding-bottom: 0.4rem;
-        border-bottom: 1px solid var(--card-border);
+        margin: 3rem 0 1rem;
+        border-top: 1px solid var(--border);
+        padding-top: 1.3rem;
+        font-size: 1.5rem;
+        scroll-margin-top: 20px;
       }
-      .toc {
-        background: var(--card);
-        border: 1px solid var(--card-border);
-        border-radius: 10px;
-        padding: 1rem 1.3rem;
-      }
-      .toc ul {
-        margin: 0.3rem 0 0;
-        padding-left: 1.2rem;
-      }
-      .toc a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-      .toc a:hover {
-        text-decoration: underline;
-      }
-      .card {
-        background: var(--card);
-        border: 1px solid var(--card-border);
-        border-left-width: 4px;
-        border-radius: 8px;
-        padding: 1rem 1.2rem;
-        margin: 0.9rem 0;
-      }
-      .card.crit {
-        border-left-color: var(--crit);
-      }
-      .card.high {
-        border-left-color: var(--high);
-      }
-      .card.med {
-        border-left-color: var(--med);
-      }
-      .card.low {
-        border-left-color: var(--low);
-      }
-      .card.info {
-        border-left-color: var(--info);
-      }
-      .card h3 {
-        margin: 0 0 0.5rem;
-        font-size: 1.02rem;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        flex-wrap: wrap;
-      }
-      .badge {
-        font-size: 0.68rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        padding: 0.15rem 0.5rem;
-        border-radius: 5px;
-        color: #0d1117;
-      }
-      .b-crit {
-        background: var(--crit);
-      }
-      .b-high {
-        background: var(--high);
-      }
-      .b-med {
-        background: var(--med);
-      }
-      .b-low {
-        background: var(--low);
-      }
-      .b-info {
-        background: var(--info);
-        color: #e6edf3;
-      }
-      .id {
-        color: var(--muted);
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.8rem;
-      }
-      .loc {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.82rem;
-        color: var(--accent);
-        background: #0d1117;
-        padding: 0.1rem 0.4rem;
-        border-radius: 4px;
-      }
-      .card p {
+      h3 {
+        font-size: 1.18rem;
+        line-height: 1.4;
         margin: 0.5rem 0;
       }
-      .rec {
-        margin-top: 0.6rem;
-        padding-top: 0.6rem;
-        border-top: 1px dashed var(--card-border);
-        font-size: 0.92rem;
+      .meta,
+      .location,
+      figcaption,
+      .muted {
+        color: var(--muted);
       }
-      .rec b {
+      .meta {
+        font-size: 0.9rem;
+      }
+      .lead {
+        font-size: 1.12rem;
+        max-width: 950px;
+      }
+      .stats {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 24px 0;
+      }
+      .stat,
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px;
+      }
+      .stat strong {
+        font-size: 1.7rem;
+        display: block;
+        line-height: 1.2;
+      }
+      .stat {
+        min-width: 135px;
+      }
+      .finding {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--border);
+        border-radius: 8px;
+        margin: 20px 0;
+        padding: 22px;
+        scroll-margin-top: 16px;
+      }
+      .finding.hoch {
+        border-left-color: var(--high);
+      }
+      .finding.mittel {
+        border-left-color: var(--medium);
+      }
+      .finding.niedrig {
+        border-left-color: var(--low);
+      }
+      .finding-meta {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .badge {
+        font-size: 0.8rem;
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 2px 9px;
+        border: 1px solid currentColor;
+      }
+      .badge.hoch {
+        color: var(--high);
+      }
+      .badge.mittel {
+        color: var(--medium);
+      }
+      .badge.niedrig {
         color: var(--low);
       }
-      .legend {
-        color: var(--muted);
-        font-size: 0.82rem;
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+      a:hover {
+        text-decoration-thickness: 2px;
+      }
+      a:focus-visible,
+      select:focus-visible,
+      input:focus-visible,
+      button:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 4px;
+      }
+      code,
+      pre,
+      .location {
+        font-family: ui-monospace, monospace;
+        font-size: 0.85em;
+        overflow-wrap: anywhere;
+      }
+      code {
+        background: #0b121c;
+        border-radius: 4px;
+        padding: 2px 5px;
+      }
+      pre {
+        white-space: pre-wrap;
+        background: #0b121c;
+        padding: 18px;
+        border-radius: 8px;
+        overflow: auto;
+      }
+      .location {
+        margin: 0.8rem 0 1rem;
+      }
+      dl {
+        margin: 0;
+      }
+      dt {
+        font-weight: 700;
         margin-top: 1rem;
       }
-      .legend span {
-        margin-right: 1rem;
-        white-space: nowrap;
+      dd {
+        margin: 4px 0 0;
       }
-      ul.tight {
-        margin: 0.3rem 0;
+      p {
+        margin: 0.65rem 0;
+      }
+      li {
+        margin: 0.45rem 0;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.92rem;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 12px 10px;
+        vertical-align: top;
+      }
+      th {
+        background: var(--surface);
+      }
+      nav ul {
+        columns: 2;
+        padding-left: 22px;
+      }
+      .filters {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: end;
+        margin: 24px 0;
+      }
+      .filters label {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .filters input,
+      .filters select,
+      .filters button {
+        font: inherit;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 9px;
+      }
+      .filters input {
+        width: min(340px, 80vw);
+      }
+      .index {
+        columns: 2;
+        padding-left: 20px;
+        font-size: 0.9rem;
+      }
+      .index li {
+        break-inside: avoid;
+      }
+      .screens {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      .screens figure {
+        margin: 0;
+      }
+      .screens img {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        display: block;
+      }
+      .screens figure:first-child {
+        grid-column: 1/-1;
+      }
+      .screens figure:nth-child(2) img {
+        max-width: 280px;
+      }
+      .screens figcaption {
+        font-size: 0.85rem;
+        margin-top: 8px;
+      }
+      .note {
+        border-left: 3px solid var(--accent);
+        padding: 10px 18px;
+        background: var(--surface);
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 650px) {
+        .wrap {
+          padding: 24px 14px 50px;
+        }
+        .finding {
+          padding: 16px;
+        }
+        .stats {
+          gap: 8px;
+        }
+        .stat {
+          min-width: calc(50% - 4px);
+          flex: 1;
+        }
+        nav ul,
+        .index {
+          columns: 1;
+        }
+        .screens {
+          display: block;
+        }
+        .screens figure {
+          margin-bottom: 22px;
+        }
+        th,
+        td {
+          padding: 9px 7px;
+        }
+        .filters {
+          align-items: stretch;
+        }
+        .filters label {
+          width: 100%;
+        }
+        .filters input {
+          width: 100%;
+        }
+      }
+      @media print {
+        :root {
+          --bg: white;
+          --surface: #fff;
+          --text: #111;
+          --muted: #444;
+          --border: #ccc;
+          --accent: #174d86;
+          --high: #9d2810;
+          --medium: #795800;
+          --low: #285934;
+          color-scheme: light;
+        }
+        .wrap {
+          max-width: none;
+          padding: 0;
+        }
+        .filters {
+          display: none;
+        }
+        .finding {
+          break-inside: avoid;
+        }
+        .finding[hidden] {
+          display: block !important;
+        }
+        a {
+          color: #174d86;
+        }
+        code,
+        pre {
+          background: #f4f4f4;
+        }
+        .screens img {
+          max-height: 450px;
+          object-fit: contain;
+        }
+        .stats {
+          break-inside: avoid;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <h1>grid — Project Health Report</h1>
-      <div class="meta">
-        Momentaufnahme · Datum: <code>2026-07-02</code> · Branch:
-        <code>main</code> · Scan: Go-Backend (<code>internal/</code>,
-        <code>main.go</code>) + TS-Frontend (<code>frontend/src/</code>) +
-        Deploy-Config
+    <main class="wrap">
+      <header>
+        <p class="meta">
+          PROJECT HEALTH REPORT · Audit vom 22.10.2026 · Repository und
+          laufender Produktionsserver
+        </p>
+        <h1>
+          Grid: stabiler Kern, offene Grenzen bei Missbrauch, Fehlererkennung
+          und Bedienbarkeit
+        </h1>
+        <p class="lead">
+          Die kleine Go-/TypeScript-Architektur passt zum Produkt. Crash-sichere
+          Persistenz, geordnete Updates, Reconnect und reproduzierbare Builds
+          sind deutlich verbessert. Vor größerer öffentlicher Nutzung sollten
+          insbesondere die veraltete Go-Toolchain, umgehbare Schreibbudgets,
+          stille Speicherfehler und die Bedienung auf Touch- und
+          Assistenzgeräten behoben werden.
+        </p>
+        <p class="meta">
+          Basis: <code>main @ 0e38543cfacf934385717e551a03dda497aeea68</code> ·
+          Arbeitsbaum zu Beginn sauber · Live:
+          <a href="https://grid.coprime.tech">grid.coprime.tech</a> · Prüfung am
+          22.10.2026, ab 13:26 CEST. Alle IDs beziehen sich auf diesen
+          Prüfstand.
+        </p>
+      </header>
+      <div class="stats">
+        <div class="stat"><strong>0</strong> kritische Befunde</div>
+        <div class="stat"><strong>8</strong> hohe Priorität</div>
+        <div class="stat"><strong>14</strong> mittlere Priorität</div>
+        <div class="stat"><strong>9</strong> niedrige Priorität</div>
       </div>
-
-      <div class="summary">
-        <span class="pill"
-          ><span class="dot d-crit"></span><b>2</b> kritisch</span
-        >
-        <span class="pill"><span class="dot d-high"></span><b>3</b> hoch</span>
-        <span class="pill"><span class="dot d-med"></span><b>5</b> mittel</span>
-        <span class="pill"
-          ><span class="dot d-low"></span><b>3</b> niedrig</span
-        >
-        <span class="pill"><span class="dot d-info"></span><b>2</b> info</span>
-      </div>
-
-      <div class="toc">
+      <p class="note">
+        <strong>Bewertung:</strong> „hoch“ betrifft Kernfunktion, erhebliche
+        Missbrauchs-/Verfügbarkeitsrisiken oder fehlenden Nachweis einer
+        notwendigen Wiederherstellung. „mittel“ betrifft spürbare Qualitäts-,
+        Kapazitäts- oder Betriebsrisiken. „niedrig“ betrifft begrenzte Defekte
+        und ergänzende Härtung. Nachweislücken und abgeleitete Szenarien sind
+        ausdrücklich markiert. Keine RCE, aktive Kompromittierung oder aktuelle
+        Datenverluste wurden nachgewiesen.
+      </p>
+      <nav aria-label="Berichtsinhalt" class="panel">
         <strong>Inhalt</strong>
         <ul>
-          <li><a href="#open">1 · Offene Findings</a></li>
-          <li><a href="#strong">2 · Was schon stark ist</a></li>
-          <li><a href="#decided">3 · Bewusst entschieden</a></li>
+          <li><a href="#scope">1. Umfang und Prüfgrenzen</a></li>
+          <li><a href="#architecture">2. Architektur und Stärken</a></li>
+          <li><a href="#server">3. Produktionsserver</a></li>
+          <li><a href="#measurements">4. Tests und Messungen</a></li>
+          <li><a href="#findings">5. Alle 31 Findings</a></li>
+          <li><a href="#screens">6. UI-Nachweise</a></li>
+          <li><a href="#old">7. Abgleich des alten Reports</a></li>
+          <li><a href="#priorities">8. Umsetzung und Abwägungen</a></li>
+          <li><a href="#evidence">9. Nachweise und Reproduktion</a></li>
         </ul>
-        <div class="legend">
-          <span><span class="dot d-crit"></span> kritisch</span>
-          <span><span class="dot d-high"></span> hoch</span>
-          <span><span class="dot d-med"></span> mittel</span>
-          <span><span class="dot d-low"></span> niedrig</span>
-          <span><span class="dot d-info"></span> info</span>
+      </nav>
+
+      <section id="scope">
+        <h2>1. Umfang und Prüfgrenzen</h2>
+        <p>
+          Geprüft wurden alle eingecheckten Implementierungs- und Testdateien in
+          <code>main.go</code>, <code>internal/</code>, <code>frontend/</code>,
+          die Build-/CI-Konfiguration, README und AGENT-Dokumente. Hinzu kommen
+          die lokal vorhandene waentw-Serverkonfiguration und die tatsächlich
+          aktiven Units, nginx-Konfiguration, Netzwerkregeln und Ressourcendaten
+          auf <code>deploy@server</code>. Die wirksame Konfiguration wurde mit
+          der dokumentierten abgeglichen; die lokale Serverkonfiguration wurde
+          nicht geändert.
+        </p>
+        <p>
+          Die Produktionsprüfung war lesend und niedrigvolumig: HTTP, wenige
+          WebSocket-Initialisierungen, Origin-/Längen-/JSON-Ablehnungen und
+          UI-Navigation ohne Pixelbestätigung. Es wurden weder Produktionspixel
+          geschrieben noch Dienste neu gestartet oder Konfigurationen verändert.
+          Schreib-, Speicherfehler- und Vollcanvasversuche liefen ausschließlich
+          mit temporärem State bzw. isolierten Browserdaten. Die
+          kapazitätsbezogenen Zahlen sind lokale Laborwerte oder ausdrücklich
+          gekennzeichnete Ableitungen.
+        </p>
+        <p>
+          Die integrierte T3-Browserumgebung konnte wegen fehlender
+          Hostbibliotheken nicht starten. Als Fallback wurden lokal vorhandenes
+          Nix-Chromium 155 und temporär installierte Playwright-/axe-Werkzeuge
+          außerhalb des Repositorys verwendet. Desktop, kleine
+          Hoch-/Querformatfenster und Touch/DPR wurden emuliert; das ersetzt
+          keinen echten Safari-/Firefox-/iOS-/Android- und Screenreader-Test.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Aspekt</th>
+                <th>Prüfung</th>
+                <th>Ergebnis / Grenze</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Produkt & Interaktion</td>
+                <td>Desktopablauf, Auswahl, Farbe, Navigation, Hilfen</td>
+                <td>UX-01 bis UX-05, REL-03</td>
+              </tr>
+              <tr>
+                <td>Mobile & Responsive</td>
+                <td>390×844, 844×390, Touch und DPR 3</td>
+                <td>UX-01, UX-02, UX-04</td>
+              </tr>
+              <tr>
+                <td>Barrierefreiheit</td>
+                <td>axe, semantisches DOM, Tastaturcode und Zoom</td>
+                <td>
+                  A11Y-01; kein vollständiger
+                  Screenreader-/WCAG-Konformitätstest
+                </td>
+              </tr>
+              <tr>
+                <td>Frontendleistung</td>
+                <td>Bundle, Netzwerkanfragen, ruhender Loop, Vollbelegung</td>
+                <td>PERF-01, PERF-04</td>
+              </tr>
+              <tr>
+                <td>Backendleistung</td>
+                <td>Delta-Ring, Snapshot, fsync, Locks, Speichergrenzen</td>
+                <td>PERF-02, PERF-03</td>
+              </tr>
+              <tr>
+                <td>Nebenläufigkeit</td>
+                <td>Lockpfade und Race-Tests; Broadcast und Save</td>
+                <td>
+                  Keine Race-Meldung im ausgeführten Test; keine allgemeine
+                  Racefreiheit bewiesen
+                </td>
+              </tr>
+              <tr>
+                <td>Synchronisation</td>
+                <td>Init, Delta, Versionslücken, Reconnect und Tab-ID</td>
+                <td>REL-03 bis REL-05, ARCH-01</td>
+              </tr>
+              <tr>
+                <td>Datenintegrität</td>
+                <td>WAL, Snapshot, fsync, Kompaktion, Fehlerfälle</td>
+                <td>REL-01, REL-02; vorhandene Crash-Recovery-Tests grün</td>
+              </tr>
+              <tr>
+                <td>Missbrauch & Identität</td>
+                <td>Cooldown, Origin, Eingabelimit, Requestkosten</td>
+                <td>SEC-02, SEC-03, REL-06</td>
+              </tr>
+              <tr>
+                <td>Abhängigkeiten</td>
+                <td>Go-Binary, Nix-Lock, npm audit, govulncheck</td>
+                <td>SEC-01, SEC-04; keine pauschale OS-weite CVE-Freigabe</td>
+              </tr>
+              <tr>
+                <td>Supply Chain & CI</td>
+                <td>Hashes/Locks, Actions, Trigger und Revisionen</td>
+                <td>SEC-07, OPS-03</td>
+              </tr>
+              <tr>
+                <td>Host & Netzwerk</td>
+                <td>Live-Units, Dienste, IPv4/IPv6-Firewall, SSH</td>
+                <td>OPS-02, SEC-06; Hostdaten im Serverabschnitt</td>
+              </tr>
+              <tr>
+                <td>HTTPS & Browsergrenzen</td>
+                <td>Live-Zertifikat, Proxy, Kompression, Header</td>
+                <td>SEC-05; TLS 1.2/1.3 konfiguriert</td>
+              </tr>
+              <tr>
+                <td>Recovery & Kontinuität</td>
+                <td>Reload, Shutdown, StateDirectory, Backupnachweis</td>
+                <td>OPS-01, REL-01; kein absichtlicher Produktionsneustart</td>
+              </tr>
+              <tr>
+                <td>Monitoring & Betrieb</td>
+                <td>Health, Logs, Timer, Alarme, Ressourcen</td>
+                <td>OPS-04; externer Alarmempfang nicht aktiv getestet</td>
+              </tr>
+              <tr>
+                <td>Datenschutz</td>
+                <td>Tracker/Requests, lokale ID, WAL, Logrotation</td>
+                <td>
+                  PRIV-01; keine Rechtsberatung/Konformitätszertifizierung
+                </td>
+              </tr>
+              <tr>
+                <td>Wartbarkeit & Einfachheit</td>
+                <td>Modulgrenzen, Typen, Protokoll und Invarianten</td>
+                <td>ARCH-01; kleiner Stack ist angemessen</td>
+              </tr>
+              <tr>
+                <td>Tests & Dokumentation</td>
+                <td>Tests, Coverage, README und Planungsstände</td>
+                <td>QA-01, DOC-01</td>
+              </tr>
+              <tr>
+                <td>Auffindbarkeit & Weitergabe</td>
+                <td>Titel, Metadaten, URLs, Lizenz und Versionierung</td>
+                <td>
+                  Minimaler Seitentitel, keine Beschreibung/Sharing-Metadaten
+                  oder Deep-Links; Produktverbesserung niedriger Priorität,
+                  keine Sicherheitslücke
+                </td>
+              </tr>
+              <tr>
+                <td>Moderation & Skalierungsmodell</td>
+                <td>
+                  Öffentliche anonyme Canvas, History und Mehrinstanzbetrieb
+                </td>
+                <td>
+                  Kein Moderations-/Rollback-Werkzeug oder dauerhafter
+                  Pixelverlauf; Abwägungen unten
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
+        <p>
+          Außerhalb des nachweisbaren Umfangs bleiben: Provider-Konsole und
+          deren Backups, externe NAS-Pulljobs, Tailscale-ACLs der Control Plane,
+          GitHub-/GitLab-Schutzregeln und tatsächliche Secretberechtigungen,
+          alarmseitiger Empfang sowie ein vollständiger Schwachstellenscan
+          sämtlicher OS-Pakete. Es wurde kein breit angelegter Portscan, kein
+          Penetrationstest mit Belastung und kein Desasterversuch auf Produktion
+          durchgeführt.
+        </p>
+      </section>
 
-      <h2 id="open">1 · Offene Findings</h2>
-
-      <div class="card crit">
-        <h3>
-          <span class="badge b-crit">kritisch</span> Grid-Größe zwischen
-          Frontend und Backend inkonsistent <span class="id">CRIT-1</span>
-        </h3>
+      <section id="architecture">
+        <h2>2. Architektur und Stärken</h2>
         <p>
-          <span class="loc">frontend/src/camera/camera.ts:3</span> setzt
-          <code>GRID_SIZE = 1000</code>, das Backend
-          <span class="loc">internal/config.go:7</span> jedoch
-          <code>GridSize = 512</code>.
+          <code
+            >Browser (Canvas + TypeScript) → HTTPS/WSS → nginx → Go-Hub auf
+            127.0.0.1:4000 → In-Memory-Store + WAL + Snapshot</code
+          >. systemd startet das unveränderliche Nix-Paket mit einem separaten
+          StateDirectory. Der Server ist die Zustandsautorität; der Browser
+          sendet Zeichenintentionen und erhält Snapshot, geordnete Updates und
+          Cooldown-Dauer. Ein neuer Seitenaufruf synchronisiert immer
+          vollständig.
         </p>
-        <p>
-          Das Frontend zeigt und erlaubt Klicks auf ein 1000×1000-Raster. Klicks
-          außerhalb 0–511 werden per <code>set_pixel</code> gesendet, vom
-          Backend in <code>ValidCoords</code> (<span class="loc"
-            >internal/validate.go:9</span
-          >) still verworfen — kein Fehler, kein Feedback, kein Cooldown. Über
-          die Hälfte der sichtbaren Fläche ist unbrauchbar. Zusätzlich rechnet
-          <code>toCenteredCoords</code> mit Mittelpunkt 500 statt 256, wodurch
-          die angezeigten Koordinaten nicht zum echten Raster passen.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Eine einzige Quelle der Wahrheit für die
-          Grid-Größe. Backend soll die Grid-Größe beim <code>init</code> an den
-          Client senden, das Frontend nutzt diesen Wert statt einer eigenen
-          Konstante.
-        </div>
-      </div>
-
-      <div class="card crit">
-        <h3>
-          <span class="badge b-crit">kritisch</span> Nach Reload bleibt die
-          Canvas nahezu leer (Delta-Sync ohne Pixel-Persistenz)
-          <span class="id">CRIT-2</span>
-        </h3>
-        <p>
-          <span class="loc">frontend/src/ws.ts:27,80,118</span> persistiert nur
-          <code>version</code> in <code>localStorage</code>, nicht die
-          Pixel-Daten. Beim Reload ist die <code>pixels</code>-Map leer, aber es
-          wird <code>init_client</code> mit der alten, hohen
-          <code>lastVersion</code> gesendet.
-        </p>
-        <p>
-          Das Backend (<span class="loc">internal/ws.go:108</span>) liefert dann
-          nur Deltas seit dieser Version (<code>sync</code>), sofern der
-          Ring-Buffer sie noch abdeckt. Der Client wendet diese wenigen Events
-          auf eine leere Map an → es erscheinen nur die seit dem letzten Besuch
-          geänderten Pixel, der Rest der Canvas fehlt, bis er zufällig
-          überschrieben wird.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Entweder beim Reconnect/Reload immer einen
-          vollständigen Snapshot anfordern (<code>lastVersion = 0</code>, wenn
-          keine lokalen Pixel vorliegen), oder die Pixel-Map ebenfalls lokal
-          persistieren. Delta-Sync nur, wenn tatsächlich ein konsistenter
-          lokaler Zustand existiert.
-        </div>
-      </div>
-
-      <div class="card high">
-        <h3>
-          <span class="badge b-high">hoch</span> docker-compose Volume zeigt auf
-          falschen Pfad — Persistenz geht verloren
-          <span class="id">HIGH-1</span>
-        </h3>
-        <p>
-          <span class="loc">docker-compose.yml:9</span> mountet
-          <code>./data:/data</code>. Der Server schreibt aber nach
-          <code>./data/snapshot.json</code> relativ zum WORKDIR
-          <code>/app</code> (<span class="loc">internal/hub.go:36</span>,
-          <span class="loc">Dockerfile:21</span>), also nach
-          <code>/app/data</code>.
-        </p>
-        <p>
-          Der gemountete Volume-Pfad <code>/data</code> wird nie beschrieben;
-          die Snapshots landen im ephemeren Container-Layer und gehen bei jedem
-          <code>docker compose up --force-recreate</code> verloren.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Volume auf <code>./data:/app/data</code> ändern
-          (oder den Snapshot-Pfad im Server auf
-          <code>/data</code> konfigurierbar machen und dort hin schreiben).
-        </div>
-      </div>
-
-      <div class="card high">
-        <h3>
-          <span class="badge b-high">hoch</span> WebSocket-Origin-Whitelist nur
-          für localhost — Produktion blockiert <span class="id">HIGH-2</span>
-        </h3>
-        <p>
-          <span class="loc">internal/ws.go:55</span> erlaubt als
-          <code>OriginPatterns</code> ausschließlich
-          <code>http://localhost:5173</code> und
-          <code>http://localhost:4000</code>.
-        </p>
-        <p>
-          Beim Deployment (Docker, Port 4000) wird die App über eine Domain/IP
-          aufgerufen; die Origin lautet dann z. B.
-          <code>http://&lt;host&gt;:4000</code> und ist nicht in der Liste →
-          <code>websocket.Accept</code> lehnt mit 403 ab. Alle WS-Verbindungen
-          scheitern, die App bleibt im „Connecting…"-Zustand hängen.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Erlaubte Origins über eine Env-Variable
-          konfigurierbar machen und in der Deploy-Konfiguration den echten Host
-          eintragen.
-        </div>
-      </div>
-
-      <div class="card high">
-        <h3>
-          <span class="badge b-high">hoch</span> Cooldown per selbstgewählter
-          clientId trivial umgehbar <span class="id">HIGH-3</span>
-        </h3>
-        <p>
-          Das Rate-Limiting (<span class="loc">internal/hub.go:178</span>)
-          verwendet die vom Client gelieferte <code>clientId</code> als
-          Schlüssel (<span class="loc">internal/ws.go:98</span>). Ein Client
-          kann für jeden Pixel eine neue zufällige, regex-konforme ID senden und
-          so den 5-Sekunden-Cooldown komplett aushebeln.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Cooldown zusätzlich (oder primär) an eine
-          serverseitige Größe binden, z. B. Remote-IP der Verbindung. Client-ID
-          bleibt für Session-Zuordnung, ist aber nicht allein
-          rate-limit-tragend.
-        </div>
-      </div>
-
-      <div class="card med">
-        <h3>
-          <span class="badge b-med">mittel</span> <code>lastAction</code>-Map
-          wächst unbegrenzt <span class="id">MED-1</span>
-        </h3>
-        <p>
-          <span class="loc">internal/hub.go:239</span> definiert
-          <code>CleanupLastAction</code>, aber die Funktion wird nirgends
-          aufgerufen. Für jede jemals gesehene <code>clientId</code> bleibt ein
-          Eintrag dauerhaft im Speicher — ein langsames, unbegrenztes Leck (in
-          Verbindung mit HIGH-3 sogar beschleunigt).
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Cleanup periodisch per Ticker (analog zu
-          <code>StartAutosave</code>) mit einer Max-Alters-Schwelle aufrufen.
-        </div>
-      </div>
-
-      <div class="card med">
-        <h3>
-          <span class="badge b-med">mittel</span> Kein WebSocket-Heartbeat /
-          kein Read-Deadline <span class="id">MED-2</span>
-        </h3>
-        <p>
-          <span class="loc">internal/ws.go:78</span> liest mit einem nie
-          ablaufenden Context; es gibt kein Ping/Pong und keinen Read-Timeout.
-          Tote Verbindungen (Netzwerkabbruch ohne Close-Frame) bleiben samt
-          Goroutine und Map-Einträgen hängen.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Periodische Pings mit Pong-Deadline einführen oder
-          pro Read einen Timeout-Context setzen; bei Ausbleiben Verbindung
-          schließen. In README/CLAUDE.md bereits als geplant vermerkt.
-        </div>
-      </div>
-
-      <div class="card med">
-        <h3>
-          <span class="badge b-med">mittel</span> Docker-Frontend-Build
-          ignoriert <code>vite.config.ts</code> und hat kein bun-Lockfile
-          <span class="id">MED-3</span>
-        </h3>
-        <p>
-          <span class="loc">Dockerfile:1-9</span> kopiert nur
-          <code>frontend/</code> und die Root-<code>package.json</code>, aber
-          nicht die <code>vite.config.ts</code> (liegt im Repo-Root). Der Build
-          läuft daher mit Vite-Defaults statt mit
-          <code>root:"frontend"</code>/<code>outDir:"../public/dist"</code> — er
-          funktioniert nur zufällig, weil die Defaults zum Copy-Layout passen.
-          Zudem verweist <code>COPY … bun.lockb*</code> auf eine nicht
-          vorhandene Lockdatei (Repo nutzt <code>package-lock.json</code>),
-          sodass <code>bun install</code> ohne Lock nicht reproduzierbar
-          auflöst.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Build-Kontext und Vite-Config konsistent halten
-          (Config mitkopieren oder Frontend-Build vollständig in
-          <code>frontend/</code> kapseln) und ein echtes Lockfile
-          committen/kopieren.
-        </div>
-      </div>
-
-      <div class="card med">
-        <h3>
-          <span class="badge b-med">mittel</span> Keine Touch-Bedienung &
-          fehlendes Viewport-Meta — auf Mobil unbenutzbar
-          <span class="id">MED-4</span>
-        </h3>
-        <p>
-          <span class="loc">frontend/src/camera/controls.ts</span> registriert
-          ausschließlich <code>mousedown/mousemove/wheel</code> — kein
-          <code>touchstart/touchmove</code> und kein Pinch-Zoom.
-          <span class="loc">frontend/index.html</span> hat kein
-          <code>viewport</code>-Meta-Tag. Auf Touch-Geräten lässt sich weder
-          pannen noch zoomen noch zuverlässig ein Pixel setzen.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Touch-/Pointer-Events für Pan &amp; Pinch-Zoom
-          ergänzen und ein <code>&lt;meta name="viewport"&gt;</code> setzen. In
-          README als „Mobile touch controls" bereits als Idee gelistet.
-        </div>
-      </div>
-
-      <div class="card med">
-        <h3>
-          <span class="badge b-med">mittel</span> Kein Nutzer-Feedback bei
-          abgelehntem Pixel <span class="id">MED-5</span>
-        </h3>
-        <p>
-          Wird ein <code>set_pixel</code> serverseitig verworfen (out of bounds,
-          ungültige Farbe, Cooldown aktiv), erfolgt keinerlei Antwort. Das
-          Frontend setzt <code>selectedPixel</code> optimistisch zurück (<span
-            class="loc"
-            >frontend/src/main.ts:67</span
-          >) und der Nutzer erhält keine Rückmeldung, warum nichts passiert ist.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Eine kompakte
-          <code>rejected</code>/<code>error</code>-Nachricht vom Server senden
-          und im UI kurz anzeigen (z. B. Toast oder rot blinkender
-          Cooldown-Button).
-        </div>
-      </div>
-
-      <div class="card low">
-        <h3>
-          <span class="badge b-low">niedrig</span>
-          <code>MaxMessageSize</code> ungenutzt — kein Read-Limit gesetzt
-          <span class="id">LOW-1</span>
-        </h3>
-        <p>
-          <span class="loc">internal/config.go:9</span> definiert
-          <code>MaxMessageSize = 1024</code>, aber die Konstante wird nie
-          verwendet; auf der Verbindung ist kein
-          <code>SetReadLimit</code> gesetzt, es gilt still das
-          Bibliotheks-Default (32 KiB).
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> <code>conn.SetReadLimit(MaxMessageSize)</code> nach
-          dem Accept setzen oder die tote Konstante entfernen.
-        </div>
-      </div>
-
-      <div class="card low">
-        <h3>
-          <span class="badge b-low">niedrig</span> Toter Code &amp; doppelte
-          Verzeichnis-Anlage <span class="id">LOW-2</span>
-        </h3>
-        <p>
-          <span class="loc">internal/hub.go:252</span>
-          <code>StartPersistenceLoop</code> wird nie aufgerufen (Autosave läuft
-          über <code>autosave.go</code>). Zusätzlich legen sowohl
-          <code>NewHub</code> (<span class="loc">internal/hub.go:31</span>) als
-          auch <code>NewPersistence</code> (<span class="loc"
-            >internal/persistence.go:20</span
-          >) das <code>data</code>-Verzeichnis an — mit uneinheitlichem Pfad
-          (<code>./data</code> vs. <code>data</code>).
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Ungenutzte Funktion entfernen und die
-          Verzeichnis-Anlage an einer Stelle bündeln.
-        </div>
-      </div>
-
-      <div class="card low">
-        <h3>
-          <span class="badge b-low">niedrig</span> Accessibility der Palette und
-          Canvas <span class="id">LOW-3</span>
-        </h3>
-        <p>
-          <span class="loc">frontend/index.html:15-54</span>: die Farb-Buttons
-          haben keinen zugänglichen Namen (nur Hintergrundfarbe), die Canvas ist
-          nicht per Tastatur bedienbar und die aktive Farbe wird nur visuell
-          (Klasse <code>active</code>) markiert.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> <code>aria-label</code> mit Farbnamen,
-          <code>aria-pressed</code> für die aktive Farbe und optionale
-          Tastatur-Navigation für die Pixel-Auswahl ergänzen.
-        </div>
-      </div>
-
-      <div class="card info">
-        <h3>
-          <span class="badge b-info">info</span> README-Status-Checkboxen
-          veraltet <span class="id">INFO-1</span>
-        </h3>
-        <p>
-          <span class="loc">README.md:156-166</span> markiert „Atomic snapshot
-          writes", „Graceful shutdown persistence" und „Periodic autosave loop"
-          als offen (<code>[ ]</code>). Alle drei sind längst implementiert
-          (<span class="loc">internal/persistence.go:41-47</span> tmp→rename,
-          <span class="loc">internal/autosave.go</span> Autosave +
-          Shutdown-Save).
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Status im README auf den echten Stand bringen.
-        </div>
-      </div>
-
-      <div class="card info">
-        <h3>
-          <span class="badge b-info">info</span> Keine automatisierten Tests
-          <span class="id">INFO-2</span>
-        </h3>
-        <p>
-          Im gesamten Repo existieren weder Go- noch Frontend-Tests. Kritische
-          Kernlogik (Ring-Buffer in <code>store.go</code>,
-          <code>GetSince</code>-Grenzfälle, Cooldown, Koordinaten-Umrechnung)
-          ist ungeschützt gegen Regressionen — gerade die Sync-Grenzfälle aus
-          CRIT-2 wären hier auffällig geworden.
-        </p>
-        <div class="rec">
-          <b>Empfehlung:</b> Mit gezielten Unit-Tests für
-          <code>PixelStore</code> (Ring-Wraparound,
-          <code>GetSince</code> unter/über dem Fenster) und die
-          Koordinaten-Utils starten; im CI ein <code>go test ./...</code>-Gate
-          ergänzen.
-        </div>
-      </div>
-
-      <h2 id="strong">2 · Was schon stark ist</h2>
-      <div class="card low">
-        <ul class="tight">
+        <ul>
           <li>
-            <b>Atomare Snapshot-Writes:</b> <code>persistence.go</code> schreibt
-            via <code>tmp → rename</code>, kein Halb-Zustand bei Crash.
+            <strong>Passend einfacher Stack:</strong> ein kleines Go-Backend mit
+            genau einer direkten externen Go-Abhängigkeit, frameworkfreies
+            Frontend, drei kleine Produktionsdateien. Kein Bedarf für
+            Microservices oder eine Datenbank allein aus Architekturgründen.
           </li>
           <li>
-            <b>Sauberes Shutdown &amp; Autosave:</b>
-            <code>autosave.go</code> deckt periodisches Speichern und
-            SIGINT/SIGTERM-Save ab.
+            <strong>Durable before broadcast:</strong> jeder akzeptierte Write
+            wird vor dem Broadcast im WAL fsynct. Snapshotersatz,
+            Verzeichnis-fsync und erst anschließende WAL-Kompaktion sind
+            vorhanden. Ein partielles letztes Journalrecord wird beim Start
+            abgeschnitten; vollständiges ungültiges JSON im WAL bricht den Start
+            ab.
           </li>
           <li>
-            <b>Server-Autorität konsequent:</b> alle Pixel werden serverseitig
-            validiert (<code>ValidCoords/ValidColor/ValidClientID</code>),
-            Clients senden nur Intents.
+            <strong>Sync-Reihenfolge:</strong> der Hub serialisiert
+            Snapshot/ready-Markierung und Writes über stateMu. Damit wird das
+            übliche Rennen zwischen Init-Snapshot und Live-Update vermieden. Ein
+            begrenzter Eventring hält die Historie im RAM endlich.
           </li>
           <li>
-            <b>Effizienter Ring-Buffer</b> mit fester Kapazität verhindert
-            unbegrenztes Event-Wachstum.
+            <strong>Nebenläufigkeit:</strong> im geprüften Code konsistente
+            Mutex-Verwendung, getrennte Client-Warteschlangen und
+            nichtblockierender Broadcast mit Entfernen langsamer Clients. Die
+            ausgeführten Race-Tests melden keine Datenraces; ungetestete
+            Interleavings bleiben möglich.
           </li>
           <li>
-            <b>Robustes Reconnect:</b> exponentielles Backoff + Jitter +
-            Online/Offline-Handling im WS-Client.
+            <strong>Verbindungslebenszyklus:</strong> echte Readiness erst nach
+            init, Backoff mit Jitter, Online-/Offline-Reaktion, Browser-Resume
+            und Server-Ping/Pong. Voller Snapshot nach Reload ist bereits
+            regressionsgetestet.
           </li>
           <li>
-            <b>Saubere Nebenläufigkeit:</b> durchgängige
-            <code>RWMutex</code>-Nutzung im Hub, per-Client Send-Channel mit
-            Drop bei Überlauf.
+            <strong>Cooldown:</strong> Restdauer vom Server plus performance.now
+            im Browser schützt die Anzeige vor unterschiedlichen Geräteuhren.
+            Bestehende Tests prüfen Uhrversatz und Wiederherstellung.
           </li>
           <li>
-            <b>Grüne Gates:</b> <code>go vet</code>, <code>go build</code> und
-            <code>tsc --noEmit</code> laufen fehlerfrei; TS-Config ist strikt
-            (<code>strict</code>, <code>noUncheckedIndexedAccess</code>).
+            <strong>Eingabegrenzen:</strong> Koordinaten, Farbe, ID-Form und
+            Versionsbereich werden geprüft; 1.024-Byte-Readlimit ist aktiv.
+            Fremde Browser-Origin wird abgelehnt.
+          </li>
+          <li>
+            <strong>Reproduzierbare Paketierung:</strong> Nix-/npm-Locks sowie
+            npm- und Go-Hashes, Go-vet-/Race-/Format- und Frontend-Gates sind
+            vorhanden. Paket und statische Assets des lokalen Builds stimmen mit
+            den aktiv ausgelieferten Referenzen überein.
+          </li>
+          <li>
+            <strong>Betriebsgrundlagen:</strong> Loopback-Bindung, restriktives
+            StateDirectory, nicht privilegierter dynamischer Benutzer,
+            HTTPS/ACME, Firewall, Ressourcenobergrenze und dokumentierter
+            Reload-/Rollbackablauf.
+          </li>
+          <li>
+            <strong>Datensparsame Oberfläche:</strong> im beobachteten
+            Normalaufruf nur eigene JS-/CSS-Ressourcen, keine
+            Drittanbieterfonts, Werbeskripte oder Tracker.
           </li>
         </ul>
-      </div>
+      </section>
 
-      <h2 id="decided">3 · Bewusst entschieden</h2>
-      <div class="card info">
-        <ul class="tight">
+      <section id="server">
+        <h2>3. Produktionsserver: beobachteter Zustand</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Bereich</th>
+                <th>Beobachtung</th>
+                <th>Einordnung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Plattform</td>
+                <td>
+                  NixOS 26.05, Build 20261020.cd4ea8d; Kernel 6.18.57; rund 3
+                  Tage Laufzeit
+                </td>
+                <td>
+                  Hostpakete aktuell datiert; gebooteter und konfigurierter
+                  Kernel identisch. Das ist keine Aussage über alle CVEs im
+                  System.
+                </td>
+              </tr>
+              <tr>
+                <td>Dienst</td>
+                <td>
+                  grid active/running seit 22.10., 13:24:12 CEST; NRestarts=0
+                  während des Audits; keine fehlgeschlagenen Units
+                </td>
+                <td>
+                  Journal zeigt vorherige kontrollierte Reloads und erfolgreiche
+                  Neustarts. Kein Produktionsneustart im Audit.
+                </td>
+              </tr>
+              <tr>
+                <td>Identität des Pakets</td>
+                <td>
+                  /nix/store/7w95yhs5bcqdbgjdfabnfl64yqfls68b-grid-0.1.0/bin/grid
+                </td>
+                <td>
+                  Aktives /proc/exe und lokale result-Referenz stimmen überein;
+                  gebaut mit Go 1.26.2, SEC-01.
+                </td>
+              </tr>
+              <tr>
+                <td>Ressourcen</td>
+                <td>
+                  grid MemoryCurrent etwa 4,1–4,4 MiB, MemoryPeak etwa 4,8 MiB;
+                  TasksCurrent 8; CPUUsage rund 0,05–0,13 s über den
+                  Messzeitraum
+                </td>
+                <td>
+                  Sehr kleiner laufender Zustand mit acht belegten Positionen,
+                  kein Volllastnachweis. RSS aus ps kann wegen geteilter Seiten
+                  abweichen.
+                </td>
+              </tr>
+              <tr>
+                <td>Hostreserve</td>
+                <td>
+                  3,8 GiB RAM, rund 3,1 GiB available; zram-Swap 1,9 GiB
+                  unbenutzt; Root-FS 79 GiB, 11 % belegt
+                </td>
+                <td>
+                  Keine momentane Ressourcenknappheit. Mehrere Webanwendungen
+                  teilen dieselbe VM.
+                </td>
+              </tr>
+              <tr>
+                <td>Ressourcenlimits</td>
+                <td>
+                  MemoryMax 256 MiB; TasksMax 4.661; LimitNOFILE 524.288; kein
+                  CPU-Quota
+                </td>
+                <td>
+                  Speicherlimit schützt den Host, ersetzt aber keine
+                  Missbrauchsgrenzen.
+                </td>
+              </tr>
+              <tr>
+                <td>Persistenz</td>
+                <td>
+                  StateDirectory=grid, Modus 0700; Snapshot und WAL 0600;
+                  Snapshot beim ersten Check 185 Byte, WAL 0 Byte
+                </td>
+                <td>
+                  State liegt außerhalb des Nix-Pakets und überlebt dessen
+                  Austausch. Keine Inhaltskopie privater Serverdateien im
+                  Report.
+                </td>
+              </tr>
+              <tr>
+                <td>Proxy/TLS</td>
+                <td>
+                  nginx 1.30.6; HTTP/2 nach außen, HTTP/1.1 + Upgrade zum
+                  Backend; Timeouts 75 s; Brotli/Gzip aktiv
+                </td>
+                <td>
+                  Passt zu 25-s-Ping bzw. 20-s-Sync. Header- und Worker-Lücken
+                  siehe SEC-05 / OPS-02.
+                </td>
+              </tr>
+              <tr>
+                <td>Zertifikat</td>
+                <td>
+                  Let’s Encrypt YE1, CN grid.coprime.tech; gültig 22.10.2026 bis
+                  20.01.2027; ACME-Timer vorhanden
+                </td>
+                <td>
+                  Live-Zertifikat verifiziert, aktuelle HTTPS-Abfragen
+                  erfolgreich. Erneuerung wurde nicht aktiv erzwungen.
+                </td>
+              </tr>
+              <tr>
+                <td>Öffentliche Firewall</td>
+                <td>
+                  IPv4 und IPv6 erlauben TCP 80/443 und UDP 41641; SSH 22 nur
+                  tailscale0; sonst DROP
+                </td>
+                <td>
+                  Loopback-Gridport ist nicht öffentlich geöffnet.
+                  Tailscale-eigene INPUT-Regeln akzeptieren aber generell
+                  Traffic vom Tailnet.
+                </td>
+              </tr>
+              <tr>
+                <td>Weitere Listener</td>
+                <td>
+                  Next auf 127.0.0.1:3000, PostgreSQL auf Loopback:5432; slf auf
+                  *:8080; sshd auf *:22
+                </td>
+                <td>
+                  Listener allein bedeuten keine öffentliche Erreichbarkeit:
+                  Firewall blockiert 8080/22 im Internet. slf kann innerhalb des
+                  erlaubten Tailnets direkt erreichbar sein; ACLs dort nicht
+                  einsehbar.
+                </td>
+              </tr>
+              <tr>
+                <td>SSH/Deploymentvertrauen</td>
+                <td>
+                  PasswordAuthentication und KbdInteractiveAuthentication aus;
+                  AllowUsers deploy; kein Agent-/TCP-Forwarding; deploy hat
+                  passwortloses sudo
+                </td>
+                <td>
+                  Schlüssel- und Tailscale-Vertrauen schützen einen
+                  vollständigen administrativen Deployzugang. Keine getrennte
+                  Least-Privilege-Deployrolle nachgewiesen.
+                </td>
+              </tr>
+              <tr>
+                <td>Monitoring</td>
+                <td>
+                  OnFailure-Hook, Journal, Logrotate, nixpkgs-age täglich;
+                  letzter Age-Check erfolgreich
+                </td>
+                <td>
+                  Die Hostalterprüfung aktualisiert nicht automatisch den
+                  eigenen Grid-nixpkgs-Lock. Stille Write-Failures bleiben
+                  REL-01.
+                </td>
+              </tr>
+              <tr>
+                <td>Serverhärtung</td>
+                <td>
+                  DynamicUser, NoNewPrivileges, ProtectSystem=strict,
+                  ProtectHome, PrivateTmp
+                </td>
+                <td>
+                  Solide Basis; zusätzliche Sandboxmöglichkeiten siehe SEC-06.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="measurements">
+        <h2>4. Tests, Sicherheitsprüfungen und Messungen</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Prüfung</th>
+                <th>Ergebnis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>go vet ./...</td>
+                <td>Erfolgreich.</td>
+              </tr>
+              <tr>
+                <td>go test -race -coverprofile=… ./...</td>
+                <td>
+                  Alle sechs Go-Tests erfolgreich; internal 76,2 %, insgesamt
+                  67,1 % Statements.
+                </td>
+              </tr>
+              <tr>
+                <td>npm test</td>
+                <td>Alle neun Node-/TypeScript-Tests erfolgreich.</td>
+              </tr>
+              <tr>
+                <td>npx tsc --noEmit</td>
+                <td>Erfolgreich mit strict und noUncheckedIndexedAccess.</td>
+              </tr>
+              <tr>
+                <td>npm run build</td>
+                <td>
+                  Erfolgreich mit Vite 8.0.14; JS 9,46 kB (gzip 3,50 kB), CSS
+                  1,88 kB (gzip 0,68 kB), HTML 1,41 kB (gzip 0,47 kB).
+                </td>
+              </tr>
+              <tr>
+                <td>nix build -L</td>
+                <td>
+                  Erfolgreich; vorhandene gecachte, identische Paketreferenz
+                  wiederverwendet. Prüfkommandos zusätzlich direkt ausgeführt.
+                </td>
+              </tr>
+              <tr>
+                <td>npm audit --json</td>
+                <td>
+                  Vier betroffene Build-/Dev-Pakete, Paket-Maximalschwere
+                  jeweils high; eigene Anwendungseinordnung SEC-04.
+                </td>
+              </tr>
+              <tr>
+                <td>govulncheck</td>
+                <td>
+                  Erster Abruf DNS-Fehler; begrenzter Wiederholungsversuch
+                  erfolgreich. 16 Symbolpfadbefunde der Go-Standardbibliothek;
+                  zusätzliche 10 Import-/9 Modulbefunde ohne gemeldeten
+                  Aufrufpfad. Siehe SEC-01 und Rohbefund.
+                </td>
+              </tr>
+              <tr>
+                <td>gitleaks git --redact</td>
+                <td>
+                  111 vom Tool gescannte Commits bei 113 erreichbaren Commits,
+                  ca. 764 kB. Zwei historische Treffer: Phoenix secret_key_base
+                  in config/dev.exs:16 und config/test.exs:20, Commit ab5ac9d.
+                  Als Entwicklungs-/Testkonfiguration eingeordnet, keine
+                  Produktionsverwendung nachgewiesen; aktueller Go-Dienst
+                  verwendet diese Werte nicht. Keine Schlüsselwerte übernommen.
+                  Kein Beweis, dass sämtliche denkbaren Secrets fehlen.
+                </td>
+              </tr>
+              <tr>
+                <td>Live-HTTP</td>
+                <td>
+                  / und /healthz 200, HTTP→HTTPS 301, /.git/config und /.env
+                  404. /assets/ zeigt eine Verzeichnisliste ausschließlich der
+                  veröffentlichten gehashten Dateien; niedriger Härtungshinweis,
+                  kein Quellcode-/Secretleck.
+                </td>
+              </tr>
+              <tr>
+                <td>Live-WS-Ablehnungen</td>
+                <td>
+                  Fremde Origin 403; 1.100-Byte-Nachricht Close 1009; ungültiges
+                  JSON führt zu Close 1000 ohne konkrete Fehlerursache.
+                </td>
+              </tr>
+              <tr>
+                <td>Browser/axe</td>
+                <td>
+                  Normalaufruf ohne JS-Fehler; fünf axe-Regelgruppen. Touch,
+                  mobiles Querformat, Storagefehler und DPR gesondert geprüft.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Frontend-Renderzeit bei zunehmender Belegung</h3>
+        <p>
+          Chromium 155 headless, Linux, AMD Ryzen 7 6800H, Viewport 1440×900.
+          Synthetische Pixel-Map mit wechselnden Farben, sieben vollständige
+          Redraws ohne Netzwerk- oder Produktionswrites. Gemessen wurde die
+          synchrone JavaScript-/Canvas-Aufrufzeit; es sind keine
+          Core-Web-Vitals-Feldwerte oder GPU-End-to-End-Zeiten.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Belegte Pixel</th>
+                <th>Median</th>
+                <th>Bereich der 7 Aufrufe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>10</td>
+                <td>0,1 ms</td>
+                <td>0.1–0.6 ms</td>
+              </tr>
+              <tr>
+                <td>10.000</td>
+                <td>30,1 ms</td>
+                <td>21.7–42.6 ms</td>
+              </tr>
+              <tr>
+                <td>100.000</td>
+                <td>318,2 ms</td>
+                <td>229.4–353.9 ms</td>
+              </tr>
+              <tr>
+                <td>262.144</td>
+                <td>444,5 ms</td>
+                <td>420.2–451.4 ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Backend- und Fehlernachweise</h3>
+        <ul>
           <li>
-            <b>In-Memory-Store + JSON-Snapshot</b> statt Datenbank — passt zum
-            Ziel „hackbar &amp; einfach", bewusst nicht auf Skalierung
-            optimiert.
+            <strong>Leeres Delta, voller Ring:</strong> rund 4 MB Allokation pro
+            Aufruf und 1,7–2,0 ms; unnötig für identische Versionen.
           </li>
           <li>
-            <b>Feste 6-Farben-Palette</b> (<code>config.go</code> /
-            <code>index.html</code>) — minimalistisch im r/place-Geist.
+            <strong>Vollsnapshot + JSON:</strong> rund 446–457 ms, 55–62 MB
+            Allokationen pro Aufruf; Save rund 324–453 ms und 58 MB. Zwei lokale
+            Benchmarkläufe mit fünf Iterationen, deutliche
+            Laufzeit-/GC-Variabilität; keine p95/p99-Aussage.
           </li>
           <li>
-            <b>Text-basiertes JSON-WS-Protokoll</b> statt Binärprotokoll —
-            Lesbarkeit über Performance (Binär ist als Zukunft notiert).
+            <strong>Cooldown:</strong> zwei IDs erzeugen zwei Writes innerhalb
+            von etwa 13 ms; gleicher Client wird dagegen von den bestehenden
+            Tests korrekt begrenzt.
           </li>
           <li>
-            <b>Kein Frontend-Framework</b> — direkter Canvas + TypeScript als
-            ausdrückliches Designprinzip.
+            <strong>Speicherfehler:</strong> lokales WAL als unbeschreibbares
+            Ziel simuliert; Schreibsperre bleibt trotz Reparatur bestehen,
+            Health liefert 200 ok und die Write-Antwort bleibt aus.
+          </li>
+          <li>
+            <strong>Snapshot:</strong> null, ungültige Pixelwerte und negative
+            Version werden akzeptiert. Fehlende Koordinaten im Write setzen
+            ungewollt 0:0.
+          </li>
+          <li>
+            <strong>Aktueller Liveaufruf:</strong> TTFB in einem Browserlauf
+            etwa 33 ms, Load etwa 598 ms. JS/CSS-Transfers rund 3.671/877 Byte
+            inklusive Protokolloverhead. Ein zusätzlicher curl-Aufruf lag
+            insgesamt bei rund 164 ms; Einzelwerte sind keine
+            Verfügbarkeits-/Latenzstatistik.
           </li>
         </ul>
-      </div>
-    </div>
+      </section>
+
+      <section id="findings">
+        <h2>5. Offene Findings</h2>
+        <p>
+          Die 31 Einträge sind nach Priorität gruppiert. Jede Empfehlung enthält
+          ein überprüfbares Ziel. Kostenlose Optionen, Produktentscheidungen und
+          unbekannte externe Systeme werden nicht als bestätigte Exploits
+          ausgegeben.
+        </p>
+        <div class="filters" role="search" aria-label="Findings filtern">
+          <label
+            >Priorität<select id="severity">
+              <option value="">Alle</option>
+              <option value="hoch">Hoch</option>
+              <option value="mittel">Mittel</option>
+              <option value="niedrig">Niedrig</option>
+            </select></label
+          ><label
+            >Bereich<select id="area">
+              <option value="">Alle Bereiche</option>
+              <option>Architektur</option>
+              <option>Barrierefreiheit</option>
+              <option>Betrieb</option>
+              <option>Datenschutz</option>
+              <option>Dokumentation</option>
+              <option>Performance</option>
+              <option>Sicherheit</option>
+              <option>Tests</option>
+              <option>UI/UX</option>
+              <option>Zuverlässigkeit</option>
+            </select></label
+          ><label
+            >Suche<input
+              type="search"
+              id="query"
+              placeholder="ID, Thema oder Fundstelle" /></label
+          ><button type="button" id="reset">Zurücksetzen</button
+          ><output id="shown" aria-live="polite">31 von 31 Findings</output>
+        </div>
+        <details>
+          <summary>Direktindex aller Findings</summary>
+          <ul class="index">
+            <li>
+              <a href="#SEC-01"
+                >SEC-01: Das ausgelieferte Binary enthält eine veraltete
+                Go-Standardbibliothek</a
+              >
+            </li>
+            <li>
+              <a href="#SEC-02"
+                >SEC-02: Der Cooldown schützt eine frei wählbare ID und lässt
+                sich durch neue Verbindungen umgehen</a
+              >
+            </li>
+            <li>
+              <a href="#SEC-03"
+                >SEC-03: Keine Budgets für WebSocket-Verbindungen und teure
+                Sync-Anfragen</a
+              >
+            </li>
+            <li>
+              <a href="#REL-01"
+                >REL-01: Ein einzelner Speicherfehler legt Schreiben dauerhaft
+                still, während Health und UI Erfolg suggerieren</a
+              >
+            </li>
+            <li>
+              <a href="#OPS-01"
+                >OPS-01: Unabhängige Backups und ein getesteter Restore sind
+                nicht nachgewiesen</a
+              >
+            </li>
+            <li>
+              <a href="#PERF-01"
+                >PERF-01: Die Canvas wird bei realistischer Vollbelegung
+                unbenutzbar langsam neu gezeichnet</a
+              >
+            </li>
+            <li>
+              <a href="#UX-01"
+                >UX-01: Die Kernnavigation funktioniert auf Touch-Geräten
+                nicht</a
+              >
+            </li>
+            <li>
+              <a href="#A11Y-01"
+                >A11Y-01: Die Kernfunktion ist für Tastatur- und
+                Screenreader-Nutzer nicht zugänglich</a
+              >
+            </li>
+            <li>
+              <a href="#SEC-04"
+                >SEC-04: Der Frontend-Build verwendet Pakete mit bekannten
+                Advisories</a
+              >
+            </li>
+            <li>
+              <a href="#SEC-05"
+                >SEC-05: Browser-Schutzheader fehlen für die Grid-Domain</a
+              >
+            </li>
+            <li>
+              <a href="#REL-02"
+                >REL-02: Snapshots werden syntaktisch, aber nicht inhaltlich
+                validiert</a
+              >
+            </li>
+            <li>
+              <a href="#REL-03"
+                >REL-03: Pixelbestätigung hat keinen nachvollziehbaren
+                Pending-/Fehlerzustand</a
+              >
+            </li>
+            <li>
+              <a href="#REL-04"
+                >REL-04: Gap-Recovery bleibt als „connected“ bedienbar und kann
+                redundante Syncs erzeugen</a
+              >
+            </li>
+            <li>
+              <a href="#REL-05"
+                >REL-05: Browserspeicher ist ein ungeprüfter Start- und
+                Verbindungsfehlerpunkt</a
+              >
+            </li>
+            <li>
+              <a href="#PERF-02"
+                >PERF-02: Auch ein leeres Delta reserviert den gesamten
+                Eventring und scannt ihn vollständig</a
+              >
+            </li>
+            <li>
+              <a href="#PERF-03"
+                >PERF-03: Snapshot-Kodierung und Datenträgerzugriffe blockieren
+                den globalen Zustandslock</a
+              >
+            </li>
+            <li>
+              <a href="#OPS-02"
+                >OPS-02: nginx verwendet nur einen Worker mit dem Default von
+                512 Verbindungen</a
+              >
+            </li>
+            <li>
+              <a href="#OPS-03"
+                >OPS-03: Deployment ist nicht an den geprüften Commit gebunden
+                und wird nicht bis zur Bereitschaft verifiziert</a
+              >
+            </li>
+            <li>
+              <a href="#QA-01"
+                >QA-01: Grüne Gates lassen wichtige Lebenszyklus- und
+                Fehlerpfade ungetestet</a
+              >
+            </li>
+            <li>
+              <a href="#UX-02"
+                >UX-02: Die feste Minimap verdeckt im Querformat fünf von sechs
+                Farben</a
+              >
+            </li>
+            <li>
+              <a href="#UX-03"
+                >UX-03: Erste Nutzung und Navigation sind kaum
+                selbsterklärend</a
+              >
+            </li>
+            <li>
+              <a href="#PRIV-01"
+                >PRIV-01: Zugriffslogs werden bis zu 26 Wochen aufbewahrt, ohne
+                sichtbare Dateninformation</a
+              >
+            </li>
+            <li>
+              <a href="#SEC-06"
+                >SEC-06: Die systemd-Sandbox lässt zusätzliche, für Grid
+                unnötige Rechteklassen offen</a
+              >
+            </li>
+            <li>
+              <a href="#SEC-07"
+                >SEC-07: CI-Abhängigkeiten sind teils nur über veränderbare Tags
+                gebunden</a
+              >
+            </li>
+            <li>
+              <a href="#REL-06"
+                >REL-06: Fehlende Pflichtkoordinaten werden als gültiger Pixel
+                bei 0:0 interpretiert</a
+              >
+            </li>
+            <li>
+              <a href="#PERF-04"
+                >PERF-04: Im Leerlauf werden die UI-Texte unnötig in jedem
+                Animationframe neu geschrieben</a
+              >
+            </li>
+            <li>
+              <a href="#UX-04"
+                >UX-04: Canvas und Minimap berücksichtigen die Pixeldichte nicht
+                konsistent</a
+              >
+            </li>
+            <li>
+              <a href="#UX-05"
+                >UX-05: Langsame Drags können als Klicks auf die Canvas
+                durchrutschen</a
+              >
+            </li>
+            <li>
+              <a href="#ARCH-01"
+                >ARCH-01: Protokoll und Invarianten sind über mehrere Module und
+                Sprachen verteilt</a
+              >
+            </li>
+            <li>
+              <a href="#DOC-01"
+                >DOC-01: Mehrere Planungsdateien widersprechen dem heutigen
+                Code</a
+              >
+            </li>
+            <li>
+              <a href="#OPS-04"
+                >OPS-04: Betriebliche Messgrößen und Zuständigkeiten sind kaum
+                sichtbar</a
+              >
+            </li>
+          </ul>
+        </details>
+        <article
+          class="finding hoch"
+          id="SEC-01"
+          data-severity="hoch"
+          data-area="Sicherheit"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>SEC-01 · Sicherheit · Bestätigt</span>
+          </div>
+          <h3>
+            Das ausgelieferte Binary enthält eine veraltete
+            Go-Standardbibliothek
+          </h3>
+          <p class="location">
+            flake.lock (nixpkgs); flake.nix:26; main.go:29;
+            Produktions-ExecStart
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Der Projekt-Lock fixiert nixpkgs vom 05.05.2026.
+              <code>go version -m result/bin/grid</code> zeigt Go 1.26.2. Genau
+              dieses Nix-Paket läuft laut <code>/proc/&lt;pid&gt;/exe</code> auf
+              dem Server. Der erfolgreiche govulncheck meldet 16 Befunde mit
+              Symbolpfad in der Standardbibliothek. Besonders relevant:
+              <a href="https://pkg.go.dev/vuln/GO-2026-6609">GO-2026-6609</a>
+              betrifft den hier eingesetzten <code>http.FileServer</code> und
+              wird ab Go 1.26.9 behoben. nginx leitet die statischen Anfragen
+              einschließlich Range-Headern an Go weiter.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Bekannte CPU-DoS-Risiken bleiben im Anwendungspaket bestehen,
+              obwohl NixOS selbst auf einem aktuellen Stand ist. Die 16
+              Scanner-Treffer sind nicht mit 16 bestätigten externen Exploits
+              gleichzusetzen: TLS und HTTP/2 terminieren bei nginx;
+              Windows-Befunde betreffen den Linux-Host nicht. Die
+              Range-Verarbeitung liegt dagegen im tatsächlichen Requestpfad. Es
+              wurde kein DoS gegen Produktion ausgeführt.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Den eigenen Grid-nixpkgs-Lock samt Go-Toolchain aktualisieren, das
+              Binary neu bauen und gezielt erneut scannen. Sicherheitsupdates
+              müssen sowohl den Host als auch die eigenständig gepinnten
+              App-Flakes erreichen. govulncheck in CI mit regelmäßiger
+              Aktualisierung der Datenbank ergänzen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Das ausgelieferte Binary verwendet eine gepflegte, gepatchte
+              Go-Version; GO-2026-6609 ist im erneuten Scan behoben.
+              Verbleibende Treffer sind je nach realem Protokollpfad
+              dokumentiert.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding hoch"
+          id="SEC-02"
+          data-severity="hoch"
+          data-area="Sicherheit"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>SEC-02 · Sicherheit · Bestätigt</span>
+          </div>
+          <h3>
+            Der Cooldown schützt eine frei wählbare ID und lässt sich durch neue
+            Verbindungen umgehen
+          </h3>
+          <p class="location">
+            internal/ws.go:55,107; internal/hub.go:165,198;
+            frontend/src/main.ts:13
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Die vom Client gelieferte, lediglich syntaktisch geprüfte ID ist
+              der einzige Cooldown-Schlüssel. Im isolierten Versuch akzeptiert
+              ein Hub zwei verschiedene IDs mit zwei Writes innerhalb von rund
+              13 ms. Eine ID kann auf derselben Verbindung nicht beliebig
+              gewechselt werden; eine neue Verbindung mit neuer ID genügt. Es
+              gibt keine zusätzliche Bindung an eine vom Server abgesicherte
+              Identität oder ein IP-Budget.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Ein Bot kann die Fünf-Sekunden-Regel praktisch aushebeln und die
+              Canvas dominieren. Gleiche IDs erlauben zudem Cooldown-Störungen
+              zwischen Clients, wenn eine fremde ID bekannt oder erratbar ist.
+              Eine zufällige UUID ist eine Zuordnungshilfe, keine
+              Authentifizierung.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Ein serverseitiges Schreibbudget pro vertrauenswürdig ermittelter
+              Quelladresse plus globales Budget ergänzen; die Browser-ID weiter
+              für Tab-Synchronisierung verwenden. Hinter nginx nur dessen
+              bereinigte Forwarding-Informationen vom bekannten Loopback-Proxy
+              vertrauen. NAT und IPv6 bei der Budgetgestaltung berücksichtigen.
+              Eine signierte Session allein verhindert automatisches Neuanlegen
+              noch nicht.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein Test mit wechselnden IDs und Verbindungen aus derselben
+              simulierten Quelle kann das definierte Budget nicht überschreiten;
+              normale Tabs teilen den Cooldown weiterhin korrekt.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding hoch"
+          id="SEC-03"
+          data-severity="hoch"
+          data-area="Sicherheit"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>SEC-03 · Sicherheit · Bestätigt</span>
+          </div>
+          <h3>
+            Keine Budgets für WebSocket-Verbindungen und teure Sync-Anfragen
+          </h3>
+          <p class="location">
+            internal/ws.go:31,85; internal/hub.go:65; Produktions-nginx:
+            location /
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Das 1-KiB-Nachrichtenlimit und der 10-s-Init-Timer existieren.
+              Nach erfolgreicher Initialisierung gibt es aber weder Token-Bucket
+              noch Limit für Sync-Frequenz, Verbindungen pro Quelle oder globale
+              Clientzahl. Ein Client kann wiederholt eine zukünftige
+              <code>lastVersion</code> senden und dadurch vollständige Snapshots
+              anfordern. Jede Verbindung erhält eigene Goroutinen und eine Queue
+              mit 32 Nachrichten. nginx enthält keine entsprechenden
+              limit_req/limit_conn-Regeln.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Kleine gültige Nachrichten können große CPU-, Allokations- und
+              Ausgabekosten auslösen. Das 256-MiB-Limit beendet im Extremfall
+              den Dienst, statt die Verursacher rechtzeitig abzuweisen; der
+              gemeinsam genutzte nginx kann auch andere Websites
+              beeinträchtigen. Die fehlenden Grenzen sind im Code bestätigt;
+              eine Produktionsüberlastung wurde nicht provoziert.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Handshake- und Verbindungslimits am Proxy, ein globales
+              Clientlimit sowie Nachrichten- und besonders Snapshot-Budgets im
+              Hub einführen. Bei Überschreitung definierte Fehler bzw.
+              Close-Codes verwenden. Teure Arbeit früh vor Snapshot-Kopie und
+              JSON-Kodierung begrenzen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Isolierte Lasttests zeigen begrenzte Speicher-/CPU-Nutzung und
+              kontrollierte Ablehnungen; legitime Clients bleiben während
+              missbräuchlicher Syncs bedienbar.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding hoch"
+          id="REL-01"
+          data-severity="hoch"
+          data-area="Zuverlässigkeit"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>REL-01 · Zuverlässigkeit · Bestätigt</span>
+          </div>
+          <h3>
+            Ein einzelner Speicherfehler legt Schreiben dauerhaft still, während
+            Health und UI Erfolg suggerieren
+          </h3>
+          <p class="location">
+            internal/ws.go:122; main.go:35; internal/autosave.go:17;
+            frontend/src/main.ts:67
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Bei fehlgeschlagenem WAL-Append wird
+              <code>h.stopping=true</code> gesetzt. Der Prozess bleibt aktiv,
+              vorhandene Clients bleiben verbunden, und weitere Writes werden
+              still verworfen. Im lokalen Fehlerexperiment meldet
+              <code>/healthz</code> anschließend weiterhin HTTP 200 mit
+              <code>ok</code>; es kommt keine Fehlerantwort auf den Write.
+              Selbst nach repariertem Speicherpfad und erfolgreichem Save bleibt
+              <code>stopping</code> gesetzt. Ein neuer Client beendet den
+              Init-Versuch ohne hilfreiche Ursache.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Ein kurzfristiger Datenträgerfehler kann eine dauerhafte,
+              unbemerkte Funktionsstörung auslösen. systemd-Restart und
+              OnFailure greifen nicht, weil der Prozess weiterläuft. Nutzer
+              verlieren ihre Auswahl und können nicht erkennen, ob ein Pixel
+              abgelehnt wurde.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Liveness und Schreibbereitschaft trennen, einen dauerhaften
+              Speicherfehler als degraded/unready signalisieren und Nutzer
+              explizit informieren. Für nicht automatisch sicher behebbaren
+              Zustand kontrolliert beenden und nach Reparatur neu starten.
+              Wiederaufnahme darf keine unklaren partiellen WAL-Einträge
+              überspringen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Fehlerinjektion erzeugt eine sichtbare Ablehnung und nicht
+              erfolgreiche Readiness; Monitoring alarmiert. Die dokumentierte
+              Wiederherstellung stellt Schreiben und korrekte WAL-Versionen
+              nachweislich wieder her.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding hoch"
+          id="OPS-01"
+          data-severity="hoch"
+          data-area="Betrieb"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>OPS-01 · Betrieb · Nachweislücke</span>
+          </div>
+          <h3>
+            Unabhängige Backups und ein getesteter Restore sind nicht
+            nachgewiesen
+          </h3>
+          <p class="location">
+            README.md: Persistence and recovery;
+            waentw/server-config/configuration.nix; Live-Timer und Units
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Snapshot und WAL liegen korrekt im persistenten StateDirectory. Im
+              geprüften Host sowie der Serverkonfiguration ist jedoch kein
+              automatischer Grid-Backupjob, kein Restic-/Borg-Dienst und kein
+              Restore-Nachweis erkennbar. Die README empfiehlt Backups
+              lediglich. Anbieter-Snapshots, NAS-Pulljobs und externe
+              Sicherungen waren nicht einsehbar; ihre Abwesenheit ist damit
+              ausdrücklich nicht bewiesen.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Die lokale Crash-Sicherheit schützt nicht vor
+              VM-/Datenträgerverlust oder fehlerhaftem Überschreiben.
+              NixOS-Rollback stellt den Anwendungscode wieder her, nicht die
+              Zeichnung. Ohne unabhängigen Restore-Nachweis bleiben RPO und RTO
+              unbekannt.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Ein unabhängiges, versioniertes Backup für Snapshot und WAL
+              gemeinsam einrichten bzw. einen vorhandenen externen Job
+              dokumentieren. Konsistenz durch gestoppten Dienst oder
+              Filesystem-Snapshot sicherstellen. Retention, Verschlüsselung,
+              Fehlermeldung und Verantwortlichkeit festlegen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein Restore in ein leeres temporäres StateDirectory reproduziert
+              Pixel und Version; Zeit bis Wiederherstellung sowie maximaler
+              Datenverlust sind gemessen. Externer Sicherungsort und letzte
+              erfolgreiche Sicherung sind dokumentiert.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding hoch"
+          id="PERF-01"
+          data-severity="hoch"
+          data-area="Performance"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>PERF-01 · Performance · Bestätigt</span>
+          </div>
+          <h3>
+            Die Canvas wird bei realistischer Vollbelegung unbenutzbar langsam
+            neu gezeichnet
+          </h3>
+          <p class="location">
+            frontend/src/render/pixels.ts:6; render/minimap.ts:17;
+            render/render.ts:16; camera/controls.ts:32
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Jedes Redraw zerlegt alle Pixel-Stringschlüssel erneut und
+              iteriert die gesamte Map zweimal: für Canvas und Minimap. Die
+              Canvas filtert erst nach dem Parsen auf Sichtbarkeit; die Minimap
+              zeichnet immer alles. Isolierte Messung in Chromium bei 1440×900,
+              sieben Wiederholungen: Median 30,1 ms bei 10.000, 318,2 ms bei
+              100.000 und 444,5 ms bei 262.144 Pixeln. Bei Vollbelegung
+              entfielen in einer separaten Teilmessung rund 135 ms auf
+              drawPixels und 317 ms auf drawMinimap.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Die Maximalgröße von 512×512 wird schon mit dem vorgesehenen
+              Datenmodell erreicht. Vollbelegung überschreitet das
+              16,7-ms-Budget für 60 Hz stark; Hover und Pan erzeugen lange
+              Main-Thread-Blockaden. Die Produktion enthielt bei der Prüfung nur
+              acht belegte Positionen, wodurch das Problem dort noch kaum
+              sichtbar ist. Headless-Zahlen sind lokale Laborwerte, keine
+              Mobilgeräte- oder Feldmessung.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Die 512×512-Pixel als vorberechnete Rasterfläche oder ImageData
+              halten und per drawImage skalieren. Minimap nur bei Pixeländerung
+              aktualisieren, den Viewport-Rahmen separat zeichnen. Koordinaten
+              numerisch speichern; Sichtfenster- bzw. Dirty-Region-Arbeit
+              begrenzen. Frameworkwechsel, Datenbank oder Binärprotokoll sind
+              dafür nicht nötig.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein reproduzierbarer Benchmark mit voller Canvas bleibt auf
+              definierter Referenzhardware im vereinbarten Framebudget; Hover
+              und Pan erzeugen keine langen Tasks durch vollständiges
+              Map-Parsen.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding hoch"
+          id="UX-01"
+          data-severity="hoch"
+          data-area="UI/UX"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>UX-01 · UI/UX · Bestätigt</span>
+          </div>
+          <h3>Die Kernnavigation funktioniert auf Touch-Geräten nicht</h3>
+          <p class="location">
+            frontend/src/camera/controls.ts:24; frontend/index.html:5;
+            frontend/style.css
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Es gibt nur Mouse- und Wheel-Handler, keine Pointer-Gesten,
+              Touch-Pan- oder Pinch-Logik. Ein Touch-Drag im Browser bei 390×844
+              mit Touch-Emulation bewegt die Kamera nicht. Das Viewport-Meta ist
+              inzwischen vorhanden. Einzelne Taps können synthetische Clicks
+              auslösen; daraus folgt aber keine brauchbare mobile Navigation.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Ein Smartphone-Nutzer kann entfernte Canvasbereiche nicht gezielt
+              erreichen oder vergrößern. Das ist eine Lücke der Kernfunktion,
+              nicht nur ein Layoutdetail.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Pointer Events mit Pointer Capture für Pan und einen klaren
+              Zwei-Finger-Zoom implementieren. Tap-Auswahl und Bestätigung von
+              Drag unterscheiden; touch-action bewusst auf die Zeichenfläche
+              begrenzen und Browserbedienung außerhalb erhalten.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Auf echten iOS-/Android-Geräten sowie in automatisierten
+              Pointertests funktionieren Pan, Pinch, Auswahl und Bestätigung
+              ohne versehentliche Writes. Browser-/OS-Gesten bleiben in den
+              vorgesehenen Bereichen erreichbar.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding hoch"
+          id="A11Y-01"
+          data-severity="hoch"
+          data-area="Barrierefreiheit"
+        >
+          <div class="finding-meta">
+            <span class="badge hoch">hoch</span
+            ><span>A11Y-01 · Barrierefreiheit · Bestätigt</span>
+          </div>
+          <h3>
+            Die Kernfunktion ist für Tastatur- und Screenreader-Nutzer nicht
+            zugänglich
+          </h3>
+          <p class="location">
+            frontend/index.html:2,14,18; frontend/src/main.ts:25,77;
+            ui/palette.ts:18; camera/controls.ts:67
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Alle sechs Farbbuttons haben keinen zugänglichen Namen und kein
+              aria-pressed. Die Bestätigung ist ein nicht fokussierbares div.
+              Die Canvas hat weder Tastatur-Auswahl noch alternativen Zugriff
+              auf Koordinaten. Space bestätigt global und verhindert damit die
+              übliche Space-Bedienung fokussierter Farbbuttons. Der globale
+              Wheel-Handler verhindert auch Browser-Wheel-Verhalten. axe
+              bestätigt fünf Regelgruppen, darunter button-name und
+              html-has-lang; dessen Wort „critical“ ist eine Tool-Impactklasse,
+              kein zusätzliches kritisches Security-Finding.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Die wesentliche Interaktion ist ohne Maus/Touch nicht
+              durchführbar. Verbindung und Cooldown werden nicht sinnvoll als
+              Status vermittelt. Ein grüner visueller Screenshot oder die
+              Space-Abkürzung allein belegt keine Barrierefreiheit.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Native Buttons mit Namen, Fokuszustand und deaktiviertem Zustand
+              verwenden; ausgewählte Farbe programmatisch kennzeichnen.
+              Koordinatenauswahl per Tastatur oder ergänzendem Formular
+              anbieten. Sprache und Landmarks setzen; wichtige Zustandswechsel
+              mit dosierten Live-Announcements mitteilen. Tastatur-Shortcuts
+              fokussensitiv machen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein vollständiger Pixel-Workflow gelingt ausschließlich mit
+              Tastatur und Screenreader. Relevante axe-Verstöße sind behoben;
+              Fokus, Vergrößerung und Statusmeldungen sind zusätzlich manuell
+              geprüft.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="SEC-04"
+          data-severity="mittel"
+          data-area="Sicherheit"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>SEC-04 · Sicherheit · Bestätigt</span>
+          </div>
+          <h3>Der Frontend-Build verwendet Pakete mit bekannten Advisories</h3>
+          <p class="location">package-lock.json; package.json; flake.nix:10</p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              npm audit meldet vier betroffene Pakete jeweils mit höchster
+              Paket-Einstufung „high“: Vite 8.0.14, PostCSS 8.5.15, nanoid
+              3.3.12 und source-map-js 1.2.1. Die vollständige Ausgabe ist
+              archiviert. Primärquellen bestätigen unter anderem die
+              <a
+                href="https://github.com/vitejs/vite/security/advisories/GHSA-rq7h-c2jc-7f22"
+                >Vite-Devserver-Lücke</a
+              >
+              und
+              <a
+                href="https://github.com/postcss/postcss/security/advisories/GHSA-r28c-9q8g-f849"
+                >PostCSS-Source-Map-Verarbeitung</a
+              >. Für weitere Paketdetails ist das Audit ein Scannerbefund, keine
+              eigene Exploitvalidierung.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Hier sind Build-/Entwicklungswerkzeuge betroffen. Produktion läuft
+              als Go-Prozess mit statischen Dateien, ohne Vite-Server,
+              PostCSS-API oder Node-Runtime. Einige Vite-Treffer setzen Windows,
+              einen exponierten Devserver oder spezielle Imports voraus; diese
+              Bedingungen wurden im Produktionspfad nicht beobachtet. Trotzdem
+              bleiben Entwicklungs- und CI-Risiken sowie ein fehlender
+              Updateprozess.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Gezielt auf gepatchte, kompatible Versionen aktualisieren;
+              Lockfile und Nix-npmDepsHash gemeinsam erneuern und die
+              vorhandenen Gates ausführen. Nicht pauschal npm audit fix --force
+              verwenden. Automatische Updatehinweise und ein regelmäßig
+              ausgeführtes Audit ergänzen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              npm audit zeigt keine ungeprüften relevanten Advisories mehr.
+              Verbleibende Ausnahmen dokumentieren tatsächlich fehlende
+              Voraussetzungen und haben ein Ablaufdatum.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="SEC-05"
+          data-severity="mittel"
+          data-area="Sicherheit"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>SEC-05 · Sicherheit · Bestätigt</span>
+          </div>
+          <h3>Browser-Schutzheader fehlen für die Grid-Domain</h3>
+          <p class="location">
+            main.go:30; waentw/server-config/configuration.nix: grid
+            virtualHost; Live-HTTP-Header
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              HTML und Assets enthalten Cache-Control und nosniff. Auf
+              grid.coprime.tech fehlen jedoch HSTS, Content-Security-Policy und
+              Frame-Schutz sowie eine explizite Referrer-Policy. HSTS ist in den
+              anderen geprüften VirtualHosts gesetzt, nicht im Grid-VirtualHost;
+              ein HSTS-Header der Hauptdomain ohne includeSubDomains deckt Grid
+              nicht automatisch ab. HTTP wird korrekt per 301 auf HTTPS
+              umgeleitet.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Es fehlen zusätzliche Grenzen gegen Einbettung/Clickjacking und
+              Auswirkungen eines späteren Script-Injection-Fehlers. Das ist kein
+              Nachweis einer vorhandenen XSS-Lücke; aktuelle Farben sind
+              serverseitig begrenzt und DOM-Ausgaben verwenden textContent bzw.
+              Canvas.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              HSTS für die eigene Domain setzen und CSP zunächst passend zur
+              tatsächlichen App testen, insbesondere connect-src für WSS,
+              frame-ancestors und object-src. Die vorhandenen Inline-Styles der
+              Palette bei der Policy berücksichtigen oder ins Stylesheet
+              verschieben. Referrer-Policy ergänzen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Die Header sind auf HTML, Fehlerseiten und relevanten Endpunkten
+              überprüft; Zeichnen und Reconnect bleiben funktionsfähig. Eine
+              fremde Seite kann Grid nicht unbeabsichtigt einbetten.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="REL-02"
+          data-severity="mittel"
+          data-area="Zuverlässigkeit"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>REL-02 · Zuverlässigkeit · Bestätigt</span>
+          </div>
+          <h3>Snapshots werden syntaktisch, aber nicht inhaltlich validiert</h3>
+          <p class="location">
+            internal/persistence.go:94; internal/store.go:110
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Das WAL validiert neue Versionen, Koordinaten, Farbe und
+              Client-ID. Der Snapshot wird dagegen nach json.Unmarshal direkt
+              übernommen. Der isolierte Test lädt sowohl <code>null</code> als
+              leeren Zustand als auch einen Snapshot mit Pixel
+              <code>999:999</code>, Farbe <code>invalid</code> und Version
+              <code>-7</code> ohne Fehler. Fehlende Snapshotfelder erhalten
+              Zero-Values.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Eine syntaktisch gültige Fehlkonfiguration, beschädigte Sicherung
+              oder manuelle Bearbeitung kann inkonsistenten oder leeren Zustand
+              in Betrieb nehmen und später wieder dauerhaft speichern. Das ist
+              ein lokales Integritäts-/Recovery-Risiko; der WebSocket-Writer
+              kann keine beliebigen Snapshotdateien hochladen.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Snapshotstruktur und erforderliche Felder validieren:
+              nichtnegative Version, kanonische Koordinaten im Grid, erlaubte
+              Farben, begrenzte Pixelzahl, plausible Cooldown-Daten.
+              Legacy-Kompatibilität explizit behandeln. Schema-Version und
+              optionale Prüfsumme helfen bei Migration und Wiederherstellung.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ungültige und null-Snapshots brechen den Start mit
+              aussagekräftigem Fehler ab; gültige alte Snapshots bleiben lesbar.
+              Negative Tests decken die beschriebenen Fälle ab.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="REL-03"
+          data-severity="mittel"
+          data-area="Zuverlässigkeit"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>REL-03 · Zuverlässigkeit · Bestätigt</span>
+          </div>
+          <h3>
+            Pixelbestätigung hat keinen nachvollziehbaren Pending-/Fehlerzustand
+          </h3>
+          <p class="location">
+            frontend/src/main.ts:55; frontend/src/ws.ts:127; internal/ws.go:107
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              confirmPixel entfernt die Auswahl unmittelbar nach send. Der
+              Wrapper sendet nur bei OPEN/connected, meldet aber nicht zurück,
+              ob tatsächlich gesendet wurde. Ein korreliertes accepted/rejected
+              mit Request-ID oder ein Timeout fehlt. Ungültige Koordinaten und
+              Farben werden still verworfen. Eine Cooldown-Ablehnung liefert
+              inzwischen korrekt die Restdauer, stellt aber die verlorene
+              Auswahl nicht wieder her.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Bei Netzwerkwechsel, hoher Latenz oder abgelehntem Write fehlt
+              eine klare Rückmeldung. Weitere Auswahl/Bestätigung ist bis zur
+              Serverantwort nicht als pending gekennzeichnet. Nach unsicherem
+              Verbindungsabbruch kann der Nutzer nicht zuverlässig zwischen noch
+              ausstehendem und verworfenem Intent unterscheiden.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Pending-Intent bis zur bestätigten Serverantwort halten, den
+              tatsächlichen Sendestatus auswerten und Ablehnungen mit Ursache
+              zurückgeben. Fehler und Timeout im UI darstellen; Auswahl für
+              einen sicheren erneuten Versuch erhalten. Keine dauerhafte lokale
+              Pixelübernahme vor Serverbestätigung.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Tests für Disconnect vor/nach Send, Cooldown-Ablehnung und
+              verzögerte Antwort zeigen genau einen verständlichen
+              Abschlusszustand ohne verschwundene Auswahl.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="REL-04"
+          data-severity="mittel"
+          data-area="Zuverlässigkeit"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span
+              >REL-04 · Zuverlässigkeit · Codebefund; Fehlerszenario nicht
+              dynamisch injiziert</span
+            >
+          </div>
+          <h3>
+            Gap-Recovery bleibt als „connected“ bedienbar und kann redundante
+            Syncs erzeugen
+          </h3>
+          <p class="location">
+            frontend/src/ws.ts:69,77; frontend/src/state.ts:13
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Beim Empfang einer Versionslücke sendet jeder weitere nicht
+              passende pixel_update sofort erneut sync. Ein
+              syncInFlight-Zustand, ein begrenzter Wiederholungsmechanismus und
+              ein Sync-Timeout fehlen. Die Verbindung bleibt connected. sync
+              übernimmt schließlich msg.version, ohne die Kontinuität der
+              gelieferten Events zu prüfen. Das aktuelle Backend erzeugt
+              geordnete Deltas; ein konkreter fehlerhafter Serverdelta wurde
+              nicht in Produktion beobachtet.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Während einer Wiederherstellung kann auf einer veralteten Ansicht
+              weiter bestätigt werden. Eine längere Lücke plus laufender
+              Eventstrom verstärkt die Zahl teurer Sync-Anfragen. Änderungen am
+              Protokoll sind ohne Frontend-Lebenszyklustests anfällig.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Recovery als expliziten Zustand modellieren, genau eine
+              Sync-Anfrage gleichzeitig zulassen und eine Antwortfrist setzen.
+              Versionskontinuität vor Übernahme prüfen; bei ungültigen Deltas
+              vollständigen Snapshot anfordern. Währenddessen Zeichnen sinnvoll
+              sperren oder eindeutig kennzeichnen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein künstlich ausgelassener Update mit anschließendem Burst löst
+              höchstens eine laufende Recovery aus; die Ansicht erreicht
+              dieselbe Map/Version wie der Server, und das UI zeigt den
+              Zwischenzustand korrekt.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="REL-05"
+          data-severity="mittel"
+          data-area="Zuverlässigkeit"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>REL-05 · Zuverlässigkeit · Bestätigt</span>
+          </div>
+          <h3>
+            Browserspeicher ist ein ungeprüfter Start- und
+            Verbindungsfehlerpunkt
+          </h3>
+          <p class="location">
+            frontend/src/main.ts:13; frontend/src/ws.ts:50,95
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              localStorage.getItem/setItem werden ohne Fehlerbehandlung
+              ausgeführt. Ein Browserkontext mit gesperrtem Storage wirft beim
+              Start SecurityError; der Loop und die WS-Initialisierung werden
+              nicht erreicht, das Overlay bleibt unsichtbar. Eine vorher
+              gespeicherte ID wie <code>invalid_id!</code> wird ungeprüft
+              wiederverwendet und führt im Browserversuch zu wiederholtem
+              Reconnecting.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Restriktive Browserumgebungen, beschädigte lokale Werte oder
+              manuelle Änderungen können die gesamte Anwendung blockieren. Das
+              UI bietet keine Reparatur oder Erklärung.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Storage-Zugriff kapseln, gespeicherte IDs validieren und bei nicht
+              verfügbarem Storage eine flüchtige Identität mit verständlicher
+              Einschränkung verwenden. Dauerhaft ungültige Handshakes reparieren
+              oder als terminalen Fehler anzeigen, statt endlos gleich zu
+              wiederholen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Die Anwendung startet mit deaktiviertem Storage und ersetzt
+              ungültige gespeicherte Werte kontrolliert. Ein Browser-E2E-Test
+              prüft beide Fälle.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="PERF-02"
+          data-severity="mittel"
+          data-area="Performance"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>PERF-02 · Performance · Bestätigt</span>
+          </div>
+          <h3>
+            Auch ein leeres Delta reserviert den gesamten Eventring und scannt
+            ihn vollständig
+          </h3>
+          <p class="location">internal/store.go:64; frontend/src/ws.ts:120</p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              GetSince reserviert mit
+              <code>make([]Event,0,s.count)</code> Speicher für alle Events und
+              iteriert danach den Ring, selbst wenn der Client bereits die
+              aktuelle Version hat. Bei vollem 100.000er-Ring ergibt der
+              isolierte Benchmark rund 4,0 MB Allokation und 1,7–2,0 ms pro
+              leerer Antwort. Jeder verbundene Browser fragt standardmäßig alle
+              20 s nach sync.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Mit zunehmender Historie erzeugen inaktive Nutzer unnötigen GC-
+              und CPU-Druck. Beispielrechnung, keine Produktionsmessung: 1.000
+              Clients bei 20-s-Takt entsprechen allein dafür ungefähr 200 MB/s
+              kurzlebigen Allokationen. Der Versionsring ist begrenzt, der
+              Aufwand pro Poll bleibt dennoch unnötig hoch.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Bei v==current sofort eine leere Antwort liefern. Für andere
+              Versionen den Startindex direkt aus der zusammenhängenden
+              Versionsfolge bestimmen und nur tatsächlich fehlende Events
+              kopieren. Die bestehende Fallback-Semantik nach Restart und
+              Ring-Wrap bewahren.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Benchmark für leeren Delta benötigt konstanten Aufwand ohne
+              ringgroße Allokation; Grenztests decken aktuellen Stand, oldest-1,
+              Wraparound, Zukunft und fehlende Historie ab.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="PERF-03"
+          data-severity="mittel"
+          data-area="Performance"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>PERF-03 · Performance · Bestätigt</span>
+          </div>
+          <h3>
+            Snapshot-Kodierung und Datenträgerzugriffe blockieren den globalen
+            Zustandslock
+          </h3>
+          <p class="location">
+            internal/ws.go:63,90,111; internal/autosave.go:11;
+            internal/persistence.go:33,51
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Initialisierung, Sync, WAL-fsync und kompletter Save laufen unter
+              h.stateMu. Der Vollcanvas-Benchmark benötigt lokal rund 446–457 ms
+              für Snapshot+JSON mit etwa 55–62 MB Allokationen; ein Save liegt
+              in zwei Läufen bei rund 324–453 ms und ungefähr 58 MB
+              Allokationen. Ein Vollsnapshot umfasst ungefähr 5,1 MB JSON. Save
+              findet alle 15 s auch ohne neue Pixel statt.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Andere Writes und Initialisierungen warten auf vollständige
+              Kopien, JSON-Sortierung und I/O. Langsamer oder blockierter
+              Speicher vergrößert die Verzögerung. Große kurzlebige Allokationen
+              reduzieren den Spielraum unter MemoryMax=256M. Die Messwerte
+              stammen vom lokalen Rechner, nicht von einem Lasttest der VM.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Zunächst unveränderte Autosaves überspringen und identische
+              Snapshotantworten versionsbezogen cachen. Danach
+              Persistenz-/Snapshot-Arbeit so entkoppeln, dass WAL-Reihenfolge
+              und „durable before broadcast“ erhalten bleiben. Nicht einfach den
+              Lock entfernen: Save-Kompaktion und Journal-Append müssen
+              konsistent bleiben.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Parallelitäts- und Crash-Recovery-Tests bleiben grün; ein
+              isolierter Vollcanvas-Test misst begrenzte p95/p99-Write-Latenz
+              während Init und Autosave.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="OPS-02"
+          data-severity="mittel"
+          data-area="Betrieb"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>OPS-02 · Betrieb · Bestätigt</span>
+          </div>
+          <h3>
+            nginx verwendet nur einen Worker mit dem Default von 512
+            Verbindungen
+          </h3>
+          <p class="location">
+            Aktive nginx.conf: events {}; Live-Prozessliste; waentw
+            nginx-Konfiguration
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Die aktive Konfiguration setzt weder worker_processes noch
+              worker_connections; die Prozessliste bestätigt genau einen Worker.
+              Die
+              <a
+                href="https://nginx.org/en/docs/ngx_core_module.html#worker_connections"
+                >nginx-Dokumentation</a
+              >
+              nennt die Defaults 1 und 512 und zählt Upstream-Verbindungen mit.
+              Jeder proxied WebSocket belegt normalerweise eine Client- und eine
+              Upstream-Verbindung. Der Worker bedient zusätzlich die anderen
+              VirtualHosts.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Rechnerisch bleiben deutlich weniger als 256 gleichzeitige
+              Grid-WebSockets, sobald andere Verbindungen und Reserven
+              berücksichtigt werden. Das ist eine aus der Konfiguration
+              abgeleitete Grenze, kein mit 256 Nutzern durchgeführter
+              Produktionstest. Ein hohes LimitNOFILE von 524.288 hebt
+              worker_connections nicht auf.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Workerzahl und Verbindungslimit explizit am Lastziel ausrichten,
+              mit passenden File-Descriptor- und Ressourcenbudgets.
+              Verbindungszahlen und Ablehnungen beobachten. Das gleichzeitig
+              fehlende Missbrauchslimit aus SEC-03 vor einer bloßen
+              Kapazitätserhöhung berücksichtigen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein isolierter Test erreicht das definierte Parallelitätsziel
+              einschließlich der anderen Anwendungen, ohne
+              worker_connections-Fehler oder unbegrenzte Ressourcenverwendung.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="OPS-03"
+          data-severity="mittel"
+          data-area="Betrieb"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>OPS-03 · Betrieb · Bestätigt</span>
+          </div>
+          <h3>
+            Deployment ist nicht an den geprüften Commit gebunden und wird nicht
+            bis zur Bereitschaft verifiziert
+          </h3>
+          <p class="location">
+            .github/workflows/deploy.yml:19,24; waentw/flake.nix:79;
+            waentw/.gitlab-ci.yml
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              GitHub baut den jeweiligen Commit, triggert anschließend aber nur
+              die GitLab-Pipeline mit ref=main. Der Server-Deploy führt
+              unabhängig davon nix flake update nixpkgs slf grid aus und kann
+              einen neueren Grid-Stand auflösen. Die Triggerantwort wird
+              verworfen; GitHub wartet weder auf GitLab-Erfolg noch auf
+              HTTP-/WS-Readiness. In CI wird der geänderte Server-Lock nicht wie
+              beim manuellen Aufruf committed. Zusätzlich kehrt ExecReload nach
+              dem HUP-Signal zurück, während der alte Prozess noch 30 s bis 5
+              min weiterläuft.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Ein grüner GitHub-Lauf belegt nicht, dass genau dessen Revision
+              produktiv oder überhaupt erfolgreich aktiviert wurde. Ein neuerer,
+              noch nicht geprüfter Stand kann den geprüften überholen. Paket-
+              und Source-Rückverfolgung sowie automatischer Rollback werden
+              unnötig schwer.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Die geprüfte Grid-SHA explizit an das Serverdeployment übergeben
+              und im Lock unverändert übernehmen. Den tatsächlich aktivierten
+              Stand samt Paketpfad festhalten. Die Folgepipeline und den
+              späteren Prozesswechsel bis zur neuen Revision plus
+              Readiness/WS-Snapshot prüfen; OnFailure allein reicht bei REL-01
+              nicht.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Eine Testdeployment-Kette weist für Build, Lock, aktive Binary und
+              Revisionsanzeige dieselbe SHA nach. Fehler in GitLab oder nach
+              Reload machen den übergeordneten Deploymentstatus sichtbar
+              fehlgeschlagen.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="QA-01"
+          data-severity="mittel"
+          data-area="Tests"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>QA-01 · Tests · Bestätigt</span>
+          </div>
+          <h3>
+            Grüne Gates lassen wichtige Lebenszyklus- und Fehlerpfade ungetestet
+          </h3>
+          <p class="location">
+            internal/reliability_test.go; frontend/src/camera/bounds.test.ts;
+            frontend/src/ui/cooldown.test.ts; main.go
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Sechs Go-Tests und neun Frontend-Tests laufen erfolgreich.
+              Gemessene Statement-Coverage: internal 76,2 %, Gesamtprojekt 67,1
+              %, main 0 %. RunAutosave und Shutdown sind im gemessenen Lauf
+              jeweils 0 %. Frontendtests prüfen nur Bounds und Cooldown;
+              WebSocket-Lebenszyklus, Interaktions-DOM, Touch, Accessibility und
+              UI-Fehlerpfade haben keine bestehenden E2E-Gates. Ein voller
+              Eventring wird in der bestehenden Suite nicht durchlaufen.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Ein Großteil der bekannten Fehler liegt an Modulgrenzen und ist
+              mit den aktuellen isolierten Tests nicht abgesichert. Die
+              Prozentzahl allein sagt nichts über funktionierende Deployments
+              oder mobile Bedienung aus.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Gezielte Tests für Write-Failure/Readiness, Signal-Shutdown, Slow
+              Clients/Queue-Überlauf, Origin/Readlimit, Ringgrenzen und
+              Snapshotvalidierung ergänzen. Kleine Browser-E2E-Suite für zwei
+              Clients, Reload, Reconnect, Tastatur und Touch im CI etablieren.
+              Künstliche Sleeps möglichst durch beobachtbare Zustände ersetzen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Die hier reproduzierten Defekte schlagen vor ihrem Fix im
+              passenden Test fehl; die Suite bleibt deterministisch und schnell.
+              Ein Mindestwert für Coverage darf kritische Szenarien nicht
+              ersetzen.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="UX-02"
+          data-severity="mittel"
+          data-area="UI/UX"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>UX-02 · UI/UX · Bestätigt</span>
+          </div>
+          <h3>
+            Die feste Minimap verdeckt im Querformat fünf von sechs Farben
+          </h3>
+          <p class="location">
+            frontend/style.css: #palette, #minimap, #cooldown
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Die Minimap ist in CSS 250×250 px groß und fest bei 16/16
+              positioniert; die vertikale Palette wird mittig platziert. Beide
+              haben z-index 1000, die später im DOM stehende Minimap liegt
+              darüber. Bei 844×390 liegt die Minimap von y=16 bis 268 über der
+              Palette von y=55 bis 335. elementFromPoint bestätigt für Rot,
+              Grün, Blau, Gelb und Schwarz die Minimap als oberstes Element. Im
+              Hochformat 390×844 verbraucht sie rund 19 % der gesamten Fläche.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Die meisten Farben sind bei kleinen Querformatfenstern tatsächlich
+              nicht anklickbar. Selbst auf größeren Mobilgeräten dominiert die
+              passive Übersicht die verfügbare Zeichenfläche. Bei noch kleineren
+              Fensterhöhen wird die feste Palette zusätzlich abgeschnitten.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Responsive Werkzeugleiste, einklappbare oder wesentlich kleinere
+              Minimap und kollisionsfreie Bereiche definieren. Safe-Area-Inset
+              und Textvergrößerung berücksichtigen. Layout anhand tatsächlicher
+              Interaktion statt ausschließlich anhand Screenshots testen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Bei 320/390 px Breite, 390 px Höhe, Hoch-/Querformat und
+              vergrößertem Text bleiben alle Farben und die Bestätigung sichtbar
+              und bedienbar.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="UX-03"
+          data-severity="mittel"
+          data-area="UI/UX"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>UX-03 · UI/UX · Bestätigt</span>
+          </div>
+          <h3>Erste Nutzung und Navigation sind kaum selbsterklärend</h3>
+          <p class="location">
+            frontend/index.html; frontend/src/camera/camera.ts:23,32;
+            main.ts:25; render/minimap.ts
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Die Seite zeigt keine Einführung oder Hilfen für Pan, Wheel-Zoom,
+              Doppelklick auf die Auswahl oder Space-Bestätigung. fitToScreen
+              setzt unabhängig vom Fenster Zoom 0,6 und zeigt auf dem Desktop
+              nur rund 60 von 512 Spalten, auf dem Smartphone rund 16. Es gibt
+              keinen sichtbaren Gesamtansicht-/Reset-Knopf, keine Sprungfunktion
+              zu Koordinaten und keine interaktive Minimap; dennoch erhält auch
+              sie den allgemeinen Grab-Cursor.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Neue Nutzer sehen leicht eine fast leere Teilfläche und müssen die
+              Bedienlogik erraten. Entfernte Zeichnungen bleiben schwer
+              auffindbar. Die Funktion „fitToScreen“ passt nach ihrem
+              tatsächlichen Verhalten nur den Viewport in die Welt ein, nicht
+              die ganze Zeichnung in den Bildschirm.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Kompakte erstmalige Bedienhilfe und sichtbare
+              Zoom-/Reset-Steuerung anbieten. Eine Übersicht und optional
+              Koordinatensprung bzw. klickbare Minimap ergänzen. Auswahlfarbe
+              und Bestätigungsaktion klar vermitteln; eine sparsame Oberfläche
+              kann diese Kernhinweise trotzdem enthalten.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein neuer Nutzer kann ohne externe README eine Zeichnung finden,
+              einen Pixel auswählen, die Farbe erkennen und den Write bewusst
+              bestätigen.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding mittel"
+          id="PRIV-01"
+          data-severity="mittel"
+          data-area="Datenschutz"
+        >
+          <div class="finding-meta">
+            <span class="badge mittel">mittel</span
+            ><span>PRIV-01 · Datenschutz · Bestätigt</span>
+          </div>
+          <h3>
+            Zugriffslogs werden bis zu 26 Wochen aufbewahrt, ohne sichtbare
+            Dateninformation
+          </h3>
+          <p class="location">
+            Aktive logrotate.conf: nginx rotate 26, weekly; frontend/index.html;
+            main.ts:13; persistence.go:19
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              nginx verwendet einen Access-Log; seine aktive Rotation ist weekly
+              mit rotate 26. Damit ist etwa ein halbes Jahr Historie vorgesehen.
+              Grid legt eine Browser-ID in localStorage an; das WAL speichert
+              diese ID mit Schreibzeit bis zur regulären Kompaktion, aktive
+              Cooldowns stehen auch im Snapshot. Es gibt keine sichtbare
+              Dateninformation in der App. In den geprüften
+              Seitennetzwerkanfragen wurden keine Drittanbieter-Tracker oder
+              externen Fonts beobachtet.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Aufbewahrung und Identitätsverwendung sind für Nutzer nicht
+              nachvollziehbar. Das ist ein Befund zur Datenminimierung und
+              Transparenz, keine pauschale rechtliche Feststellung. Bei
+              fehlgeschlagener Kompaktion kann die WAL-Aufbewahrung länger sein
+              als 15 s.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Zweck, tatsächliche Datenfelder und Aufbewahrung dokumentieren;
+              Logretention an den notwendigen Betriebszweck anpassen und
+              gegebenenfalls Adressen kürzen. Informationen zur lokalen ID und
+              zum Zurücksetzen zugänglich machen. Backup-Retention mit derselben
+              Datenbeschreibung abstimmen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Die dokumentierte Retention stimmt mit nginx,
+              WAL-/Snapshotlebenszyklus und Backups überein; unnötige
+              personenbezogene Betriebsdaten werden nicht länger als festgelegt
+              gehalten.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="SEC-06"
+          data-severity="niedrig"
+          data-area="Sicherheit"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>SEC-06 · Sicherheit · Bestätigt</span>
+          </div>
+          <h3>
+            Die systemd-Sandbox lässt zusätzliche, für Grid unnötige
+            Rechteklassen offen
+          </h3>
+          <p class="location">grid.service; systemd-analyze security grid</p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              DynamicUser, NoNewPrivileges, PrivateTmp, ProtectHome und
+              ProtectSystem=strict sind bereits aktiv. Zusätzliche Grenzen wie
+              leeres CapabilityBoundingSet, PrivateDevices,
+              ProtectKernelTunables/Modules/Logs, RestrictNamespaces und
+              RestrictAddressFamilies fehlen. systemd-analyze ergibt 8,1
+              EXPOSED. Dieser generische Toolscore ist kein Exploitnachweis und
+              berücksichtigt die vorhandene Nicht-root-Ausführung nur begrenzt.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Bei einer späteren Codeausführung im Dienst wäre der erreichbare
+              Systembereich größer als für einen Loopback-HTTP-Server mit einem
+              StateDirectory nötig. Wegen vorhandener Grundhärtung ist dies eine
+              ergänzende Maßnahme, kein akuter Root-Befund.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Zusätzliche Restriktionen schrittweise in der NixOS-Unit setzen
+              und mit Go-Netzwerk, DNS, WAL-fsync und Reload testen. Ausgehendes
+              Netzwerk bei Bedarf beschränken. Den Score als Checkliste und
+              nicht als alleinige Zielmetrik verwenden.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Die erforderlichen Funktionen bleiben unter engerem Rechteprofil
+              erfolgreich; der verbleibende Netzwerk- und Dateizugriff ist
+              begründet.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="SEC-07"
+          data-severity="niedrig"
+          data-area="Sicherheit"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>SEC-07 · Sicherheit · Bestätigt</span>
+          </div>
+          <h3>
+            CI-Abhängigkeiten sind teils nur über veränderbare Tags gebunden
+          </h3>
+          <p class="location">
+            .github/workflows/deploy.yml:17; .gitlab-ci.yml:4; package.json:7
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              GitHub Actions verwenden checkout@v7 und install-nix-action@v31
+              statt Commit-SHAs; der GitLab-Build verwendet nixos/nix:latest.
+              package.json nutzt für @types/bun latest, wobei das eingecheckte
+              npm-Lock den tatsächlich ausgeführten npm-/Nix-Build aktuell
+              trotzdem fixiert. Im Workflow fehlen explizite minimale
+              permissions. Ein npm-/Go-Sicherheitsaudit ist noch kein CI-Gate.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Ein nachträglich bewegter Action-/Image-Tag verändert den
+              Build-Kontext außerhalb der Projektänderung. Die starken
+              Lock-/Hash-Eigenschaften des Nix-Pakets decken diese vorgelagerten
+              CI-Komponenten nicht vollständig ab.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Actions auf geprüfte SHAs und Images auf geeignete unveränderliche
+              Referenzen setzen, Updates automatisiert vorschlagen lassen und
+              permissions explizit minimieren. Frontendmanifest und Lockpflege
+              vereinfachen; allein die latest-Angabe ist bei npm ci kein
+              ungepinnter Produktionsinstall.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              CI-Eingänge sind nachvollziehbar gepinnt und regelmäßig
+              aktualisiert; der Workflow hat nur die benötigten Berechtigungen.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="REL-06"
+          data-severity="niedrig"
+          data-area="Zuverlässigkeit"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>REL-06 · Zuverlässigkeit · Bestätigt</span>
+          </div>
+          <h3>
+            Fehlende Pflichtkoordinaten werden als gültiger Pixel bei 0:0
+            interpretiert
+          </h3>
+          <p class="location">internal/ws.go:13,51,107</p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              ClientMsg benutzt int-Felder ohne Anwesenheitsprüfung. Der
+              isolierte Test sendet nur
+              <code>{"type":"set_pixel","color":"#0000ff"}</code>; Unmarshal
+              setzt x/y auf 0 und der Write bei 0:0 wird akzeptiert. Gleiches
+              gilt für null in primitiven Koordinatenfeldern. Unbekannte
+              Nachrichtentypen werden nach Init ohne Fehlermeldung ignoriert.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Fehlerhafte Integrationen oder zukünftige Frontendregressionen
+              können unbeabsichtigt das Ursprungspixel verändern. Koordinaten
+              außerhalb des Grids, Dezimalzahlen und fremde Farben sind
+              weiterhin serverseitig geschützt; dies ist keine beliebige
+              Schreib-/Codeausführung.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Nach Nachrichtentyp getrennte Payloads mit Pflichtfeldern bzw.
+              Pointer-/Presence-Prüfung decodieren. Fehlende oder
+              null-Koordinaten ablehnen und die Ursache zurückgeben. Unbekannte
+              Felder nur entsprechend einer bewusst gewählten
+              Kompatibilitätspolitik behandeln.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Fehlende/null-Koordinaten verändern weder Version noch Canvas;
+              gültige 0:0-Writes funktionieren weiterhin.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="PERF-04"
+          data-severity="niedrig"
+          data-area="Performance"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>PERF-04 · Performance · Bestätigt</span>
+          </div>
+          <h3>
+            Im Leerlauf werden die UI-Texte unnötig in jedem Animationframe neu
+            geschrieben
+          </h3>
+          <p class="location">
+            frontend/src/main.ts:90; ui/button.ts:6; ui/connection.ts:4
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Der requestAnimationFrame-Loop läuft dauerhaft und ruft
+              updateButtonUI sowie updateConnectionUI auf. Selbst wenn die
+              Canvas wegen needsRender nicht neu gezeichnet wird, wird Select
+              Pixel erneut textContent zugewiesen. Ein MutationObserver
+              registriert bei ruhender verbundener Seite 60 DOM-Mutationen am
+              Bestätigungsfeld in rund einer Sekunde. Jeder leere heartbeat-sync
+              fordert außerdem ein Canvas-Redraw an.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Es entsteht vermeidbare Main-Thread-Arbeit und Energieverbrauch.
+              Die Messung belegt unnötige Mutationen, nicht eine bestimmte
+              Akkulaufzeit. Mit einer Live-Region würde ungefiltertes
+              Aktualisieren zusätzlich die Sprachausgabe belasten.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              UI nur bei geändertem Text/Status aktualisieren. Animation nur
+              während Kamerabewegung und Countdown takten; leere Syncs dürfen
+              keinen Pixellayer invalidieren. Reduced-Motion-Präferenz bei
+              Kamerainterpolation berücksichtigen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Eine ruhende Seite erzeugt ohne echte Zustandsänderung keine
+              wiederholten DOM-Mutationen; Countdown und Kamerabewegung bleiben
+              flüssig.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="UX-04"
+          data-severity="niedrig"
+          data-area="UI/UX"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>UX-04 · UI/UX · Bestätigt</span>
+          </div>
+          <h3>
+            Canvas und Minimap berücksichtigen die Pixeldichte nicht konsistent
+          </h3>
+          <p class="location">
+            frontend/src/dom.ts:13; camera/controls.ts:86; render/minimap.ts:5;
+            frontend/style.css: #minimap
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Auf einem mit DPR=3 emulierten Smartphone ist die
+              Canvas-Backingbreite weiterhin 390 bei 390 CSS-Pixeln. Die Minimap
+              zeichnet in 180×180, wird in CSS aber auf 250×250 skaliert. Ein
+              Weltpixel entspricht dort 180/512 Zeichenpixeln, wird jedoch mit
+              mindestens 1 Pixel gemalt; benachbarte Farben überdecken sich
+              deshalb stärker und abhängig von der Einfügereihenfolge.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Linien und Auswahlränder sind auf hochauflösenden Displays
+              unscharf; die Übersicht ist eine verzerrte grobe Vorschau, kein
+              präzises Abbild. Eine pauschale DPR-Vergrößerung würde ohne
+              PERF-01 zugleich die Renderkosten erhöhen.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              CSS-Koordinaten und Backingstore bewusst trennen, Transform und
+              Pointerumrechnung konsistent halten. Die Minimap aus einem
+              korrekten 512er-Raster herunterskalieren und Anzeigegröße an das
+              responsive Layout koppeln.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Auf DPR 1/2/3 stimmen Auswahlkoordinaten und scharfe Ränder; die
+              Übersicht zeigt unabhängig von der Einfügereihenfolge dieselbe
+              Fläche.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="UX-05"
+          data-severity="niedrig"
+          data-area="UI/UX"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>UX-05 · UI/UX · Codebefund</span>
+          </div>
+          <h3>Langsame Drags können als Klicks auf die Canvas durchrutschen</h3>
+          <p class="location">
+            frontend/src/camera/controls.ts:32; frontend/src/main.ts:25
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              moved wird erst gesetzt, wenn ein einzelnes mousemove-Delta größer
+              als 2 px ist. last wird nach jedem Event aktualisiert. Viele
+              aufeinanderfolgende Bewegungen von jeweils 1–2 px verschieben
+              daher die Kamera, ohne moved zu setzen. Der abschließende Click
+              kann dann eine Auswahl oder bei passendem bereits ausgewähltem
+              Pixel eine Bestätigung auslösen.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Die Geste „verschieben“ ist nicht robust von
+              „auswählen/bestätigen“ getrennt. Dies ist ein direkt aus dem
+              Eventcode abgeleiteter Grenzfall; er wurde nicht als
+              versehentlicher Produktionswrite ausprobiert.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Die Gesamtbewegung vom Pointer-Down-Punkt auswerten und eine
+              einmal überschrittene Drag-Schwelle bis zum Pointer-Up
+              beibehalten. Nur vorgesehene Maustasten akzeptieren und
+              Pointer-Capture/-Cancel behandeln.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein Test mit vielen kleinen Deltas pannt, löst aber weder Auswahl
+              noch Write aus; ein echter Tap/Klick bleibt möglich.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="ARCH-01"
+          data-severity="niedrig"
+          data-area="Architektur"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>ARCH-01 · Architektur · Bestätigt</span>
+          </div>
+          <h3>
+            Protokoll und Invarianten sind über mehrere Module und Sprachen
+            verteilt
+          </h3>
+          <p class="location">
+            internal/config.go; internal/ws.go; internal/store.go:34;
+            frontend/src/ws.ts:5; camera/camera.ts:4; frontend/index.html
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Gridgröße, Palette und Nachrichtenschema stehen mehrfach in Go,
+              TypeScript und HTML. ServerResponse beschreibt cooldown-Antworten
+              mit end nicht vollständig; diese werden separat als anonyme
+              Struktur gebaut. Im Frontend sind fast alle Felder einer einzigen
+              PixelMessage optional, statt Nachrichtentypen mit Pflichtfeldern
+              zu unterscheiden. Pixel und andere einfache Typen sind mehrfach
+              definiert. Der Hub exportiert Store und Persistence, obwohl
+              Konsistenz zusätzlich stateMu voraussetzt; mehrere
+              Mutationseinstiege können diese Ordnung künftig umgehen.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Die geringe Codegröße ist gut, aber wichtige Garantien hängen von
+              nicht typisierten Aufrufkonventionen ab. Frühere Gridgrößenfehler
+              zeigen den praktischen Wert eines klaren Vertrags. Ein großer
+              Abstraktionsumbau würde die Einfachheit eher verschlechtern.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Kleinen dokumentierten Protokollvertrag samt versioniertem
+              init-Metadatum für Gridgröße/Palette schaffen; diskriminierte
+              TypeScript-Unions und explizite Serverantworten nutzen. Die
+              pixelMap vom Renderer entkoppeln, Mutationspfade im Hub bündeln
+              und Lockreihenfolge dokumentieren. Keine Framework- oder
+              Datenbankmigration allein hierfür.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein Contracttest prüft Client-/Serverannahmen; Gridgröße und
+              Palette müssen bei einer Änderung nicht an unkontrollierten
+              Stellen manuell synchronisiert werden.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="DOC-01"
+          data-severity="niedrig"
+          data-area="Dokumentation"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>DOC-01 · Dokumentation · Bestätigt</span>
+          </div>
+          <h3>Mehrere Planungsdateien widersprechen dem heutigen Code</h3>
+          <p class="location">
+            AGENT/TODO.md; AGENT/Roadmap.md; AGENT/TMP-TODO.md; CLAUDE.md;
+            README.md
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              TODO/Roadmap führen bereits erledigte Autosave-, Reconnect-,
+              Heartbeat- und Cleanup-Arbeit als offen bzw. unsicher. TODO
+              behauptet einen vorhandenen Invalid-Message-Counter, den der
+              aktuelle WS-Handler nicht besitzt. CLAUDE.md enthält weiterhin bun
+              install als Standard, während der reproduzierbare Pfad npm
+              ci/package-lock nutzt. package.json führt ein nicht existierendes
+              index.ts als module. Dazu kommen Bun-Typen trotz Node-Testworkflow
+              und TypeScript als Peer- statt Entwicklungsabhängigkeit. README
+              ist erheblich aktueller als diese Dateien.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Neue Mitwirkende und spätere Agenten bekommen widersprüchliche
+              Aufgaben und Sicherheitszusicherungen. Es fehlt ein kompakter
+              maßgeblicher Backlog mit Bezug zu belegten Findings und
+              Releaseänderungen.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Überholte Planungsstände als historisch markieren oder
+              zusammenführen, aktuelle Sicherheitsgrenzen korrekt beschreiben
+              und einen primären Setup-/Checkpfad nennen. Lizenzdatei ist
+              vorhanden; SPDX-Angaben, Releaseversionen und Changelog können für
+              die Weitergabe präzisiert werden.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              README, CLAUDE und ein aktiver Backlog widersprechen sich nicht
+              mehr; erledigte Arbeit und offene Audit-IDs sind eindeutig
+              verknüpft.
+            </dd>
+          </dl>
+        </article>
+        <article
+          class="finding niedrig"
+          id="OPS-04"
+          data-severity="niedrig"
+          data-area="Betrieb"
+        >
+          <div class="finding-meta">
+            <span class="badge niedrig">niedrig</span
+            ><span>OPS-04 · Betrieb · Teilweise Nachweislücke</span>
+          </div>
+          <h3>
+            Betriebliche Messgrößen und Zuständigkeiten sind kaum sichtbar
+          </h3>
+          <p class="location">
+            main.go:35; internal/ws.go; waentw notify-failure@; README.md
+          </p>
+          <dl>
+            <dt>Befund und Nachweis</dt>
+            <dd>
+              Vorhanden sind Journal, nginx-Access-Log, systemd-Ressourcenwerte,
+              ACME-Timer, ein nixpkgs-age-Check und ein OnFailure-Hook. Grid
+              liefert aber keine Angaben zu aktiven Clients, Write-/Rejectraten,
+              Queue-Drops, persistierter Version, letztem erfolgreichen Save
+              oder Sync-Latenzen. Ein externer synthetischer HTTP+WS-Test und
+              feste SLOs sind in den einsehbaren Konfigurationen nicht
+              erkennbar. Die Erreichbarkeit/Zustellung des
+              Benachrichtigungskanals wurde nicht durch Testnachrichten
+              ausgelöst.
+            </dd>
+            <dt>Auswirkung und Einordnung</dt>
+            <dd>
+              Kapazitätsprobleme, stille Readinessfehler und Änderungen an der
+              Latenz sind schwer früh zu erkennen. Ein Prozess kann laufen,
+              während die Kernfunktion gestört ist. Ein externes
+              Monitoringsystem außerhalb des Hosts ist durch diesen Befund nicht
+              ausgeschlossen.
+            </dd>
+            <dt>Empfehlung</dt>
+            <dd>
+              Wenige gezielte Metriken oder strukturierte periodische
+              Zustandslogs ergänzen, Version und Buildrevision ausgeben und
+              einen unabhängigen HTTP+WS-Lesecheck dokumentieren. Zuständigkeit,
+              Alarmweg und erwartetes Wiederherstellungsziel festlegen.
+            </dd>
+            <dt>Abnahmekriterium</dt>
+            <dd>
+              Ein Betreiber kann ohne Debugger letzte durable Version,
+              Schreibbereitschaft und aktuelle Auslastung beurteilen; ein
+              dokumentierter Alarmtest erreicht den vorgesehenen Empfänger.
+            </dd>
+          </dl>
+        </article>
+      </section>
+
+      <section id="screens">
+        <h2>6. UI-Nachweise aus der laufenden Anwendung</h2>
+        <p>
+          Diese Screenshots zeigen den echten Produktionsstand während des
+          Audits. Die Tests bestätigen keinen Pixel; Änderungen an der
+          Auswahl/Kamera bleiben lokal. Relevante Messwerte und Hit-Tests stehen
+          zusätzlich in browser-results.json und extra-results.json.
+        </p>
+        <div class="screens">
+          <figure>
+            <a href="audit/2026-10-22/desktop.png"
+              ><img
+                src="audit/2026-10-22/desktop.png"
+                alt="Desktopansicht: dunkle Canvas mit großer Minimap links oben, vertikaler Farbpalette und Bestätigung unten"
+                loading="lazy"
+                width="1440"
+                height="900"
+            /></a>
+            <figcaption>
+              1440×900: kleine Assets und reduzierte Oberfläche, aber fehlende
+              Bedienhilfe und wenig sichtbare Gesamtfläche.
+            </figcaption>
+          </figure>
+          <figure>
+            <a href="audit/2026-10-22/mobile.png"
+              ><img
+                src="audit/2026-10-22/mobile.png"
+                alt="Mobile Hochformatansicht: die Minimap nimmt einen großen Teil des oberen Zeichenbereichs ein"
+                loading="lazy"
+                width="390"
+                height="844"
+            /></a>
+            <figcaption>
+              390×844: Minimap bleibt 252×252 px inklusive Rand; Touchnavigation
+              fehlt.
+            </figcaption>
+          </figure>
+          <figure>
+            <a href="audit/2026-10-22/mobile-landscape.png"
+              ><img
+                src="audit/2026-10-22/mobile-landscape.png"
+                alt="Mobile Querformatansicht: die Minimap verdeckt fast die gesamte Farbpalette; nur Weiß ist vollständig bedienbar"
+                loading="lazy"
+                width="844"
+                height="390"
+            /></a>
+            <figcaption>
+              844×390: fünf Farbbuttons werden von der Minimap überlagert. Durch
+              elementFromPoint geprüft.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="old">
+        <h2>7. Neubewertung des Reports vom 02.07.2026</h2>
+        <p>
+          Der alte Bericht enthielt 15 Einträge. Seine beiden kritischen
+          Einträge sind behoben; die damaligen Aussagen dürfen nicht unverändert
+          als heutiger Zustand weitergeführt werden. Die historische Fassung
+          bleibt in der Git-Historie erhalten. Der heutige Bericht vergibt neue,
+          thematische IDs und überprüft die weiterhin relevanten Punkte erneut.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Alte ID</th>
+                <th>Alter Befund</th>
+                <th>Status heute</th>
+                <th>Nachweis / Weiterführung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CRIT-1</td>
+                <td>Gridgrößen inkonsistent</td>
+                <td>Behoben</td>
+                <td>
+                  Frontend und Backend sind 512; Kontraktduplikation bleibt
+                  ARCH-01.
+                </td>
+              </tr>
+              <tr>
+                <td>CRIT-2</td>
+                <td>Reload bekommt unvollständige Deltas</td>
+                <td>Behoben</td>
+                <td>
+                  Init liefert immer Snapshot, Version bleibt im passenden
+                  In-Memory-Zustand; bestehender WS-Test grün.
+                </td>
+              </tr>
+              <tr>
+                <td>HIGH-1</td>
+                <td>Docker-Volume zeigt auf falschen Pfad</td>
+                <td>Entfallen</td>
+                <td>
+                  Docker entfernt; Produktions-StateDirectory liegt außerhalb
+                  des Pakets.
+                </td>
+              </tr>
+              <tr>
+                <td>HIGH-2</td>
+                <td>Origin blockiert Produktion</td>
+                <td>Korrigiert / behoben</td>
+                <td>
+                  Same-Origin-Produktion funktioniert; fremde Origin wird mit
+                  403 abgelehnt. Die frühere Aussage, eine
+                  localhost-Ausnahmeliste blockiere grundsätzlich Same-Origin,
+                  war zu pauschal.
+                </td>
+              </tr>
+              <tr>
+                <td>HIGH-3</td>
+                <td>Client-ID umgeht Cooldown</td>
+                <td>Weiter offen</td>
+                <td>Neu SEC-02; erneute Verbindung mit anderer ID reicht.</td>
+              </tr>
+              <tr>
+                <td>MED-1</td>
+                <td>lastAction wächst ohne Cleanup</td>
+                <td>Behoben</td>
+                <td>
+                  saveLocked ruft CleanupLastAction(CooldownMs) regulär alle 15
+                  s auf.
+                </td>
+              </tr>
+              <tr>
+                <td>MED-2</td>
+                <td>Kein Heartbeat</td>
+                <td>Behoben</td>
+                <td>
+                  Server-Ping 25 s mit 10-s-Timeout, Client-Sync 20 s und
+                  Stale-Erkennung vorhanden.
+                </td>
+              </tr>
+              <tr>
+                <td>MED-3</td>
+                <td>Dockerbuild und Lockdatei fehlerhaft</td>
+                <td>Entfallen / behoben</td>
+                <td>
+                  Docker entfernt; npm-Lock, Nix-Hash und erfolgreicher
+                  Nix-Build vorhanden.
+                </td>
+              </tr>
+              <tr>
+                <td>MED-4</td>
+                <td>Keine Touchbedienung / Viewport fehlt</td>
+                <td>Teilweise behoben</td>
+                <td>Viewport vorhanden; Touchnavigation bleibt UX-01.</td>
+              </tr>
+              <tr>
+                <td>MED-5</td>
+                <td>Keine Ablehnungsrückmeldung</td>
+                <td>Teilweise behoben</td>
+                <td>
+                  Cooldown sendet Restdauer; sonstige Fehler/Pending fehlen
+                  weiterhin, REL-01 und REL-03.
+                </td>
+              </tr>
+              <tr>
+                <td>LOW-1</td>
+                <td>Readlimit unbenutzt</td>
+                <td>Behoben</td>
+                <td>
+                  SetReadLimit(1024) aktiv; Liveprobe schließt
+                  1.100-Byte-Nachricht mit 1009.
+                </td>
+              </tr>
+              <tr>
+                <td>LOW-2</td>
+                <td>Toter Persistence-Loop / doppelte Anlage</td>
+                <td>Behoben</td>
+                <td>
+                  Aktueller Einstieg OpenHub bündelt Verzeichnisanlage; alte
+                  Funktion nicht mehr vorhanden.
+                </td>
+              </tr>
+              <tr>
+                <td>LOW-3</td>
+                <td>Palette/Canvas nicht zugänglich</td>
+                <td>Weiter offen, höher priorisiert</td>
+                <td>A11Y-01 bestätigt Ausschluss der Kernfunktion.</td>
+              </tr>
+              <tr>
+                <td>INFO-1</td>
+                <td>README-Status veraltet</td>
+                <td>Behoben</td>
+                <td>
+                  Aktuelle README beschreibt implementierte Persistenz und
+                  Deployment; andere Planungsdateien bleiben DOC-01.
+                </td>
+              </tr>
+              <tr>
+                <td>INFO-2</td>
+                <td>Keine Tests</td>
+                <td>Behoben</td>
+                <td>
+                  Sechs Go- und neun Frontend-Tests vorhanden; gezielte Lücken
+                  bleiben QA-01.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="priorities">
+        <h2>8. Empfohlene Reihenfolge und bewusste Abwägungen</h2>
+        <ol>
+          <li>
+            <strong>Zuerst sichere Betriebsfähigkeit:</strong> SEC-01 (eigene
+            Toolchain patchen), SEC-02/03 (Schreib-/Verbindungs-/Syncbudgets),
+            REL-01 (Speicherfehler, Readiness und Recovery), OPS-01
+            (Backup/Restore-Nachweis). Dazu kleine gezielte Regressionstests.
+            Ein gepatchter Host allein löst den alten App-Lock nicht.
+          </li>
+          <li>
+            <strong>Dann Kernbedienung für alle Zielgeräte:</strong> A11Y-01 und
+            UX-01/02 gemeinsam angehen, native Bedienelemente, Pointergesten und
+            kollisionsfreies Layout entwickeln. REL-03/05 für verständliche
+            Bestätigung und robusten Start mitnehmen.
+          </li>
+          <li>
+            <strong>Vor größerer Belegung und Nutzerzahl:</strong> PERF-01/02
+            zuerst mit kleinen, messbaren Änderungen beheben; danach
+            Lock-/Savezeiten aus PERF-03 und Proxykapazität OPS-02 prüfen. Das
+            Leer-Delta-Fastpath und getrennte Minimap-Invalidierung sind kleine
+            Verbesserungen mit klarer Wirkung.
+          </li>
+          <li>
+            <strong>Deployment nachvollziehbar machen:</strong> OPS-03 mit
+            exakter SHA und nachgelagerter Readinessprüfung schließen. QA-01 um
+            reale Browser-/Fehlerpfade erweitern, SEC-04/05/07 und OPS-04
+            systematisch pflegen.
+          </li>
+          <li>
+            <strong>Anschließend Konsolidierung:</strong> ARCH-01, DOC-01,
+            kleinere Interaktionsfehler, Logretention und ergänzende
+            Sandboxhärtung in begrenzten Änderungen umsetzen. Abnahmekriterien
+            pro Finding verwenden statt eines pauschalen Rewrite.
+          </li>
+        </ol>
+        <h3>Was nicht vorschnell umgebaut werden sollte</h3>
+        <ul>
+          <li>
+            <strong>JSON, Go und Canvas beibehalten:</strong> die aktuell
+            winzige JS-Nutzlast und einfache Serverstruktur sind Vorteile. Die
+            gemessenen Engpässe entstehen durch wiederholtes Map-Parsen,
+            Vollsnapshotarbeit und unnötige Allokationen, nicht zwingend durch
+            JSON als Wireformat.
+          </li>
+          <li>
+            <strong>Ein Prozess ist für diesen Datenumfang plausibel:</strong>
+            mehrere Instanzen mit demselben Dateipfad sind nicht sicher
+            koordiniert. Der aktuelle Code hat keinen Interprozesslock, kein
+            gemeinsames Write-Ordering und keine Leaderwahl. Horizontal
+            skalieren erst nach Bedarf; einen zweiten Prozess nicht einfach auf
+            dasselbe StateDirectory zeigen lassen.
+          </li>
+          <li>
+            <strong>Crash-Persistenz ist keine vollständige History:</strong>
+            der Ring enthält nur 100.000 RAM-Events und das WAL wird
+            kompaktisiert. Moderation, gezieltes Zurückrollen einzelner
+            Vandalenaktionen, Attribution und Timelapse brauchen ein bewusstes
+            zusätzliches Aufbewahrungs-/Produktkonzept. Bei öffentlichen Nutzern
+            sollten Moderationsweg, Meldekanal und Schutz vor flächigem
+            Vandalismus vorab definiert werden.
+          </li>
+          <li>
+            <strong>Kurzer Reconnect bei Paketwechsel ist dokumentiert:</strong>
+            der vorhandene Quiet-Window-Reload ist nachvollziehbar. Nahtloser
+            Prozesshandover oder Zero-Downtime-Cluster sind ohne SLO-Anforderung
+            keine zwingenden Verbesserungen. Readiness muss trotzdem den echten
+            Prozesswechsel abwarten.
+          </li>
+          <li>
+            <strong>Feste Palette und feste Gridgröße sind legitim:</strong> ihr
+            Vertrag sollte eindeutig sein. Accounts, Teams, Social-Funktionen
+            und frei wachsende Weltgröße sind Produktentscheidungen, keine
+            automatisch fehlende Codequalität.
+          </li>
+          <li>
+            <strong>Keine willkürliche Gesamtnote:</strong> ein synthetischer
+            Score würde funktionale Ausschlüsse, Betriebsnachweislücken und
+            echte Sicherheitsrisiken verschleiern. Entscheidend sind die
+            überprüfbaren Befunde und die genannten Voraussetzungen.
+          </li>
+        </ul>
+      </section>
+
+      <section id="evidence">
+        <h2>9. Nachweise, Quellen und Wiederholung</h2>
+        <p>
+          Die Belege liegen im Repository unter
+          <code>AGENT/audit/2026-10-22/</code>. Dort sind ausschließlich
+          Laborergebnisse, öffentliche UI-Aufnahmen und bereinigte
+          Zusammenfassungen abgelegt; keine SSH-Schlüssel, Produktionssnapshots,
+          Secretwerte, Alarm-URLs oder vollständigen Netzwerk-/Hostdumps.
+        </p>
+        <ul>
+          <li>
+            <a href="audit/2026-10-22/README.md"
+              >Methodik, Befehle und Reproduktionsanleitung</a
+            >
+          </li>
+          <li>
+            <a href="audit/2026-10-22/browser-results.json"
+              >Browser, axe, Layout und Renderzeitmessung</a
+            >
+            ·
+            <a href="audit/2026-10-22/extra-results.json"
+              >Hit-Tests, Idle-Mutationen und redigierter historischer
+              Secretkontext</a
+            >
+          </li>
+          <li>
+            <a href="audit/2026-10-22/protocol-results.json"
+              >Read-only-Liveprotokoll und lokaler Speicherfehler/Health</a
+            >
+          </li>
+          <li>
+            <a href="audit/2026-10-22/backend-results.txt"
+              >Isolierte Backend-Fälle und Benchmarkausgabe</a
+            >
+            ·
+            <a href="audit/2026-10-22/reproduce_test.go.txt"
+              >zusätzliche Labor-Testfälle als Textvorlage</a
+            >
+          </li>
+          <li>
+            <a href="audit/2026-10-22/npm-audit.json">npm-Audit-Rohbefund</a> ·
+            <a href="audit/2026-10-22/govulncheck-retry.txt"
+              >erfolgreicher govulncheck-Rohbefund</a
+            >
+          </li>
+        </ul>
+        <p>
+          Primärquellen zur Einordnung:
+          <a href="https://pkg.go.dev/vuln/GO-2026-6609"
+            >Go FileServer / Range-Verarbeitung</a
+          >,
+          <a href="https://pkg.go.dev/vuln/GO-2026-6089"
+            >Go unverschlüsseltes HTTP/2 als Voraussetzung</a
+          >,
+          <a href="https://pkg.go.dev/vuln/GO-2026-6617">Go HTTP/2-Encoder</a>,
+          <a
+            href="https://github.com/vitejs/vite/security/advisories/GHSA-rq7h-c2jc-7f22"
+            >Vite-Devserver</a
+          >,
+          <a
+            href="https://github.com/postcss/postcss/security/advisories/GHSA-r28c-9q8g-f849"
+            >PostCSS</a
+          >,
+          <a href="https://nginx.org/en/docs/ngx_core_module.html"
+            >nginx Worker- und Verbindungslimits</a
+          >. Advisories und Paketstände sind zeitabhängig; bei Umsetzung erneut
+          prüfen. Keine langen Textauszüge wurden aus diesen Quellen übernommen.
+        </p>
+        <pre>
+nix develop -c sh -c 'go vet ./... &amp;&amp; go test -race ./... &amp;&amp; npm test &amp;&amp; npx tsc --noEmit &amp;&amp; npm run build'
+nix build -L
+nix develop -c npm audit --json
+nix develop -c go run golang.org/x/vuln/cmd/govulncheck@latest ./...</pre>
+        <p class="muted">
+          Der Bericht dokumentiert den untersuchten Stand. Änderungen an
+          Anwendung und Infrastruktur sind nicht Teil dieses Audits;
+          Empfehlungen sind keine bereits umgesetzten Fixes.
+        </p>
+      </section>
+    </main>
+    <script>
+      const cards = [...document.querySelectorAll(".finding")];
+      const sev = document.getElementById("severity"),
+        area = document.getElementById("area"),
+        q = document.getElementById("query"),
+        shown = document.getElementById("shown");
+      function filter() {
+        let n = 0;
+        for (const c of cards) {
+          c.hidden = !!(
+            (sev.value && c.dataset.severity !== sev.value) ||
+            (area.value && c.dataset.area !== area.value) ||
+            (q.value &&
+              !c.textContent
+                .toLocaleLowerCase("de")
+                .includes(q.value.toLocaleLowerCase("de")))
+          );
+          if (!c.hidden) n++;
+        }
+        shown.textContent = n + " von " + cards.length + " Findings";
+      }
+      for (const el of [sev, area, q]) el.addEventListener("input", filter);
+      document.getElementById("reset").addEventListener("click", () => {
+        sev.value = "";
+        area.value = "";
+        q.value = "";
+        filter();
+      });
+      function reveal() {
+        const target = document.getElementById(location.hash.slice(1));
+        if (target && target.classList.contains("finding") && target.hidden) {
+          sev.value = "";
+          area.value = "";
+          q.value = "";
+          filter();
+          target.scrollIntoView();
+        }
+      }
+      window.addEventListener("hashchange", reveal);
+      reveal();
+    </script>
   </body>
 </html>

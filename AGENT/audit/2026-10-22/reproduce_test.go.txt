@@ -1,0 +1,56 @@
+package internal
+
+import (
+ "encoding/json"
+ "fmt"
+ "os"
+ "path/filepath"
+ "testing"
+ "time"
+)
+
+func TestAuditIdentityAndMissingFields(t *testing.T) {
+ h := openTestHub(t,t.TempDir())
+ start:=time.Now()
+ handleSetPixel(h,"identity-one",ClientMsg{X:5,Y:5,Color:"#ff0000"})
+ handleSetPixel(h,"identity-two",ClientMsg{X:6,Y:5,Color:"#00ff00"})
+ t.Logf("different IDs: %d writes in %v",h.Store.Version(),time.Since(start))
+ var msg ClientMsg
+ if err:=json.Unmarshal([]byte(`{"type":"set_pixel","color":"#0000ff"}`),&msg);err!=nil{t.Fatal(err)}
+ handleSetPixel(h,"identity-three",msg)
+ pixels,v:=h.Store.Snapshot();t.Logf("omitted coordinates: version=%d pixel-at-origin=%s",v,pixels["0:0"])
+}
+
+func TestAuditSemanticSnapshot(t *testing.T) {
+ for _,content:=range []string{`null`,`{"pixels":{"999:999":"invalid"},"version":-7}`,`{"pixels":{},"version":40}`} {
+  dir:=t.TempDir();os.WriteFile(filepath.Join(dir,"snapshot.json"),[]byte(content),0600)
+  h,err:=OpenHub(dir)
+  if err!=nil{t.Logf("%s: rejected: %v",content,err)}else{pixels,v:=h.Store.Snapshot();t.Logf("%s: ACCEPTED pixels=%v version=%d",content,pixels,v)}
+ }
+}
+
+func TestAuditWriteFailure(t *testing.T) {
+ dir:=t.TempDir();h:=openTestHub(t,dir)
+ wal:=filepath.Join(dir,"snapshot.json.wal");os.Remove(wal);os.Mkdir(wal,0700)
+ handleSetPixel(h,"failure",ClientMsg{X:3,Y:3,Color:"#ff0000"})
+ t.Logf("after WAL failure: stopping=%v version=%d",h.stopping,h.Store.Version())
+ os.Remove(wal)
+ if err:=h.Save();err!=nil{t.Fatal(err)}
+ handleSetPixel(h,"failure2",ClientMsg{X:4,Y:4,Color:"#00ff00"})
+ t.Logf("storage repaired + Save success: stopping=%v version=%d",h.stopping,h.Store.Version())
+}
+
+func BenchmarkAuditEmptyDeltaFullRing(b *testing.B) {
+ s:=NewPixelStore();for i:=0;i<MaxEvents;i++ {s.Set("0:0",0,0,"#ff0000")}
+ b.ReportAllocs();b.ResetTimer();for i:=0;i<b.N;i++{s.GetSince(MaxEvents)}
+}
+
+func BenchmarkAuditFullSnapshot(b *testing.B) {
+ s:=NewPixelStore();for y:=0;y<GridSize;y++{for x:=0;x<GridSize;x++{s.Set(fmt.Sprintf("%d:%d",x,y),x,y,"#ff0000")}}
+ b.ReportAllocs();b.ResetTimer();for i:=0;i<b.N;i++ {pixels,v:=s.Snapshot();json.Marshal(ServerResponse{Type:"init",Pixels:pixels,Version:v})}
+}
+
+func BenchmarkAuditFullSave(b *testing.B) {
+ h,err:=OpenHub(b.TempDir());if err!=nil{b.Fatal(err)};for y:=0;y<GridSize;y++{for x:=0;x<GridSize;x++{h.Store.Set(fmt.Sprintf("%d:%d",x,y),x,y,"#ff0000")}}
+ b.ReportAllocs();b.ResetTimer();for i:=0;i<b.N;i++{if err:=h.Save();err!=nil{b.Fatal(err)}}
+}

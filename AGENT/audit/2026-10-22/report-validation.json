@@ -1,0 +1,46 @@
+{
+  "errors": [],
+  "structure": {
+    "cards": 31,
+    "high": 8,
+    "medium": 14,
+    "low": 9,
+    "duplicateIds": [],
+    "brokenFragments": [],
+    "localLinks": [
+      "audit/2026-10-22/desktop.png",
+      "audit/2026-10-22/mobile.png",
+      "audit/2026-10-22/mobile-landscape.png",
+      "audit/2026-10-22/README.md",
+      "audit/2026-10-22/browser-results.json",
+      "audit/2026-10-22/extra-results.json",
+      "audit/2026-10-22/protocol-results.json",
+      "audit/2026-10-22/backend-results.txt",
+      "audit/2026-10-22/reproduce_test.go.txt",
+      "audit/2026-10-22/npm-audit.json",
+      "audit/2026-10-22/govulncheck-retry.txt"
+    ],
+    "images": [
+      {
+        "src": "audit/2026-10-22/desktop.png",
+        "loaded": true
+      },
+      {
+        "src": "audit/2026-10-22/mobile.png",
+        "loaded": true
+      },
+      {
+        "src": "audit/2026-10-22/mobile-landscape.png",
+        "loaded": true
+      }
+    ]
+  },
+  "filteredHigh": 8,
+  "filteredSearch": 1,
+  "reset": 31,
+  "axe": [],
+  "mobile": {
+    "viewport": 390,
+    "documentWidth": 390
+  }
+}
