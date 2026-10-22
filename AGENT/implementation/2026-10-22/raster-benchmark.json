@@ -1,0 +1,137 @@
+{
+  "errors": [],
+  "axe": [],
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "buttons": [
+        {
+          "label": "Red",
+          "visible": true
+        },
+        {
+          "label": "Green",
+          "visible": true
+        },
+        {
+          "label": "Blue",
+          "visible": true
+        },
+        {
+          "label": "Yellow",
+          "visible": true
+        },
+        {
+          "label": "Black",
+          "visible": true
+        },
+        {
+          "label": "White",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "documentWidth": 844,
+      "buttons": [
+        {
+          "label": "Red",
+          "visible": true
+        },
+        {
+          "label": "Green",
+          "visible": true
+        },
+        {
+          "label": "Blue",
+          "visible": true
+        },
+        {
+          "label": "Yellow",
+          "visible": true
+        },
+        {
+          "label": "Black",
+          "visible": true
+        },
+        {
+          "label": "White",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "documentWidth": 320,
+      "buttons": [
+        {
+          "label": "Red",
+          "visible": true
+        },
+        {
+          "label": "Green",
+          "visible": true
+        },
+        {
+          "label": "Blue",
+          "visible": true
+        },
+        {
+          "label": "Yellow",
+          "visible": true
+        },
+        {
+          "label": "Black",
+          "visible": true
+        },
+        {
+          "label": "White",
+          "visible": true
+        }
+      ]
+    }
+  ],
+  "render": [
+    {
+      "count": 10000,
+      "samples": [
+        0.2999999998137355,
+        0,
+        0.10000000055879354,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "count": 100000,
+      "samples": [
+        0.7999999998137355,
+        0,
+        0,
+        0,
+        0,
+        0.10000000055879354,
+        0
+      ]
+    },
+    {
+      "count": 262144,
+      "samples": [
+        1.2000000001862645,
+        0.09999999962747097,
+        0,
+        0,
+        0.09999999962747097,
+        0,
+        0
+      ]
+    }
+  ]
+}

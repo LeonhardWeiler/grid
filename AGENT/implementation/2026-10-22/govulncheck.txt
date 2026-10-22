@@ -1,0 +1,2 @@
+error (ignored): SQLite database '/home/leo/.cache/nix/eval-cache-v6/ef56fac4253f1118429090ec5d7054583f356372798c7e43fd19ee07e85f7a7e.sqlite' is busy
+No vulnerabilities found.

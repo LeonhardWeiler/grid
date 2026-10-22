@@ -21,7 +21,7 @@ nix build -L                    # frontend tests/typecheck; Go vet and race test
 nix develop -c npm run test:browser  # isolated production server + Chromium/axe
 nix develop -c go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
 nix develop -c npm audit
-nix run nixpkgs#gitleaks -- git --redact --config .gitleaks.toml
+nix develop -c gitleaks git --redact --config .gitleaks.toml
 ```
 
 Browser tests use temporary state and never write to production. They cover real

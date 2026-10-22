@@ -1,0 +1,12 @@
+warning: Git tree '/home/leo/files/repos/grid' is dirty
+building '/nix/store/p5yhxsvvwfd7f9dj3l103wracq5v8q5d-nix-shell-env.drv'...
+
+    ○
+    │╲
+    │ ○
+    ○ ░
+    ░    gitleaks
+
+9:56PM INF 155 commits scanned.
+9:56PM INF scanned ~1378865 bytes (1.38 MB) in 1.13s
+9:56PM INF no leaks found

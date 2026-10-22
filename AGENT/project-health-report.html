@@ -354,17 +354,9 @@
           laufender Produktionsserver
         </p>
         <h1>
-          Grid: stabiler Kern, offene Grenzen bei Missbrauch, Fehlererkennung
-          und Bedienbarkeit
+          Grid: Umsetzung und Prüfung aller 31 Auditpunkte
         </h1>
-        <p class="lead">
-          Die kleine Go-/TypeScript-Architektur passt zum Produkt. Crash-sichere
-          Persistenz, geordnete Updates, Reconnect und reproduzierbare Builds
-          sind deutlich verbessert. Vor größerer öffentlicher Nutzung sollten
-          insbesondere die veraltete Go-Toolchain, umgehbare Schreibbudgets,
-          stille Speicherfehler und die Bedienung auf Touch- und
-          Assistenzgeräten behoben werden.
-        </p>
+        <p class="lead">Alle 31 Auditpunkte sind mit gezielten Änderungen umgesetzt. Dieser Report verbindet jeden ursprünglichen Befund mit seiner Korrektur, Tests und den abschließenden Betriebsnachweisen.</p>
         <p class="meta">
           Basis: <code>main @ 0e38543cfacf934385717e551a03dda497aeea68</code> ·
           Arbeitsbaum zu Beginn sauber · Live:
@@ -389,7 +381,7 @@
         Datenverluste wurden nachgewiesen.
       </p>
       <nav aria-label="Berichtsinhalt" class="panel">
-        <strong>Inhalt</strong>
+        <strong>Inhalt</strong><p><a href="#implementation">Aktuelle Umsetzung, Commits und Abnahme</a></p>
         <ul>
           <li><a href="#scope">1. Umfang und Prüfgrenzen</a></li>
           <li><a href="#architecture">2. Architektur und Stärken</a></li>
@@ -402,6 +394,27 @@
           <li><a href="#evidence">9. Nachweise und Reproduktion</a></li>
         </ul>
       </nav>
+
+      
+      <section id="implementation" class="panel">
+        <h2>Umsetzung aller 31 Auditpunkte</h2>
+        <p>Die folgende Tabelle beschreibt den implementierten Stand. Der ursprüngliche Audit darunter bleibt als nachvollziehbarer Ausgangsbefund erhalten. Seine Versions-, Prioritäts- und Messangaben beziehen sich auf den damaligen Stand, nicht auf die neue Auslieferung.</p>
+        <p id="release-state"><strong>Stand: Implementiert und lokal geprüft; abschließende Server-/NAS-Auslieferung und Restore-Prüfung laufen noch.</strong></p>
+        <p>Absichtlich beibehalten: ein einzelner Go-Prozess, JSON/WAL, ein begrenztes Canvas und frameworkfreies TypeScript. Kein Cluster, keine Datenbank, kein Binärprotokoll und keine Account-Infrastruktur wurden für diese Befunde benötigt.</p>
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>Umsetzung und Nachweis</th><th>Commits je Punkt</th></tr></thead><tbody><tr><th><a href="#SEC-01">SEC-01</a></th><td>Go 1.27.3 und aktuelle gepinnte Nix-Basis; govulncheck ohne Treffer; täglicher CI-Scan.</td><td>Grid: a55307d; Grid: c1ed041</td></tr><tr><th><a href="#SEC-02">SEC-02</a></th><td>Persistiertes Netzwerkbudget (IPv6 /64), globale Schreibgrenze und unveränderte Browserwartezeit. ID-Wechsel-/Restart-Test.</td><td>Grid: cb7f8b2</td></tr><tr><th><a href="#SEC-03">SEC-03</a></th><td>Verbindungs-, Handshake-, Nachrichten-, Sync- und Bytebudgets; langsame Clients werden entfernt. Isolierter Sync-Flood-/Queue-Test.</td><td>Grid: 56d89e7</td></tr><tr><th><a href="#SEC-04">SEC-04</a></th><td>Vite-/TypeScript-/PostCSS-Abhängigkeiten aktualisiert; Node-Workflow konsolidiert; npm audit ohne Treffer.</td><td>Grid: 1aab42e</td></tr><tr><th><a href="#SEC-05">SEC-05</a></th><td>CSP, Frame-/Referrer-/MIME-/Permissions-Schutz für alle App-Antworten, HSTS in nginx; kein Directory Listing; immutable Hash-Assets.</td><td>Grid: e1ca2d7; Serverkonfiguration: 32297cf</td></tr><tr><th><a href="#SEC-06">SEC-06</a></th><td>systemd ohne Capabilities, mit Kernel-/Geräte-/Prozess-/Namespace-Schutz und ausschließlich Loopback-Netzwerk für die App.</td><td>Serverkonfiguration: ebd211d</td></tr><tr><th><a href="#SEC-07">SEC-07</a></th><td>Actions auf Commit-IDs, GitLab-Image auf Digest gepinnt; minimale CI-Rechte, Dependabot und tägliche Sicherheitsprüfungen. Zwei historische Testschlüssel nur per exaktem Scanner-Fingerprint ausgenommen.</td><td>Grid: 491daee; Grid: 5af45e3; Grid: 92673a8; Grid: 5b80343</td></tr><tr><th><a href="#REL-01">REL-01</a></th><td>Speicherfehler machen Readiness rot und lösen begrenzten Neustart aus. WAL bleibt erhalten. Fehler-/Reparatur-/Recovery- und sauberer WS-Shutdown-Test.</td><td>Grid: 14dbabe; Grid: 951c009</td></tr><tr><th><a href="#REL-02">REL-02</a></th><td>Semantische Snapshotvalidierung mit Pflichtfeldern, Schema, Koordinaten, Palette und Version; alte gültige Snapshots bleiben lesbar.</td><td>Grid: 5c9ab97</td></tr><tr><th><a href="#REL-03">REL-03</a></th><td>Korrelierte accepted/rejected-Antworten, zehn Sekunden Timeout, keine automatische Wiederholung ungewisser Writes. Neue und abgelehnte Auswahl bleibt erhalten.</td><td>Grid: d99f522; Grid: 3df5c6e</td></tr><tr><th><a href="#REL-04">REL-04</a></th><td>Genau eine Recovery in Arbeit, expliziter syncing-Zustand und atomare Prüfung zusammenhängender Deltas; Burst-/Gap-/Fehler-E2E.</td><td>Grid: 3b02479</td></tr><tr><th><a href="#REL-05">REL-05</a></th><td>Abgefangene Storage-Fehler, flüchtige Ersatz-ID und Reparatur ungültiger IDs. Unit- und Browserprüfungen.</td><td>Grid: a51fede</td></tr><tr><th><a href="#REL-06">REL-06</a></th><td>Pflichtfelder werden vor dem Dekodieren geprüft; fehlende/null-Koordinaten werden abgelehnt; gültige Nullkoordinaten bleiben erlaubt.</td><td>Grid: df4bd73</td></tr><tr><th><a href="#PERF-01">PERF-01</a></th><td>Inkrementelles 512²-Raster statt vollständigem Map-Parsen pro Frame; Canvas und Übersicht nutzen dasselbe Raster. Lokaler Vollcanvas-Benchmark.</td><td>Grid: 7e83503</td></tr><tr><th><a href="#PERF-02">PERF-02</a></th><td>Direkter Ringzugriff auf fehlende Events. Leerer aktueller Delta: 0 Byte, 0 Allokationen; Grenzfälle getestet.</td><td>Grid: 32fa4df</td></tr><tr><th><a href="#PERF-03">PERF-03</a></th><td>Snapshot-JSON je Version gecacht; Checkpoint-Encoder außerhalb des Zustandslocks; WAL behält neuere Writes. Unveränderte Saves ohne Disk-IO; Dense-State-Latenztest: bei 80 Writes während Init/Checkpoint p95 7,4 ms und p99 320 ms auf der lokalen Referenzmaschine.</td><td>Grid: 450c444</td></tr><tr><th><a href="#PERF-04">PERF-04</a></th><td>Frames nur bei Änderungen/Animation, Countdown nur solange nötig; versteckte Tabs ruhen. Browserprüfung zeigt keine wiederholten RAF-Anforderungen im Idle.</td><td>Grid: 72ac777</td></tr><tr><th><a href="#UX-01">UX-01</a></th><td>Pointer Capture, Einfinger-Pan und verankerter Zweifinger-Pinch; automatisierte Touch-Prüfung mit separatem bewussten Place-Schritt.</td><td>Grid: 2900adb</td></tr><tr><th><a href="#UX-02">UX-02</a></th><td>Umlaufende, scrollbar erreichbare Bedienelemente, mindestens 44px Farbfelder und umbrochene Koordinatenfelder; vier Größen und 200% Text geprüft.</td><td>Grid: f1c6f42</td></tr><tr><th><a href="#UX-03">UX-03</a></th><td>Sichtbare Zoom-/Reset-/Help-Steuerung, verständlicher Einstieg, Anfangsansicht mit sinnvoller Canvasübersicht, Farbnamen und Auswahlvorschau.</td><td>Grid: 1393854</td></tr><tr><th><a href="#UX-04">UX-04</a></th><td>CSS-Koordinaten getrennt von DPR-Backingstores; DPR 1/2/3 geprüft. Die Übersicht zeichnet alle Pixel unabhängig von Einfügereihenfolge.</td><td>Grid: 6b74a72</td></tr><tr><th><a href="#UX-05">UX-05</a></th><td>Drag-Schwelle misst Gesamtbewegung statt einzelner Event-Deltas; Slow-Drag-/Tap-Regression.</td><td>Grid: 18003c9</td></tr><tr><th><a href="#A11Y-01">A11Y-01</a></th><td>Semantische Bereiche, benannte native Buttons, Tastatur-/Koordinatenworkflow, Fokus und Live-Status. Axe in vier Layouts ohne Verstöße.</td><td>Grid: 63dbff1</td></tr><tr><th><a href="#OPS-01">OPS-01</a></th><td>Stündlicher konsistenter Export nur der Zeichnung zum unabhängigen NAS. Eigener Upload-Schlüssel ohne Lesen/Löschen/Überschreiben, gepinnter Hostschlüssel, Frischeprüfung und NAS-Retention.</td><td>Serverkonfiguration: 57fd045; NAS: aba24b0; NAS: b822495</td></tr><tr><th><a href="#OPS-02">OPS-02</a></th><td>Nginx worker_processes auto und 2048 Verbindungen je Worker statt Standardgrenze. App selbst bleibt auf 256 WS-Verbindungen begrenzt.</td><td>Serverkonfiguration: 4599156; Serverkonfiguration: e1645a9</td></tr><tr><th><a href="#OPS-03">OPS-03</a></th><td>GitHub übergibt exakt die geprüfte SHA; Server-Deployment aktualisiert gezielt nur Grid. Beide Pipelines warten auf gleiche Live-Revisionsanzeige und HTTP-/WS-Probe.</td><td>Grid: 98d2522; Serverkonfiguration: 940e3a6</td></tr><tr><th><a href="#OPS-04">OPS-04</a></th><td>Private Readiness/Metriken/Backup, öffentliche Revision und eigenständige read-only Probe. NAS überwacht unabhängig alle zwei Minuten über HTTP und WS; vorhandener Alarmkanal wird genutzt.</td><td>Grid: 7a6331a</td></tr><tr><th><a href="#QA-01">QA-01</a></th><td>Dauerhafte Produktionsbrowser-/Axe-Suite sowie Go-Race-, Shutdown-, Disk-Fehler-, Queue-, Rate-, Recovery- und Vollcanvas-Tests; Gates vor Deployment.</td><td>Grid: d7aa952</td></tr><tr><th><a href="#PRIV-01">PRIV-01</a></th><td>Privacy-Dialog und lokaler ID-Reset. Zugriffslogs ohne IP/URL/User-Agent; tägliche Rotation mit 14 Archiven und 14 Tage Journalretention. NAS-Exports ohne Identitätsdaten.</td><td>Grid: 3a085dd; Grid: f910c58; Serverkonfiguration: eeb1bfc</td></tr><tr><th><a href="#ARCH-01">ARCH-01</a></th><td>Eine JSON-Quelle für Palette/Grid/Protokoll, diskriminierte TS-Nachrichten, gemeinsamer Pixeltyp, entkoppeltes Modell, private Hub-Persistenz und dokumentierte Lockreihenfolge. Prozesssperre verhindert parallele Journalbesitzer.</td><td>Grid: 1815c08; Grid: a4c4a5d; Grid: 7dd6cc4</td></tr><tr><th><a href="#DOC-01">DOC-01</a></th><td>README, Contributor Guide und Protokollvertrag aktualisiert; widersprüchliche Altplanungen durch eindeutige Statusverweise ersetzt. Nicht vorhandener package-module-Eintrag entfernt.</td><td>Grid: 66d4d33</td></tr></tbody></table></div>
+        <h3>Neue Prüfung und Leistungswerte</h3>
+        <ul>
+          <li>Go vet und Race-Tests erfolgreich; einschließlich Disk-Fehler und Reparatur, WAL-Recovery, parallelen Checkpoints, Shutdown, Queue-Grenzen und Sync-Flood.</li>
+          <li>14 Node-Tests und TypeScript strict erfolgreich. Produktionsbrowser-Suite prüft echte HTTP-/WebSocket-Kommunikation, ACKs, Reconnect/Offline, Gaps, Storage, Tastatur, Touch, DPR und Layout. Axe meldet in vier Größen keine Verstöße.</li>
+          <li>govulncheck mit Go 1.27.3: keine bekannten Schwachstellen. npm audit: keine Treffer. Gitleaks über die gesamte Historie: keine neuen Secrets; zwei entfernte Phoenix-Entwicklungs-/Testdefaults sind exakt ausgenommen.</li>
+          <li>Lokaler Backend-Benchmark: aktueller leerer Delta ca. 18 ns, 0 B/op, 0 Allokationen. Vollcanvas-Snapshot ca. 88–101 ms und acht bis neun Allokationen statt Einzelallokationen pro Pixel. Referenz: Ryzen 7 6800H; keine Produktionslastmessung.</li>
+          <li>Inkrementelles Vollcanvas-Raster: direkte Renderaufrufe im lokalen Chromium im Bereich von 0–1,2 ms statt wiederholtem Vollmap-Parsen. Dies ist CPU-Aufrufzeit, keine Zusage über GPU- oder Geräte-Framezeiten.</li>
+        </ul>
+        <p>Rohdaten und Reproduktion: <a href="implementation/2026-10-22/README.md">Umsetzungsnachweise</a>, <a href="../README.md">Betrieb und Restore</a>, <a href="protocol.md">Protokoll und Locks</a>.</p>
+        <h3>Verbleibende Prüfgrenzen</h3>
+        <p>Keine physische iOS-/Android-Hardware und kein interaktiver Screenreader stehen hier zur Verfügung. Touch wird mit Chromium-Touchereignissen, Barrierefreiheit mit Tastatur, Accessibility-Semantik und Axe geprüft. Es gab keinen destruktiven Last- oder Diskfehler-Test auf Produktion. Die 256-Client-Grenze ist eine Schutzgrenze, kein nachgewiesenes SLA; verteilten Missbrauch kann ein Dienst ohne Accounts nicht vollständig verhindern. Der NAS-Backupzyklus hat nominell eine Stunde RPO; Daten seit dem letzten erfolgreichen Upload können bei vollständigem Serververlust fehlen.</p>
+        <div id="live-evidence"><p>Live-Nachweise werden nach dem Deployment ergänzt.</p></div>
+      </section>
 
       <section id="scope">
         <h2>1. Umfang und Prüfgrenzen</h2>
@@ -1006,7 +1019,7 @@
       </section>
 
       <section id="findings">
-        <h2>5. Offene Findings</h2>
+        <h2>5. Ursprüngliche Findings und heutige Umsetzung</h2>
         <p>
           Die 31 Einträge sind nach Priorität gruppiert. Jede Empfehlung enthält
           ein überprüfbares Ziel. Kostenlose Optionen, Produktentscheidungen und
@@ -1246,7 +1259,7 @@
           <h3>
             Das ausgelieferte Binary enthält eine veraltete
             Go-Standardbibliothek
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Go 1.27.3 und aktuelle gepinnte Nix-Basis; govulncheck ohne Treffer; täglicher CI-Scan. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             flake.lock (nixpkgs); flake.nix:26; main.go:29;
             Produktions-ExecStart
@@ -1304,7 +1317,7 @@
           <h3>
             Der Cooldown schützt eine frei wählbare ID und lässt sich durch neue
             Verbindungen umgehen
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Persistiertes Netzwerkbudget (IPv6 /64), globale Schreibgrenze und unveränderte Browserwartezeit. ID-Wechsel-/Restart-Test. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             internal/ws.go:55,107; internal/hub.go:165,198;
             frontend/src/main.ts:13
@@ -1358,7 +1371,7 @@
           </div>
           <h3>
             Keine Budgets für WebSocket-Verbindungen und teure Sync-Anfragen
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Verbindungs-, Handshake-, Nachrichten-, Sync- und Bytebudgets; langsame Clients werden entfernt. Isolierter Sync-Flood-/Queue-Test. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             internal/ws.go:31,85; internal/hub.go:65; Produktions-nginx:
             location /
@@ -1413,7 +1426,7 @@
           <h3>
             Ein einzelner Speicherfehler legt Schreiben dauerhaft still, während
             Health und UI Erfolg suggerieren
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Speicherfehler machen Readiness rot und lösen begrenzten Neustart aus. WAL bleibt erhalten. Fehler-/Reparatur-/Recovery- und sauberer WS-Shutdown-Test. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             internal/ws.go:122; main.go:35; internal/autosave.go:17;
             frontend/src/main.ts:67
@@ -1470,7 +1483,7 @@
           <h3>
             Unabhängige Backups und ein getesteter Restore sind nicht
             nachgewiesen
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Stündlicher konsistenter Export nur der Zeichnung zum unabhängigen NAS. Eigener Upload-Schlüssel ohne Lesen/Löschen/Überschreiben, gepinnter Hostschlüssel, Frischeprüfung und NAS-Retention. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             README.md: Persistence and recovery;
             waentw/server-config/configuration.nix; Live-Timer und Units
@@ -1524,7 +1537,7 @@
           <h3>
             Die Canvas wird bei realistischer Vollbelegung unbenutzbar langsam
             neu gezeichnet
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Inkrementelles 512²-Raster statt vollständigem Map-Parsen pro Frame; Canvas und Übersicht nutzen dasselbe Raster. Lokaler Vollcanvas-Benchmark. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/render/pixels.ts:6; render/minimap.ts:17;
             render/render.ts:16; camera/controls.ts:32
@@ -1579,7 +1592,7 @@
             <span class="badge hoch">hoch</span
             ><span>UX-01 · UI/UX · Bestätigt</span>
           </div>
-          <h3>Die Kernnavigation funktioniert auf Touch-Geräten nicht</h3>
+          <h3>Die Kernnavigation funktioniert auf Touch-Geräten nicht</h3><p class="note"><strong>Umgesetzt:</strong> Pointer Capture, Einfinger-Pan und verankerter Zweifinger-Pinch; automatisierte Touch-Prüfung mit separatem bewussten Place-Schritt. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/camera/controls.ts:24; frontend/index.html:5;
             frontend/style.css
@@ -1628,7 +1641,7 @@
           <h3>
             Die Kernfunktion ist für Tastatur- und Screenreader-Nutzer nicht
             zugänglich
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Semantische Bereiche, benannte native Buttons, Tastatur-/Koordinatenworkflow, Fokus und Live-Status. Axe in vier Layouts ohne Verstöße. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/index.html:2,14,18; frontend/src/main.ts:25,77;
             ui/palette.ts:18; camera/controls.ts:67
@@ -1681,7 +1694,7 @@
             <span class="badge mittel">mittel</span
             ><span>SEC-04 · Sicherheit · Bestätigt</span>
           </div>
-          <h3>Der Frontend-Build verwendet Pakete mit bekannten Advisories</h3>
+          <h3>Der Frontend-Build verwendet Pakete mit bekannten Advisories</h3><p class="note"><strong>Umgesetzt:</strong> Vite-/TypeScript-/PostCSS-Abhängigkeiten aktualisiert; Node-Workflow konsolidiert; npm audit ohne Treffer. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">package-lock.json; package.json; flake.nix:10</p>
           <dl>
             <dt>Befund und Nachweis</dt>
@@ -1737,7 +1750,7 @@
             <span class="badge mittel">mittel</span
             ><span>SEC-05 · Sicherheit · Bestätigt</span>
           </div>
-          <h3>Browser-Schutzheader fehlen für die Grid-Domain</h3>
+          <h3>Browser-Schutzheader fehlen für die Grid-Domain</h3><p class="note"><strong>Umgesetzt:</strong> CSP, Frame-/Referrer-/MIME-/Permissions-Schutz für alle App-Antworten, HSTS in nginx; kein Directory Listing; immutable Hash-Assets. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             main.go:30; waentw/server-config/configuration.nix: grid
             virtualHost; Live-HTTP-Header
@@ -1787,7 +1800,7 @@
             <span class="badge mittel">mittel</span
             ><span>REL-02 · Zuverlässigkeit · Bestätigt</span>
           </div>
-          <h3>Snapshots werden syntaktisch, aber nicht inhaltlich validiert</h3>
+          <h3>Snapshots werden syntaktisch, aber nicht inhaltlich validiert</h3><p class="note"><strong>Umgesetzt:</strong> Semantische Snapshotvalidierung mit Pflichtfeldern, Schema, Koordinaten, Palette und Version; alte gültige Snapshots bleiben lesbar. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             internal/persistence.go:94; internal/store.go:110
           </p>
@@ -1838,7 +1851,7 @@
           </div>
           <h3>
             Pixelbestätigung hat keinen nachvollziehbaren Pending-/Fehlerzustand
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Korrelierte accepted/rejected-Antworten, zehn Sekunden Timeout, keine automatische Wiederholung ungewisser Writes. Neue und abgelehnte Auswahl bleibt erhalten. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/main.ts:55; frontend/src/ws.ts:127; internal/ws.go:107
           </p>
@@ -1893,7 +1906,7 @@
           <h3>
             Gap-Recovery bleibt als „connected“ bedienbar und kann redundante
             Syncs erzeugen
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Genau eine Recovery in Arbeit, expliziter syncing-Zustand und atomare Prüfung zusammenhängender Deltas; Burst-/Gap-/Fehler-E2E. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/ws.ts:69,77; frontend/src/state.ts:13
           </p>
@@ -1946,7 +1959,7 @@
           <h3>
             Browserspeicher ist ein ungeprüfter Start- und
             Verbindungsfehlerpunkt
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Abgefangene Storage-Fehler, flüchtige Ersatz-ID und Reparatur ungültiger IDs. Unit- und Browserprüfungen. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/main.ts:13; frontend/src/ws.ts:50,95
           </p>
@@ -1996,7 +2009,7 @@
           <h3>
             Auch ein leeres Delta reserviert den gesamten Eventring und scannt
             ihn vollständig
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Direkter Ringzugriff auf fehlende Events. Leerer aktueller Delta: 0 Byte, 0 Allokationen; Grenzfälle getestet. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">internal/store.go:64; frontend/src/ws.ts:120</p>
           <dl>
             <dt>Befund und Nachweis</dt>
@@ -2046,7 +2059,7 @@
           <h3>
             Snapshot-Kodierung und Datenträgerzugriffe blockieren den globalen
             Zustandslock
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Snapshot-JSON je Version gecacht; Checkpoint-Encoder außerhalb des Zustandslocks; WAL behält neuere Writes. Unveränderte Saves ohne Disk-IO; Dense-State-Latenztest: bei 80 Writes während Init/Checkpoint p95 7,4 ms und p99 320 ms auf der lokalen Referenzmaschine. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             internal/ws.go:63,90,111; internal/autosave.go:11;
             internal/persistence.go:33,51
@@ -2099,7 +2112,7 @@
           <h3>
             nginx verwendet nur einen Worker mit dem Default von 512
             Verbindungen
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Nginx worker_processes auto und 2048 Verbindungen je Worker statt Standardgrenze. App selbst bleibt auf 256 WS-Verbindungen begrenzt. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             Aktive nginx.conf: events {}; Live-Prozessliste; waentw
             nginx-Konfiguration
@@ -2157,7 +2170,7 @@
           <h3>
             Deployment ist nicht an den geprüften Commit gebunden und wird nicht
             bis zur Bereitschaft verifiziert
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> GitHub übergibt exakt die geprüfte SHA; Server-Deployment aktualisiert gezielt nur Grid. Beide Pipelines warten auf gleiche Live-Revisionsanzeige und HTTP-/WS-Probe. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             .github/workflows/deploy.yml:19,24; waentw/flake.nix:79;
             waentw/.gitlab-ci.yml
@@ -2213,7 +2226,7 @@
           </div>
           <h3>
             Grüne Gates lassen wichtige Lebenszyklus- und Fehlerpfade ungetestet
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Dauerhafte Produktionsbrowser-/Axe-Suite sowie Go-Race-, Shutdown-, Disk-Fehler-, Queue-, Rate-, Recovery- und Vollcanvas-Tests; Gates vor Deployment. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             internal/reliability_test.go; frontend/src/camera/bounds.test.ts;
             frontend/src/ui/cooldown.test.ts; main.go
@@ -2265,7 +2278,7 @@
           </div>
           <h3>
             Die feste Minimap verdeckt im Querformat fünf von sechs Farben
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Umlaufende, scrollbar erreichbare Bedienelemente, mindestens 44px Farbfelder und umbrochene Koordinatenfelder; vier Größen und 200% Text geprüft. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/style.css: #palette, #minimap, #cooldown
           </p>
@@ -2312,7 +2325,7 @@
             <span class="badge mittel">mittel</span
             ><span>UX-03 · UI/UX · Bestätigt</span>
           </div>
-          <h3>Erste Nutzung und Navigation sind kaum selbsterklärend</h3>
+          <h3>Erste Nutzung und Navigation sind kaum selbsterklärend</h3><p class="note"><strong>Umgesetzt:</strong> Sichtbare Zoom-/Reset-/Help-Steuerung, verständlicher Einstieg, Anfangsansicht mit sinnvoller Canvasübersicht, Farbnamen und Auswahlvorschau. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/index.html; frontend/src/camera/camera.ts:23,32;
             main.ts:25; render/minimap.ts
@@ -2365,7 +2378,7 @@
           <h3>
             Zugriffslogs werden bis zu 26 Wochen aufbewahrt, ohne sichtbare
             Dateninformation
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Privacy-Dialog und lokaler ID-Reset. Zugriffslogs ohne IP/URL/User-Agent; tägliche Rotation mit 14 Archiven und 14 Tage Journalretention. NAS-Exports ohne Identitätsdaten. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             Aktive logrotate.conf: nginx rotate 26, weekly; frontend/index.html;
             main.ts:13; persistence.go:19
@@ -2420,7 +2433,7 @@
           <h3>
             Die systemd-Sandbox lässt zusätzliche, für Grid unnötige
             Rechteklassen offen
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> systemd ohne Capabilities, mit Kernel-/Geräte-/Prozess-/Namespace-Schutz und ausschließlich Loopback-Netzwerk für die App. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">grid.service; systemd-analyze security grid</p>
           <dl>
             <dt>Befund und Nachweis</dt>
@@ -2467,7 +2480,7 @@
           </div>
           <h3>
             CI-Abhängigkeiten sind teils nur über veränderbare Tags gebunden
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Actions auf Commit-IDs, GitLab-Image auf Digest gepinnt; minimale CI-Rechte, Dependabot und tägliche Sicherheitsprüfungen. Zwei historische Testschlüssel nur per exaktem Scanner-Fingerprint ausgenommen. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             .github/workflows/deploy.yml:17; .gitlab-ci.yml:4; package.json:7
           </p>
@@ -2516,7 +2529,7 @@
           <h3>
             Fehlende Pflichtkoordinaten werden als gültiger Pixel bei 0:0
             interpretiert
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Pflichtfelder werden vor dem Dekodieren geprüft; fehlende/null-Koordinaten werden abgelehnt; gültige Nullkoordinaten bleiben erlaubt. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">internal/ws.go:13,51,107</p>
           <dl>
             <dt>Befund und Nachweis</dt>
@@ -2564,7 +2577,7 @@
           <h3>
             Im Leerlauf werden die UI-Texte unnötig in jedem Animationframe neu
             geschrieben
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Frames nur bei Änderungen/Animation, Countdown nur solange nötig; versteckte Tabs ruhen. Browserprüfung zeigt keine wiederholten RAF-Anforderungen im Idle. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/main.ts:90; ui/button.ts:6; ui/connection.ts:4
           </p>
@@ -2613,7 +2626,7 @@
           </div>
           <h3>
             Canvas und Minimap berücksichtigen die Pixeldichte nicht konsistent
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> CSS-Koordinaten getrennt von DPR-Backingstores; DPR 1/2/3 geprüft. Die Übersicht zeichnet alle Pixel unabhängig von Einfügereihenfolge. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/dom.ts:13; camera/controls.ts:86; render/minimap.ts:5;
             frontend/style.css: #minimap
@@ -2660,7 +2673,7 @@
             <span class="badge niedrig">niedrig</span
             ><span>UX-05 · UI/UX · Codebefund</span>
           </div>
-          <h3>Langsame Drags können als Klicks auf die Canvas durchrutschen</h3>
+          <h3>Langsame Drags können als Klicks auf die Canvas durchrutschen</h3><p class="note"><strong>Umgesetzt:</strong> Drag-Schwelle misst Gesamtbewegung statt einzelner Event-Deltas; Slow-Drag-/Tap-Regression. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             frontend/src/camera/controls.ts:32; frontend/src/main.ts:25
           </p>
@@ -2708,7 +2721,7 @@
           <h3>
             Protokoll und Invarianten sind über mehrere Module und Sprachen
             verteilt
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Eine JSON-Quelle für Palette/Grid/Protokoll, diskriminierte TS-Nachrichten, gemeinsamer Pixeltyp, entkoppeltes Modell, private Hub-Persistenz und dokumentierte Lockreihenfolge. Prozesssperre verhindert parallele Journalbesitzer. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             internal/config.go; internal/ws.go; internal/store.go:34;
             frontend/src/ws.ts:5; camera/camera.ts:4; frontend/index.html
@@ -2760,7 +2773,7 @@
             <span class="badge niedrig">niedrig</span
             ><span>DOC-01 · Dokumentation · Bestätigt</span>
           </div>
-          <h3>Mehrere Planungsdateien widersprechen dem heutigen Code</h3>
+          <h3>Mehrere Planungsdateien widersprechen dem heutigen Code</h3><p class="note"><strong>Umgesetzt:</strong> README, Contributor Guide und Protokollvertrag aktualisiert; widersprüchliche Altplanungen durch eindeutige Statusverweise ersetzt. Nicht vorhandener package-module-Eintrag entfernt. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             AGENT/TODO.md; AGENT/Roadmap.md; AGENT/TMP-TODO.md; CLAUDE.md;
             README.md
@@ -2813,7 +2826,7 @@
           </div>
           <h3>
             Betriebliche Messgrößen und Zuständigkeiten sind kaum sichtbar
-          </h3>
+          </h3><p class="note"><strong>Umgesetzt:</strong> Private Readiness/Metriken/Backup, öffentliche Revision und eigenständige read-only Probe. NAS überwacht unabhängig alle zwei Minuten über HTTP und WS; vorhandener Alarmkanal wird genutzt. <a href="#implementation">Nachweise und Abnahme</a>.</p>
           <p class="location">
             main.go:35; internal/ws.go; waentw notify-failure@; README.md
           </p>

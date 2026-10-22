@@ -1,0 +1,16 @@
+warning: Git tree '/home/leo/files/repos/grid' is dirty
+?   	grid	[no test files]
+ok  	grid/internal	5.215s
+=== RUN   TestDenseStateCheckpointWriteLatency
+    load_test.go:120: full canvas + concurrent init/checkpoint: n=80 p50=6.696025ms p95=7.444837ms p99=319.504237ms
+--- PASS: TestDenseStateCheckpointWriteLatency (1.69s)
+PASS
+ok  	grid/internal	1.724s
+goos: linux
+goarch: amd64
+pkg: grid/internal
+cpu: AMD Ryzen 7 6800H with Radeon Graphics         
+BenchmarkDenseSnapshot-16    	      10	 101016656 ns/op	10388966 B/op	       8 allocs/op
+BenchmarkCurrentDelta-16     	64699174	        18.55 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	grid/internal	2.679s

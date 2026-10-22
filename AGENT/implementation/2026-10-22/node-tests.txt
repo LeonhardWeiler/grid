@@ -1,0 +1,27 @@
+warning: Git tree '/home/leo/files/repos/grid' is dirty
+
+> test
+> node --test "frontend/src/**/*.test.ts"
+
+✔ viewport stays inside all grid edges at 390×844 (2.779038ms)
+✔ viewport stays inside all grid edges at 1920×1080 (0.379922ms)
+✔ viewport stays inside all grid edges at 5120×1440 (0.362758ms)
+✔ viewport stays inside all grid edges at 390×3000 (0.333071ms)
+✔ viewport stays inside all grid edges at 50000×5000 (0.300998ms)
+✔ ordinary camera position and zoom are preserved (1.983995ms)
+✔ resizing a zoomed-out view raises the minimum zoom (0.447685ms)
+✔ many tiny pointer movements count as a drag after crossing the total threshold (2.513178ms)
+✔ blocked or unavailable storage keeps the canvas usable (4.197297ms)
+✔ invalid identities are replaced once and valid identities are reused (0.694857ms)
+✔ a gap cannot partially change or advance the local canvas (4.025932ms)
+✔ duplicate and empty deltas do not redraw or roll back the version (0.633768ms)
+✔ countdown expires after the server duration despite device clock differences (5.117764ms)
+✔ reconnect restores the remaining cooldown and expired cooldowns clear it (0.673395ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 284.340523
