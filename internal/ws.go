@@ -20,6 +20,7 @@ type ClientMsg struct {
 }
 
 type ServerResponse struct {
+	Code        string            `json:"code,omitempty"`
 	Protocol    int               `json:"protocol,omitempty"`
 	GridSize    int               `json:"gridSize,omitempty"`
 	End         int64             `json:"end,omitempty"`
@@ -32,6 +33,17 @@ type ServerResponse struct {
 }
 
 func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
+	if !h.Ready() {
+		http.Error(w, "server unavailable", 503)
+		return
+	}
+	source := sourceKey(r)
+	if !h.admit(source, time.Now().UnixMilli()) {
+		w.Header().Set("Retry-After", "1")
+		http.Error(w, "connection budget exceeded", 429)
+		return
+	}
+	defer h.releaseAdmission(source)
 	// coder/websocket always accepts the request's own origin. Local Vite uses
 	// the same-origin dev proxy, so no cross-origin exceptions are required.
 	conn, err := websocket.Accept(w, r, nil)
@@ -51,6 +63,12 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
+		next, retry := advanceBudget(client.messageBudget, time.Now().UnixMilli(), 100, 20)
+		if retry > 0 {
+			conn.Close(websocket.StatusPolicyViolation, "message budget exceeded")
+			return
+		}
+		client.messageBudget = next
 		msg, err := decodeClientMsg(data)
 		if err != nil {
 			conn.Close(websocket.StatusPolicyViolation, "invalid message")
@@ -74,7 +92,10 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			snap, version := h.store.Snapshot()
 			end := h.GetCooldownEnd(msg.ClientID)
 			out, _ := json.Marshal(ServerResponse{Protocol: Protocol.Protocol, GridSize: GridSize, Type: "init", Pixels: snap, Version: version, CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())})
-			trySend(client.send, out)
+			if !h.enqueue(client, out) {
+				h.stateMu.Unlock()
+				return
+			}
 			h.mu.Lock()
 			client.ready = true
 			h.mu.Unlock()
@@ -91,23 +112,41 @@ func HandleWS(h *Hub, w http.ResponseWriter, r *http.Request) {
 			if !ValidVersion(msg.LastVersion) {
 				return
 			}
+			now := time.Now().UnixMilli()
+			if now-client.lastSync < 1000 {
+				h.sendRateLimit(client)
+				continue
+			}
+			client.lastSync = now
 			h.stateMu.Lock()
 			events, ok := h.store.GetSince(msg.LastVersion)
 			end := h.GetCooldownEnd(id)
 			resp := ServerResponse{Type: "sync", Events: events, Version: h.store.Version(), CooldownEnd: end, CooldownMs: max(0, end-time.Now().UnixMilli())}
 			if !ok {
+				next, retry := advanceBudget(h.snapshotBudget, now, 500, 2)
+				if retry > 0 {
+					h.stateMu.Unlock()
+					h.sendRateLimit(client)
+					continue
+				}
+				h.snapshotBudget = next
 				resp.Type = "init"
 				resp.Protocol = Protocol.Protocol
 				resp.GridSize = GridSize
 				resp.Pixels, resp.Version = h.store.Snapshot()
 			}
 			out, _ := json.Marshal(resp)
-			trySend(client.send, out)
+			h.enqueue(client, out)
 			h.stateMu.Unlock()
 		case "set_pixel":
-			handleSetPixel(h, id, sourceKey(r), msg)
+			handleSetPixel(h, id, source, msg)
 		}
 	}
+}
+
+func (h *Hub) sendRateLimit(client *Client) {
+	out, _ := json.Marshal(ServerResponse{Type: "error", Code: "rate_limited", CooldownMs: 1000})
+	h.enqueue(client, out)
 }
 
 func decodeClientMsg(data []byte) (ClientMsg, error) {

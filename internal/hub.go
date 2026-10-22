@@ -12,29 +12,36 @@ import (
 )
 
 type Hub struct {
-	stateMu       sync.Mutex
-	lastWrite     time.Time
-	sourceActions map[string]int64 // guarded by stateMu
-	globalWrite   int64
-	stopping      bool
-	failed        atomic.Bool
-	closing       atomic.Bool
-	failures      chan error
-	mu            sync.RWMutex
-	clients       map[*websocket.Conn]*Client
-	store         *PixelStore
-	lastAction    map[string]int64
-	connToID      map[*websocket.Conn]string
-	idToClients   map[string]map[*Client]struct{}
-	persistence   *Persistence
+	stateMu         sync.Mutex
+	lastWrite       time.Time
+	sourceActions   map[string]int64 // guarded by stateMu
+	globalWrite     int64
+	snapshotBudget  int64
+	admissions      map[string]*admission // guarded by mu
+	openConnections int
+	handshakeBudget int64
+	stopping        bool
+	failed          atomic.Bool
+	closing         atomic.Bool
+	failures        chan error
+	mu              sync.RWMutex
+	clients         map[*websocket.Conn]*Client
+	store           *PixelStore
+	lastAction      map[string]int64
+	connToID        map[*websocket.Conn]string
+	idToClients     map[string]map[*Client]struct{}
+	persistence     *Persistence
 }
 
 type Client struct {
-	ready  bool
-	conn   *websocket.Conn
-	send   chan []byte
-	ctx    context.Context
-	cancel context.CancelFunc
+	queued        atomic.Int64
+	messageBudget int64
+	lastSync      int64
+	ready         bool
+	conn          *websocket.Conn
+	send          chan []byte
+	ctx           context.Context
+	cancel        context.CancelFunc
 }
 
 func NewHub() *Hub {
@@ -67,6 +74,7 @@ func OpenHub(dir string) (*Hub, error) {
 		lastWrite:     time.Now(),
 		sourceActions: state.SourceActions,
 		failures:      make(chan error, 1),
+		admissions:    make(map[string]*admission),
 	}, nil
 }
 
@@ -108,6 +116,7 @@ func (h *Hub) Add(c *websocket.Conn) *Client {
 
 				ctx, cancel := context.WithTimeout(cl.ctx, 5*time.Second)
 				err := cl.conn.Write(ctx, websocket.MessageText, msg)
+				cl.queued.Add(-int64(len(msg)))
 				cancel()
 
 				if err != nil {
@@ -133,11 +142,7 @@ func (h *Hub) Broadcast(msg []byte) {
 	h.mu.RUnlock()
 
 	for _, client := range clients {
-		select {
-		case client.send <- msg:
-		default:
-			go h.RemoveClient(client.conn)
-		}
+		h.enqueue(client, msg)
 	}
 }
 
@@ -156,11 +161,7 @@ func (h *Hub) SendToClientID(id string, msg []byte) {
 	h.mu.RUnlock()
 
 	for _, client := range clients {
-		select {
-		case client.send <- msg:
-		default:
-			h.RemoveClient(client.conn)
-		}
+		h.enqueue(client, msg)
 	}
 }
 
@@ -257,10 +258,19 @@ func (h *Hub) RemoveClient(conn *websocket.Conn) {
 	}
 }
 
-func trySend(ch chan []byte, msg []byte) {
+func (h *Hub) enqueue(client *Client, msg []byte) bool {
+	if client.queued.Add(int64(len(msg))) > maxQueuedBytes {
+		client.queued.Add(-int64(len(msg)))
+		h.RemoveClient(client.conn)
+		return false
+	}
 	select {
-	case ch <- msg:
+	case client.send <- msg:
+		return true
 	default:
+		client.queued.Add(-int64(len(msg)))
+		h.RemoveClient(client.conn)
+		return false
 	}
 }
 

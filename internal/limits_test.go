@@ -41,3 +41,26 @@ func TestProxyTrust(t *testing.T) {
 		t.Fatal("ignored trusted proxy")
 	}
 }
+
+func TestAdmissionLimitsAndRecovery(t *testing.T) {
+	h := openTestHub(t, t.TempDir())
+	for i := 0; i < 3; i++ {
+		if !h.admit("source", 100000) {
+			t.Fatal("small burst rejected")
+		}
+	}
+	if h.admit("source", 100000) {
+		t.Fatal("unbounded handshake burst")
+	}
+	for i := 0; i < 3; i++ {
+		h.releaseAdmission("source")
+	}
+	if !h.admit("source", 104000) {
+		t.Fatal("budget did not refill")
+	}
+	h.releaseAdmission("source")
+	h.openConnections = maxClients
+	if h.admit("other", 105000) {
+		t.Fatal("global connection limit ignored")
+	}
+}

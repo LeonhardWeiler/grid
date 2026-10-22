@@ -11,6 +11,54 @@ import (
 )
 
 const sourceBurst = 3
+const maxClients = 256
+const maxSourceClients = 12
+const maxQueuedBytes = 8 << 20
+
+type admission struct {
+	debt   int64
+	active int
+	seen   int64
+}
+
+func (h *Hub) admit(source string, now int64) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for key, a := range h.admissions {
+		if a.active == 0 && now-a.seen > 60000 {
+			delete(h.admissions, key)
+		}
+	}
+	a := h.admissions[source]
+	if a == nil {
+		if len(h.admissions) >= 1024 {
+			return false
+		}
+		a = &admission{}
+		h.admissions[source] = a
+	}
+	if h.openConnections >= maxClients || a.active >= maxSourceClients {
+		return false
+	}
+	next, retry := advanceBudget(a.debt, now, 1000, 3)
+	global, globalRetry := advanceBudget(h.handshakeBudget, now, 250, 4)
+	if retry > 0 || globalRetry > 0 {
+		return false
+	}
+	a.debt = next
+	a.seen = now
+	a.active++
+	h.openConnections++
+	h.handshakeBudget = global
+	return true
+}
+
+func (h *Hub) releaseAdmission(source string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.openConnections--
+	h.admissions[source].active--
+}
 
 // Trust only nginx on loopback, with an explicitly enabled, overwritten header.
 func sourceKey(r *http.Request) string {
