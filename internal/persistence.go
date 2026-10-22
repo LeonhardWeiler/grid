@@ -7,10 +7,13 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
 )
 
 type SnapshotFile struct {
+	Schema     int               `json:"schema,omitempty"`
 	Pixels     map[string]string `json:"pixels"`
 	Version    int               `json:"version"`
 	LastAction map[string]int64  `json:"lastAction,omitempty"`
@@ -51,7 +54,7 @@ func (p *Persistence) Append(entry JournalEntry) error {
 func (p *Persistence) Save(pixels map[string]string, version int, lastAction map[string]int64) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	b, err := json.Marshal(SnapshotFile{Pixels: pixels, Version: version, LastAction: lastAction})
+	b, err := json.Marshal(SnapshotFile{Schema: 1, Pixels: pixels, Version: version, LastAction: lastAction})
 	if err != nil {
 		return err
 	}
@@ -97,7 +100,14 @@ func (p *Persistence) Load() (SnapshotFile, error) {
 	state := SnapshotFile{Pixels: make(map[string]string), LastAction: make(map[string]int64)}
 	b, err := os.ReadFile(p.filePath)
 	if err == nil {
+		var fields map[string]json.RawMessage
+		if err = json.Unmarshal(b, &fields); err != nil || fields == nil || fields["pixels"] == nil || fields["version"] == nil || string(fields["pixels"]) == "null" || string(fields["version"]) == "null" {
+			return state, fmt.Errorf("snapshot requires pixels and version")
+		}
 		if err = json.Unmarshal(b, &state); err != nil {
+			return state, err
+		}
+		if err = validateSnapshot(state); err != nil {
 			return state, err
 		}
 	} else if !os.IsNotExist(err) {
@@ -166,4 +176,24 @@ func (p *Persistence) Load() (SnapshotFile, error) {
 		}
 	}
 	return state, nil
+}
+
+func validateSnapshot(s SnapshotFile) error {
+	if s.Schema < 0 || s.Schema > 1 || s.Version < 0 || len(s.Pixels) > GridSize*GridSize || len(s.Pixels) > s.Version || len(s.LastAction) > 10000 {
+		return fmt.Errorf("invalid snapshot metadata")
+	}
+	for key, color := range s.Pixels {
+		xs, ys, ok := strings.Cut(key, ":")
+		x, xe := strconv.Atoi(xs)
+		y, ye := strconv.Atoi(ys)
+		if !ok || xe != nil || ye != nil || !ValidCoords(x, y) || fmt.Sprintf("%d:%d", x, y) != key || !ValidColor(color) {
+			return fmt.Errorf("invalid snapshot pixel %q", key)
+		}
+	}
+	for id, timestamp := range s.LastAction {
+		if !ValidClientID(id) || timestamp < 0 {
+			return fmt.Errorf("invalid snapshot cooldown")
+		}
+	}
+	return nil
 }
