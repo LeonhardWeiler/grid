@@ -62,6 +62,12 @@ canvas.addEventListener("keydown",event=>{
 })
 const help=document.getElementById("help") as HTMLDialogElement
 document.getElementById("help-open")!.addEventListener("click",()=>help.showModal())
+const privacy=document.getElementById("privacy") as HTMLDialogElement
+document.getElementById("privacy-open")!.addEventListener("click",()=>privacy.showModal())
+document.getElementById("identity-reset")!.addEventListener("click",()=>{
+  try {localStorage.removeItem("clientId");location.reload()}
+  catch {document.getElementById("privacy-feedback")!.textContent="Browser storage is blocked. Close this page to discard the temporary ID."}
+})
 document.getElementById("zoom-in")!.addEventListener("click",()=>zoomCamera(2))
 document.getElementById("zoom-out")!.addEventListener("click",()=>zoomCamera(.5))
 document.getElementById("reset-view")!.addEventListener("click",()=>{fitToScreen();requestRender()})
