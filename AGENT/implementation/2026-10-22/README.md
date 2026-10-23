@@ -42,3 +42,9 @@ before activation. The pure-evaluation deploy error and alert suppression were
 also corrected. The latest server pipeline and initial GitHub release are green.
 Documentation, minimum-Go-version and CI-maintenance follow-ups use the same
 SHA/readiness verification; the public `/version` shows the exact active revision.
+
+Retention has two layers: the Grid upload folder expires files after about thirty
+days; existing NAS filesystem snapshots retain appdata for up to twelve months,
+and external-disk yearly archives have no age limit. Those longer-lived copies
+contain only public pixels/version. The Privacy dialog and operating guide make
+this distinction explicit; no existing NAS snapshots were modified or deleted.

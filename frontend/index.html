@@ -133,8 +133,10 @@
         anonymous. Expired drawing limits are removed at the next checkpoint,
         normally within 30 seconds. Connection limits expire after a minute
         without activity. They are not included in the independent hourly
-        backups; those contain only pixels and the drawing version and are kept
-        for approximately 30 days.
+        backups; those contain only pixels and the drawing version. Uploads stay
+        in the active backup folder for approximately 30 days. Archived and
+        offline backups can retain the public drawing longer, including
+        indefinitely.
       </p>
       <p>
         Access logs contain request counts, status, size and duration, without

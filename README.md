@@ -133,8 +133,10 @@ it with `grid -check-state`, and uploads only pixels and the version to
 `/data/appdata/grid` on the NAS. The dedicated server key is loaded by systemd
 from `/var/lib/grid-backup-key/id_ed25519`; the NAS host key is pinned. That key
 cannot open a shell, forward ports, read, delete or overwrite previous backups.
-The NAS controls retention (approximately thirty days) and includes appdata in
-its independent backup-disk routine. Backup failures and a backup older than two
+The NAS expires active upload files after approximately thirty days. Its existing
+filesystem snapshots can retain copies for twelve months; the external backup
+disk also keeps yearly archives without an age limit. These archives contain
+only the public drawing, never browser/network IDs. Backup failures and a backup older than two
 hours fail monitored systemd units. This provides a one-hour backup interval;
 total source/backup loss between runs can lose changes since the last upload.
 
