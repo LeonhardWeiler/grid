@@ -1,0 +1,32 @@
+warning: Git tree '/home/leo/files/repos/grid' is dirty
+
+> test:browser
+> playwright test
+
+[WebServer] (node:87452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] 2026/10/23 08:28:39 Server running on 127.0.0.1:5410
+
+Running 17 tests using 1 worker
+
+(node:87579) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/browser/canvas.spec.ts:49:1 › real WebSocket confirms, broadcasts, persists and enforces cooldown (1.2s)
+  ✓   2 tests/browser/canvas.spec.ts:72:1 › rejections, delayed confirmation and reconnect preserve the right selection (1.6s)
+  ✓   3 tests/browser/canvas.spec.ts:109:1 › version gaps disable drawing and coalesce recovery into one contiguous delta (2.4s)
+  ✓   4 tests/browser/canvas.spec.ts:157:3 › keyboard, DPR and accessible layout at 1440×900 (1.5s)
+  ✓   5 tests/browser/canvas.spec.ts:157:3 › keyboard, DPR and accessible layout at 390×844 (1.3s)
+  ✓   6 tests/browser/canvas.spec.ts:157:3 › keyboard, DPR and accessible layout at 320×568 (1.3s)
+  ✓   7 tests/browser/canvas.spec.ts:157:3 › keyboard, DPR and accessible layout at 844×390 (1.4s)
+  ✓   8 tests/browser/canvas.spec.ts:210:1 › blocked storage remains usable (682ms)
+  ✓   9 tests/browser/canvas.spec.ts:234:1 › invalid stored identities are repaired before connecting (241ms)
+  ✓  10 tests/browser/canvas.spec.ts:249:1 › tools remain reachable at 200 percent text size on a narrow screen (679ms)
+  ✓  11 tests/browser/canvas.spec.ts:272:3 › canvas selection uses CSS coordinates at DPR 1 (666ms)
+  ✓  12 tests/browser/canvas.spec.ts:272:3 › canvas selection uses CSS coordinates at DPR 3 (583ms)
+  ✓  13 tests/browser/canvas.spec.ts:300:1 › offline recovery keeps the selection and a privacy reset replaces local identity (706ms)
+  ✓  14 tests/browser/canvas.spec.ts:323:1 › an idle canvas stops requesting animation frames (816ms)
+  ✓  15 tests/browser/canvas.spec.ts:341:1 › a slow drag does not place a click selection; touch pan and pinch work (775ms)
+  ✓  16 tests/browser/canvas.spec.ts:407:1 › production HTTP applies CSP, revalidates HTML and caches hashed assets (22ms)
+  ✓  17 tests/browser/canvas.spec.ts:424:1 › the default desktop view preserves the original minimal floating layout (374ms)
+
+  17 passed (17.9s)

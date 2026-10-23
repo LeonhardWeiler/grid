@@ -1,7 +1,11 @@
 import { canvas, view } from "../dom"
-import { camera, BASE_PIXEL_SIZE } from "../camera/camera"
+import { camera, BASE_PIXEL_SIZE, GRID_SIZE } from "../camera/camera"
 
 import type { Pixel } from "../model"
+
+export function displayCoords(x: number, y: number): string {
+  return `${x - Math.floor(GRID_SIZE / 2)} | ${Math.floor(GRID_SIZE / 2) - y}`
+}
 
 export interface ScreenCoords {
   x: number

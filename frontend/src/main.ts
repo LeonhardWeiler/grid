@@ -9,7 +9,7 @@ import { render, requestRender } from "./render/render"
 import { updateButtonUI } from "./ui/button"
 import { isCooldownActive, getCooldownRemaining } from "./ui/cooldown"
 import { requestFrame, setFrameHandler } from "./frame"
-import { screenToWorld } from "./utils/coords"
+import { screenToWorld, displayCoords } from "./utils/coords"
 import { createWS } from "./ws"
 import { browserIdentity } from "./identity"
 
@@ -43,7 +43,7 @@ function selectPixel(pixel: Pixel, center = false) {
   state.selectedPixel = pixel
   xInput.value = String(pixel.x)
   yInput.value = String(pixel.y)
-  coordsEl.textContent = pixel.x + " | " + pixel.y
+  coordsEl.textContent = displayCoords(pixel.x, pixel.y)
   if (center) {
     camera.tx = pixel.x + 0.5
     camera.ty = pixel.y + 0.5
@@ -73,6 +73,7 @@ canvas.addEventListener("click", (event) => {
 document.getElementById("coordinates")!.addEventListener("submit", (event) => {
   event.preventDefault()
   selectPixel({ x: xInput.valueAsNumber, y: yInput.valueAsNumber }, true)
+  help.close()
 })
 cooldownEl.addEventListener("click", confirmPixel)
 canvas.addEventListener("keydown", (event) => {
@@ -108,9 +109,22 @@ canvas.addEventListener("keydown", (event) => {
   selectPixel(next, true)
 })
 const help = document.getElementById("help") as HTMLDialogElement
-document
-  .getElementById("help-open")!
-  .addEventListener("click", () => help.showModal())
+coordsEl.addEventListener("click", () => help.showModal())
+window.addEventListener("keydown", (event) => {
+  const target = event.target
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.altKey
+  )
+    return
+  if (event.key === "?" && !help.open && !privacy.open) {
+    event.preventDefault()
+    help.showModal()
+  }
+})
 const privacy = document.getElementById("privacy") as HTMLDialogElement
 document
   .getElementById("privacy-open")!

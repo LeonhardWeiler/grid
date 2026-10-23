@@ -7,42 +7,21 @@
       name="description"
       content="Draw together on one shared pixel canvas. Choose a color, select a pixel, and leave your mark."
     />
-    <meta name="theme-color" content="#10151d" />
+    <meta name="theme-color" content="#111111" />
     <title>grid | A shared pixel canvas</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="brand">
-        <h1>grid</h1>
-        <p>One shared canvas.</p>
-      </div>
-      <span
-        id="connection-status"
-        class="sr-only"
-        role="status"
-        aria-live="polite"
-        >Connecting…</span
-      >
-      <nav id="navigation" aria-label="Canvas controls">
-        <button
-          type="button"
-          id="zoom-out"
-          aria-label="Zoom out"
-          title="Zoom out"
-        >
-          −
-        </button>
-        <button type="button" id="zoom-in" aria-label="Zoom in" title="Zoom in">
-          +
-        </button>
-        <button type="button" id="reset-view">Reset view</button>
-        <button type="button" id="help-open">Help</button>
-        <button type="button" id="privacy-open">Privacy</button>
-      </nav>
-    </header>
+    <span
+      id="connection-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+      >Connecting…</span
+    >
     <main id="workspace" aria-label="Shared canvas">
+      <h1 class="sr-only">grid</h1>
       <canvas
         id="canvas"
         tabindex="0"
@@ -50,7 +29,8 @@
         aria-label="Shared pixel canvas"
         aria-describedby="instructions selection"
       >
-        Use the X and Y fields below to select and inspect a pixel.
+        Open the coordinate readout for X and Y fields to select and inspect a
+        pixel.
       </canvas>
       <aside class="overview" aria-label="Canvas overview">
         <canvas
@@ -66,11 +46,38 @@
         Click or tap to select a pixel. Drag to pan and pinch or scroll to zoom.
         With the canvas focused, use arrow keys to select, Shift and arrow keys
         to move ten cells, and Enter or Space to place. You can also use the
-        coordinate fields.
+        coordinate fields. Open the top-right coordinate readout or press ? for
+        controls and help.
       </p>
     </main>
     <footer id="tools" aria-label="Drawing tools">
       <div id="palette" role="group" aria-label="Choose a color"></div>
+      <button
+        type="button"
+        id="coords"
+        aria-haspopup="dialog"
+        title="Coordinates and canvas controls · ?"
+      >
+        0 / 0
+      </button>
+      <button type="button" id="cooldown" disabled>Select Pixel</button>
+      <p id="selection" class="sr-only" role="status">
+        Select a pixel to inspect its color.
+      </p>
+      <p id="feedback" class="sr-only" role="status" aria-live="polite"></p>
+    </footer>
+    <dialog id="help" aria-labelledby="help-title">
+      <h2 id="help-title">Canvas controls</h2>
+      <nav id="navigation" aria-label="Canvas controls">
+        <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+        <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+        <button type="button" id="reset-view">Reset view</button>
+        <button type="button" id="privacy-open">Privacy</button>
+      </nav>
+      <p>
+        Choose a cell from 0 to 511. The corner readout measures from the
+        center.
+      </p>
       <form id="coordinates" aria-label="Select a pixel by coordinates">
         <label for="pixel-x">X</label
         ><input
@@ -92,17 +99,12 @@
         />
         <button type="submit">Select</button>
       </form>
-      <output id="coords" aria-label="Pointer coordinates">256 | 256</output>
-      <button type="button" id="cooldown" disabled>Select a pixel</button>
-      <p id="selection" role="status">Select a pixel to inspect its color.</p>
-      <p id="feedback" role="status" aria-live="polite"></p>
-    </footer>
-    <dialog id="help" aria-labelledby="help-title">
-      <h2 id="help-title">Draw together</h2>
+
       <p>
-        Choose a color, select a pixel, then use the Place button. A saved pixel
-        is shared with everyone. Each browser waits five seconds between pixels;
-        shared networks also have a small drawing budget.
+        Choose a color, select a pixel, then confirm with the button at the
+        bottom. A saved pixel is shared with everyone. Each browser waits five
+        seconds between pixels; shared networks also have a small drawing
+        budget.
       </p>
       <p>
         Drag to move around. Scroll or pinch with two fingers to zoom. You can

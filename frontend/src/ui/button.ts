@@ -3,23 +3,31 @@ import { state, connection } from "../state"
 import { getCooldownRemaining } from "./cooldown"
 import { config } from "../protocol"
 import { pixels } from "../model"
+import { displayCoords } from "../utils/coords"
 
 function setText(element: HTMLElement | null, text: string) {
   if (element && element.textContent !== text) element.textContent = text
 }
 export function updateButtonUI(): void {
   setText(document.getElementById("feedback"), state.message)
+  const feedback = document.getElementById("feedback")!
+  const visible =
+    /^(Storage unavailable|Connection lost|No confirmation|Please wait|This pixel is invalid|Browser storage)/.test(
+      state.message
+    )
+  if (feedback.dataset.visible !== String(visible))
+    feedback.dataset.visible = String(visible)
   const remaining = getCooldownRemaining()
   const pixel = state.selectedPixel
   const colorName =
     config.colors.find((c) => c.value === state.selectedColor)?.name ?? "color"
-  let label = "Select a pixel"
+  let label = "Select Pixel"
   if (state.pending) label = "Saving pixel…"
   else if (connection.status !== "connected") label = "Waiting for connection"
   else if (remaining > 0)
-    label = "Ready in " + (remaining / 1000).toFixed(1) + "s"
+    label = "Cooldown: " + (remaining / 1000).toFixed(1) + "s"
   else if (pixel)
-    label = "Place " + colorName + " at " + pixel.x + ", " + pixel.y
+    label = "Click to accept Pixel (" + displayCoords(pixel.x, pixel.y) + ")"
   setText(cooldownEl, label)
   const disabled =
     connection.status !== "connected" ||
@@ -27,6 +35,10 @@ export function updateButtonUI(): void {
     !pixel ||
     remaining > 0
   if (cooldownEl.disabled !== disabled) cooldownEl.disabled = disabled
+  const dimmed =
+    remaining > 0 || state.pending !== null || connection.status !== "connected"
+  if (cooldownEl.classList.contains("disabled") !== dimmed)
+    cooldownEl.classList.toggle("disabled", dimmed)
   if (pixel) {
     const current = pixels.get(pixel.x + ":" + pixel.y)
     const currentName =

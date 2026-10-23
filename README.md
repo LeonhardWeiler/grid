@@ -38,7 +38,8 @@ After npm dependency changes, recompute `npmDepsHash` in `flake.nix` with
 ## Drawing and protocol
 
 Choose a named color, select a cell, then Place. Drag to pan, scroll or pinch to
-zoom. Coordinates, zoom/reset controls and the Help dialog are always available.
+zoom. The original floating layout stays minimal. Open the top-right coordinate readout
+(or press `?`) for exact coordinates, zoom/reset controls, help and privacy information.
 With the canvas focused, arrow keys select cells, Shift moves ten cells, and
 Enter/Space places. Confirmation is explicit; rejected or uncertain writes retain
 the selection and are never retried automatically.

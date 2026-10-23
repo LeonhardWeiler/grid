@@ -6,7 +6,9 @@ export function drawMinimap(): void {
   flushRaster()
   const width = minimap.clientWidth,
     height = minimap.clientHeight
-  minimapCtx.imageSmoothingEnabled = false
+  // Area filtering preserves isolated pixels when the full canvas is reduced.
+  minimapCtx.imageSmoothingEnabled = true
+  minimapCtx.imageSmoothingQuality = "high"
   minimapCtx.drawImage(raster, 0, 0, width, height)
   const scale = width / GRID_SIZE
   const visibleWidth = view.width / (BASE_PIXEL_SIZE * camera.zoom)

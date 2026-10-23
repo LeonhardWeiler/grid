@@ -1,6 +1,6 @@
 import { canvas, minimap, coordsEl, view, resizeCanvas } from "../dom"
 import { camera, BASE_PIXEL_SIZE, GRID_SIZE, clampCamera } from "./camera"
-import { screenToWorld } from "../utils/coords"
+import { screenToWorld, displayCoords } from "../utils/coords"
 import { requestRender } from "../render/render"
 import { state } from "../state"
 import { exceedsDragThreshold } from "./gesture"
@@ -78,7 +78,7 @@ export function setupControls(): void {
       pixel.y < GRID_SIZE
     ) {
       state.hoverPixel = pixel
-      coordsEl.textContent = pixel.x + " | " + pixel.y
+      coordsEl.textContent = displayCoords(pixel.x, pixel.y)
     } else state.hoverPixel = null
     requestRender()
   })

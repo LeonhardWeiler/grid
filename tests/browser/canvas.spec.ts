@@ -32,7 +32,12 @@ async function fakeServer(page: Page) {
     connections: () => connections
   }
 }
+async function openControls(page: Page) {
+  if (!(await page.locator("#help").isVisible()))
+    await page.locator("#coords").click()
+}
 async function select(page: Page, x = 200, y = 210) {
+  await openControls(page)
   await page.locator("#pixel-x").fill(String(x))
   await page.locator("#pixel-y").fill(String(y))
   await page.getByRole("button", { name: "Select", exact: true }).click()
@@ -188,8 +193,12 @@ for (const viewport of [
       await button.scrollIntoViewIfNeeded()
       await expect(button).toBeInViewport()
       const rect = await button.boundingBox()
-      expect(rect!.width).toBeGreaterThanOrEqual(44)
-      expect(rect!.height).toBeGreaterThanOrEqual(44)
+      expect(rect!.width).toBeGreaterThanOrEqual(34)
+      expect(rect!.height).toBeGreaterThanOrEqual(34)
+      const target = await button.evaluate((e) =>
+        getComputedStyle(e, "::after")
+      )
+      expect(Number.parseFloat(target.width)).toBeGreaterThanOrEqual(44)
     }
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations).toEqual([])
@@ -214,6 +223,7 @@ test("blocked storage remains usable", async ({ page }) => {
   )
   await select(page)
   await expect(page.locator("#cooldown")).toBeEnabled()
+  await openControls(page)
   await page.getByRole("button", { name: "Privacy", exact: true }).click()
   await page.getByRole("button", { name: "Reset browser ID" }).click()
   await expect(page.locator("#privacy-feedback")).toContainText(
@@ -271,6 +281,7 @@ for (const dpr of [1, 3]) {
     await fakeServer(page)
     await page.goto("http://127.0.0.1:5410")
     await connected(page)
+    await openControls(page)
     await page.getByRole("button", { name: "Zoom in", exact: true }).click()
     await select(page, 200, 210)
     await page.waitForTimeout(50)
@@ -300,6 +311,7 @@ test("offline recovery keeps the selection and a privacy reset replaces local id
   await context.setOffline(false)
   await connected(page)
   await expect(page.locator("#selection")).toContainText("200")
+  await openControls(page)
   await page.getByRole("button", { name: "Privacy", exact: true }).click()
   await page.getByRole("button", { name: "Reset browser ID" }).click()
   await connected(page)
@@ -407,4 +419,47 @@ test("production HTTP applies CSP, revalidates HTML and caches hashed assets", a
   expect((await request.get("/assets/")).status()).toBe(404)
   expect((await request.get("/metrics")).status()).toBe(404)
   expect((await request.get("/backup")).status()).toBe(404)
+})
+
+test("the default desktop view preserves the original minimal floating layout", async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await fakeServer(page)
+  await page.goto("/")
+  await connected(page)
+  expect(await page.locator("#canvas").boundingBox()).toEqual({
+    x: 0,
+    y: 0,
+    width: 1440,
+    height: 900
+  })
+  const minimap = (await page.locator("#minimap").boundingBox())!
+  expect(minimap).toEqual({ x: 16, y: 16, width: 252, height: 252 })
+  const palette = (await page.locator("#palette").boundingBox())!
+  expect(palette.x).toBe(16)
+  expect(palette.y + palette.height / 2).toBe(450)
+  expect(
+    await page
+      .locator("#palette")
+      .evaluate((e) => getComputedStyle(e).flexDirection)
+  ).toBe("column")
+  const color = (await page.locator("#palette .color").nth(1).boundingBox())!
+  expect(color.width).toBe(34)
+  expect(color.height).toBe(34)
+  const coords = (await page.locator("#coords").boundingBox())!
+  expect(coords.x + coords.width).toBe(1424)
+  expect(coords.y).toBe(16)
+  const confirm = (await page.locator("#cooldown").boundingBox())!
+  expect(confirm.x + confirm.width / 2).toBe(720)
+  expect(confirm.y + confirm.height).toBe(880)
+  await expect(page.locator("#cooldown")).toHaveText("Select Pixel")
+  await expect(page.locator("#navigation")).toBeHidden()
+  await expect(page.locator("#coordinates")).toBeHidden()
+  await expect(page.locator("#selection")).not.toBeInViewport()
+  await expect(page.locator("#feedback")).not.toBeInViewport()
+  await page.keyboard.press("?")
+  await expect(page.locator("#help")).toBeVisible()
+  await page.keyboard.press("Escape")
+  await expect(page.locator("#help")).toBeHidden()
 })
