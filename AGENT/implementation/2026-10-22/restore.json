@@ -1,0 +1,11 @@
+{
+  "source": "NAS /data/appdata/grid/snapshot-2026-10-23T06-02-06-922889474.json",
+  "version": 13,
+  "pixels": 8,
+  "checked": "valid version=13 pixels=8",
+  "httpReady": true,
+  "webSocketRestored": true,
+  "identityMetadataAbsent": true,
+  "restoreMilliseconds": 1882,
+  "measuredAt": "2026-10-23T06:04:24.618Z"
+}

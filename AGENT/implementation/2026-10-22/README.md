@@ -29,3 +29,16 @@ No synthetic canvas or load flood was sent to production. Live probes are
 read-only; a backup restore is validated in empty temporary state, not over the
 production drawing. Exact deployed revisions, restore time/version and service
 verification are recorded after release.
+
+Live verification completed on 2026-10-23. See `live-verification.json`,
+`restore.json`, live response headers and desktop/mobile captures. The functional
+release retained all eight pixels at version thirteen. The restricted upload key
+was tested against an isolated disposable marker, not against backup history.
+Restore took 1.882 seconds including NAS download and a fresh local HTTP/WS server.
+
+The first server switch exposed an nginx log-format ordering mistake and briefly
+stopped the proxy. It was repaired immediately; target-side `nginx -t` now runs
+before activation. The pure-evaluation deploy error and alert suppression were
+also corrected. The latest server pipeline and initial GitHub release are green.
+Documentation, minimum-Go-version and CI-maintenance follow-ups use the same
+SHA/readiness verification; the public `/version` shows the exact active revision.

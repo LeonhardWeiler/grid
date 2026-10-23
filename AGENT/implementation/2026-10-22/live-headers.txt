@@ -1,0 +1,16 @@
+HTTP/2 200 
+server: nginx
+date: Fri, 23 Oct 2026 06:02:05 GMT
+content-type: text/html; charset=utf-8
+content-length: 6109
+vary: Accept-Encoding
+accept-ranges: bytes
+cache-control: no-cache
+content-security-policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
+last-modified: Thu, 01 Jan 1970 00:00:01 GMT
+permissions-policy: camera=(), microphone=(), geolocation=()
+referrer-policy: no-referrer
+x-content-type-options: nosniff
+x-frame-options: DENY
+strict-transport-security: max-age=63072000
+

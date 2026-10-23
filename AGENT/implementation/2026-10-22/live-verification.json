@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-23",
+  "verifiedFunctionalRelease": "5f6b67efc6b17e2ba67110909df67137c90bcfc2",
+  "currentRevisionEndpoint": "https://grid.coprime.tech/version",
+  "goVersion": "go1.27.3",
+  "beforeAndAfterVersion": 13,
+  "beforeAndAfterPixels": 8,
+  "drawingUnchanged": true,
+  "httpAndWebSocketProbe": "success, from laptop and independent NAS",
+  "privateBackupAndMetricsOnPublicHost": "both HTTP 404",
+  "backupAndFreshnessUnits": "success",
+  "backupDestination": "NAS /data/appdata/grid",
+  "uploadKeyRestrictions": {
+    "shell": "denied",
+    "reading": "denied",
+    "deletion": "denied",
+    "overwriting": "original disposable marker retained"
+  },
+  "systemdExposure": "2.7 OK",
+  "observedGridMemoryBytes": 3895296,
+  "stateFileModes": "0600, private state directory",
+  "hostAndNasFailedUnitsAfterRepair": 0,
+  "githubPipeline": "https://github.com/LeonhardWeiler/grid/actions/runs/39908457090",
+  "gitlabPipeline": "https://gitlab.com/htl-villach/it/classes/4ahitm-2026/waentw/weilerle/-/pipelines/2979746224",
+  "nasChecks": "nix flake check including the complete VM suite passed before deployment",
+  "nasNotificationDelivery": "OnFailure notification service succeeded during the initial unavailable readiness check; repeated notifications are bounded without a start-limit failure",
+  "deploymentCorrections": [
+    "Read locked revision with jq instead of pure Nix readFile evaluation",
+    "Declare the nginx log format before its use; proxy outage repaired",
+    "Add target-side nginx -t preflight before future switches"
+  ]
+}
