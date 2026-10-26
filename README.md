@@ -28,7 +28,7 @@ Browser tests use temporary state and never write to production. They cover real
 broadcasts and confirmations, uncertain writes, reconnect/offline recovery, version
 gaps, blocked storage, keyboard use, touch pan/pinch, DPR, layout and accessibility.
 `BROWSER_EXECUTABLE` can select another installed Chromium. `nix develop` sets it.
-The security workflow also runs daily; Dependabot proposes dependency/action updates.
+The security workflow also runs daily.
 
 After npm dependency changes, recompute `npmDepsHash` in `flake.nix` with
 `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`, or temporarily use
