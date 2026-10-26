@@ -14,7 +14,7 @@
           version = "0.1.0";
           src = ./.;
           nodejs = pkgs.nodejs_24;
-          npmDepsHash = "sha256-+669B44SCeOpS07Tg8eq4C91ZbpirbpNf70vGZrhiOc=";
+          npmDepsHash = "sha256-imqPsnwrXJ9FZ/gyKTy5xrFTuqXGb8HIS50hAEpyuYc=";
           preBuild = "npm test && npm exec tsc -- --noEmit";
           installPhase = "cp -r public/dist $out";
         };
@@ -24,7 +24,7 @@
           pname = "grid";
           version = "0.1.0";
           src = ./.;
-          vendorHash = "sha256-7JqwcenKhaOgziXfkl32qz2VrZ0zKhNJMLfvHto/Pco=";
+          vendorHash = "sha256-1ckWAhiyEgGgIk/9Y/bgj4msc4eNVpsRgyIpxK8hDks=";
           ldflags = [ "-s" "-w" "-X grid/internal.Revision=${self.rev or self.dirtyRev or "dev"}" ];
           preCheck = ''
             test -z "$(gofmt -l main.go internal)"
